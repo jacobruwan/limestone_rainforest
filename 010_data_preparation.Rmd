@@ -414,6 +414,12 @@ seedlingcover_spread <- specieslvl_dom_seedling_count2 %>%
   select(Site, Transect, Quadrat, seedlingcover_sample, dom_seedling_cover) %>%
   spread(seedlingcover_sample, dom_seedling_cover)
 
+overall_seedling_cover_spread <-specieslvl_dom_seedling_count2%>%
+  select(Site, Transect, Quadrat, overall_seedling_cover) %>%
+  mutate(overall_seedling_cover = overall_seedling_cover/100) %>%
+  distinct()
+
+
 sla_spread <- specieslvl_dom_leaf_area3 %>%
   mutate(sla_sample = paste0("dom_", `Dom Species ID`, "_sla")) %>%
   select(Site, Transect, Quadrat, sla_sample, av_dom_sla_from_ind) %>%
@@ -423,7 +429,9 @@ species_richness_rq3.df <- species_id3 %>%
   left_join(abundance_spread,
             by = c("Site", "Transect", "Quadrat")) %>%
   left_join(seedlingcover_spread,
-            by = c("Site", "Transect", "Quadrat")) %>%
+            by = c("Site", "Transect", "Quadrat"))  %>%
+  left_join(overall_seedling_cover_spread,
+            by = c("Site", "Transect", "Quadrat"))%>%
   left_join(sla_spread,
             by = c("Site", "Transect", "Quadrat"))%>%
   left_join(quadrat_penetrometer2,
@@ -466,8 +474,8 @@ quadrat_modelling.df <- quadrat %>%
   left_join(transect_filter_paper2, by=c("Site", "Transect")) %>%
   left_join(transect_hobo2, by=c("Site", "Transect"))
 
-save(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.RData"))
-write.csv(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.csv"))
+# save(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.RData"))
+# write.csv(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.csv"))
 
 ############################################################
 # Species ID Level Dataset
@@ -547,8 +555,8 @@ species_modelling.df %<>%
          site = Site, transect = Transect, quadrat = Quadrat)
 
 # Save the dataset
-save(species_modelling.df, file = paste0(data_folder, "species_modelling.RData"))
-write.csv(species_modelling.df, file = paste0(data_folder, "species_modelling.csv"))
+# save(species_modelling.df, file = paste0(data_folder, "species_modelling.RData"))
+# write.csv(species_modelling.df, file = paste0(data_folder, "species_modelling.csv"))
 
 ############################################################
 # Species ID with Individual Abiotic Data
