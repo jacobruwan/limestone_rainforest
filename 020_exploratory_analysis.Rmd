@@ -1,0 +1,137 @@
+---
+title: "model_development"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Mixed Effects Model
+```{r load_datasets}
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\"
+
+load(paste0(dropbox, "quadrat_modelling.RData"))
+load(paste0(dropbox, "species_modelling.RData"))
+load(paste0(dropbox, "species_rawabiotic_modelling.RData"))
+load(paste0(dropbox, "hobo_modelling.RData"))
+```
+
+
+```{r}
+library(nlme)
+library(lme4)
+
+# Run regular lme on log(dom_shannon)
+fit <- lme(log(dom_shannon) ~ site, 
+           random = ~1|transect/quadrat,
+           data = species_modelling.df,
+           method = "REML")
+
+summary(fit)
+
+# SiteP is significant. intercept -0.515, coefficient - 0.133
+# Compare to gaussian glmm in fit2
+fit.2 <- glmer(log(dom_shannon) ~ site + (1|transect/quadrat),
+             data = species_modelling.df,
+             family = "gaussian")
+
+summary(fit.2)
+
+# Can get the variance estimates in glmer
+coefficients(fit.2)
+
+# glmer produces the same coefficients! but no p-values?
+# can get p values from t values, but can't get degrees of freedom easily..
+p_value = 2*pt(t_value, df=133, lower=FALSE)
+
+
+# Test the same lme model with the large combined dataset
+fit.1 <- lme(log(dom_shannon) ~ site, 
+           random = ~1|transect/quadrat,
+           data = species_rawabiotic_modelling.df,
+           method = "REML")
+
+summary(fit.1)
+
+#as expected, the estimates change between datasets.
+# I thought the estimates should be the same, with less standard errrors?
+# Check balance of datasets
+species_modelling.df %>%
+  group_by(site, transect, quadrat, dom_shannon) %>%
+  summarise(obs = n()) %>%
+  left_join(
+    species_rawabiotic_modelling.df %>%
+  group_by(site, transect, quadrat, dom_shannon) %>%
+  summarise(big_obs = n()),
+  by = c("site", "transect", "quadrat", "dom_shannon")
+  ) %>%
+  data.frame()
+
+# as expected, the joining of datasets produces unbalance. 
+# This is due to some species occuring more often in some datasets
+# so, we need to exclude quadrat level data from species lvl data, since this creates 'made up' replicates of single observations
+
+
+# When we plot both datasets, they look exactly the same.
+# But the box_plots will change... hmmm...
+# species_rawabiotic_modelling.df %>%
+species_modelling.df %>%
+  ggplot(aes(x=site, y = log(dom_shannon))) +
+  geom_point()
+
+# In conlcusion, different dataset for every different level
+# When observations cannot be matched, we must combine them at the min, mean, median, max level.
+
+
+# Another example, use a repeated quadrat_modelling.df datset
+# with a balanced dataset repeated, effect estimates are equivalent.
+fit.5 <- lme(log(dom_shannon) ~ Site, 
+             random = ~1|Transect/Quadrat,
+             data = quadrat_modelling.df)
+summary(fit.5)
+
+fit.6 <- lme(log(dom_shannon) ~ Site, 
+             random = ~1|Transect/Quadrat,
+             data = rbind(quadrat_modelling.df,
+                          quadrat_modelling.df))
+summary(fit.6)
+
+```
+
+
+```{r}
+
+
+fit2 <- glmer(dom_abundance ~ site + (1|transect/quadrat),
+             data = species_modelling.df,
+             family = "poisson")
+
+summary(fit2)
+
+
+
+
+```
+
+```{r}
+# install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
+# options(repos = c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/testing"))
+# update.packages("INLA")
+library(INLA)
+#### Fit the model via INLA
+fit3 = inla(log(dom_shannon) ~ site + f(transect, model="iid") + f(quadrat:transect, model = "iid"),
+            family="gaussian",
+            data=quadrat_modelling.df)
+summary(fit3)
+
+
+
+#result = inla(formula,family="gaussian",data=data.full,control.compute =list(dic=TRUE, waic= TRUE, cpo = TRUE, mlik = TRUE,config=TRUE), control.predictor=list(compute=T))
+
+```
+
+# GLMM
+'There is likely to be variability among the females and variability among the males. That is, some females will be more likely to mate than other females, and we would
+like the model to reflect the tendencies of the individual salamanders.'

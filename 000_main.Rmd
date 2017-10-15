@@ -1,0 +1,121 @@
+---
+title: "Langkawi Island Limestone Rainforest Project"
+author: "MXB344 Students: Jacob, Nick and Ricky"
+date: "Started: 24 August 2017"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_section: true
+    theme: sandstone
+    highlight: tango
+    fig_caption: true
+    df_print: paged
+    code_folding: hide
+    fig_height: 3
+    fig_width: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
+
+# Function to automatically install missing libraries and load all.
+# Sourced from internet: 
+instant_pkgs <- function(pkgs) {  
+  pkgs_miss <- pkgs[which(!pkgs %in% installed.packages()[, 1])] 
+  if (length(pkgs_miss) > 0) { 
+    install.packages(pkgs_miss) 
+  } 
+  
+  if (length(pkgs_miss) == 0) { 
+    message("\n ...Packages were already installed!\n") 
+  } 
+  
+  # install packages not already loaded: 
+  pkgs_miss <- pkgs[which(!pkgs %in% installed.packages()[, 1])] 
+  if (length(pkgs_miss) > 0) { 
+    suppressPackageStartupMessages(install.packages(pkgs_miss)) 
+  } 
+  
+  # load packages not already loaded: 
+  attached <- search() 
+  attached_pkgs <- attached[grepl("package", attached)] 
+  need_to_attach <- pkgs[which(!pkgs %in% gsub("package:", "", attached_pkgs))] 
+  
+  if (length(need_to_attach) > 0) { 
+    for (i in 1:length(need_to_attach)) 
+      suppressPackageStartupMessages(require(need_to_attach[i], character.only = TRUE)) 
+  } 
+  
+  if (length(need_to_attach) == 0) { 
+    message("\n ...Packages were already loaded!\n") 
+  } 
+} 
+
+# Define packages to load run instant_pkgs
+packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
+                      "ggplot2", "ggthemes", "lubridate",
+                      "lme4", "INLA", "stringr")
+
+instant_pkgs(packages_to_load)
+
+## Setup ggplot theme
+theme_project <- function() {
+  theme_bw() +
+    theme(legend.position = "top") 
+}
+```
+
+# Abstract
+
+
+# Introduction
+Is there a relationship between understory diversity and forest disturbance.
+
+## Research Question 1
+$H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
+
+## Research Question 2
+$H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
+
+## Research Question 3
+$H_0$: Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
+
+# Experimental Design
+```{r, child = '001_experimental_design.Rmd'}
+```
+
+# Data Build
+```{r, child = '010_data_preparation.Rmd'}
+```
+
+# Exploratory Analysis
+```{r, child = '020_exploratory_analysis.Rmd'}
+```
+
+# Model Development
+```{r, child = '030_model_development.Rmd'}
+```
+
+# Results
+```{r, child = '040_model_results.Rmd'}
+```
+
+# Conclusion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

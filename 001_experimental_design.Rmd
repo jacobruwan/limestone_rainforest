@@ -1,0 +1,165 @@
+---
+title: "Langkawi Island Limestone Rainforest Project"
+author: "MXB344 Students: Jacob, Nick and Ricky"
+date: "24 August 2017"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_section: true
+    theme: sandstone
+    highlight: tango
+    fig_caption: true
+    df_print: paged
+    code_folding: hide
+    fig_height: 3
+    fig_width: 5
+---
+
+## Experiment Design
+
+Design:
+
+  * Two Forest Types (Pristine vs Disturbed)
+  * Each operator is responsible for the same measurement
+    This changed throughout experiment
+  * Randomise coordinates of quadrats from along transect
+    
+## Randomisation
+### Location of Quadrats
+#### Part 1
+```{r}
+# Randomly generate 12 trials for the length and width.
+# Set seet is chosen randomly by all participants
+set.seed(3754313)
+length.prop <- runif(22, 0, 1)
+width.prop <- runif(22, 0, 1)
+
+# Set the minimum transect length and width.
+length.transect <- 20
+width.transect <- 4
+min_dist <- 2*sqrt(0.5^2 + 0.5^2)
+
+# Calculate the Coordinates, and test if they overlap
+Coordinates <- data.frame(Length_Prop = length.prop,
+                         Width_Prop = width.prop) %>%
+  mutate(Length_Coord = Length_Prop*length.transect,
+         Width_Coord = Width_Prop*width.transect) %>%
+  arrange(Length_Coord, Width_Coord) %>%
+  mutate(distance_to_next = sqrt(abs(lead(Length_Coord) - Length_Coord) + abs(lead(Width_Coord) - Width_Coord)),
+         Cull = ifelse(distance_to_next <= min_dist,
+                       "Yes",
+                       "No"),
+         Cull = ifelse(is.na(distance_to_next), "No",
+                       Cull))
+  
+Coordinates2 <- Coordinates %>%
+  filter(Cull == "No") %>%
+  mutate(Cull2 = ifelse(distance_to_next <= min_dist,
+                       "Yes",
+                       "No"),
+         Cull2 = ifelse(is.na(distance_to_next), "No",
+                       Cull2))
+
+# cull_index <- sample(8,2)
+
+Keep <- Coordinates2 %>% 
+  head(4) %>%
+  select(Length_Prop, Width_Prop, Length_Coord, Width_Coord)
+```
+
+### Part 2: 30 Quadrats
+```{r}
+shit1 <- runif(26, 0, 1) # length.prop2 
+shit2 <- runif(26, 0, 1) # width.prop2
+
+Order <- c(1:4, sample(26, 26)+4) # Order
+
+set.seed(3754313) #Reset the seed...
+shit3 <- runif(22, 0, 1) # length.prop
+shit4 <- runif(22, 0, 1) # length.prop
+shit5 <- sample(8,2)     # cull_index
+shit6 <- runif(26, 0, 1) # length.prop2 
+shit7 <- runif(26, 0, 1) # width.prop2
+
+# Run the real length and width code
+length.prop2 <- runif(26, 0, 1)
+width.prop2 <- runif(26, 0, 1)
+
+New_Coordinates <- data.frame(Length_Prop = length.prop2,
+                         Width_Prop = width.prop2) %>%
+  mutate(Length_Coord = Length_Prop*length.transect,
+         Width_Coord = Width_Prop*width.transect) 
+
+# set.seed(3754313)
+
+
+combined <- rbind(Keep,
+      New_Coordinates) %>%
+  mutate(Order = Order) 
+
+# combined %>%
+#   write.csv("C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Quadrat_Positions2.csv")
+
+# combined
+```
+
+### Part 3: Culling of single overlap
+```{r}
+extra_overlap_pristine3_length <- runif(1, 0, 1)
+extra_overlap_pristine3_width <- runif(1, 0, 1)
+
+combined %>%
+  filter(Order != 30) %>%
+  rbind(data.frame(Length_Prop = extra_overlap_pristine3_length,
+                   Width_Prop = extra_overlap_pristine3_width) %>%
+          mutate(Length_Coord = Length_Prop*length.transect,
+                 Width_Coord = Width_Prop*width.transect,
+                 Order = 30))
+  
+
+```
+
+```{r}
+df <- read_excel("C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Quadrat_Positions_Original.xlsx")
+
+df %>%
+  filter(Site == "D") %>%
+  ggplot() +
+  geom_point(aes(x=Width_Coord, y=Length_Coord)) +
+  facet_wrap("Transect") +
+  coord_equal() +
+  ggtitle("Disturbed Quadrat Coordinates") +
+  theme_bw() +
+  ylab("Length") +
+  xlab("Width")
+
+df %>%
+  filter(Site == "P") %>%
+  ggplot() +
+  geom_point(aes(x=Width_Coord, y=Length_Coord)) +
+  facet_wrap("Transect") +
+  coord_equal() +
+  ggtitle("Pristine Quadrat Coordinates") +
+  theme_bw() +
+  ylab("Length") +
+  xlab("Width")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
