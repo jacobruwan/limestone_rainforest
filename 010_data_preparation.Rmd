@@ -9,31 +9,28 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Modelling Data Preparation
 ```{r importing_data}
-googledrive <- "https://drive.google.com/open?id=1LHGvQbdIjKGPbATLVsnVDwYIX_Tj4Uqfyrn9bbhNdYE"
-
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 # load(paste0(dropbox, "quadrat_modelling.RData"))
 # load(paste0(dropbox, "species_modelling.RData"))
 # load(paste0(dropbox, "hobo_modelling.RData"))
 
-location <- paste0(dropbox, "Malaysia_Capstone_Raw_Data.xlsx")
+location <- paste0(data_folder, "Malaysia_Capstone_Raw_Data.xlsx")
 
 sheets <- c("Transect", 
             "Quadrat", 
-            "Species Identification", 
-            "Seedling Counts", 
-            "Dominant Seedling Counts",
+            "Species ID",
             "Leaf Traits",
             "Leaf Area", 
             "Dominant Leaf Area",
+            "Seedling Count", 
+            "Dominant Seedling Count",
             "Filter Paper", 
             "Canopy Cover", 
             "Hobo ID", 
             "Hobo Time Series",
             "Time Index",
-            "Penetration Meter", 
-            "Dominant Function Leaf Traits")
+            "Penetrometer")
 
 dictionary <- read_excel(paste0(location), sheet = "Dictionary")
 transect <- read_excel(paste0(location), sheet = "Transect")
@@ -58,16 +55,19 @@ penetrometer <- read_excel(paste0(location), sheet = "Penetrometer")
 # Is this a modelling variable?
 transect2 <- transect %>%
   group_by(Site, Transect) %>%
-  summarise(av_transect_elevation = mean(Elevation))
+  summarise(av_trans_elevation = mean(Elevation))
 
 # quadrat dataframe contains quadrat coordinates, and does not provide any modelling information
+# It contains all quadrats as rows, and is useful as a base dataset to join information to
+quadrat2 <- quadrat %>%
+  select(Site, Transect, Quadrat)
 
 # species_id dataframe is only used for combining a name to each species ID
 # This does not get included in the modelling dataframe
 # This is used as a look up table for exploratory analysis
 # Jenn and Mimi's presence data now lets us include species richness into out dataset
 # Only for 12 quadrats
-# Valid for quadrat and species ID level
+# Valid for 12 quadrat and species ID level
 species_id2 <- species_id %>%
   filter(!is.na(`Species ID`)) %>%
   gather(site_trans_quad, Presence, -`Species ID`, -`Dom Species ID`, -`Species Pseudo Name`) %>%
@@ -77,10 +77,10 @@ species_id2 <- species_id %>%
   select(-site_trans_quad) %>%
   rename(species_presence = Presence)
 
+# So, we have our research question 3 dataset started below
 species_id3 <- species_id2 %>%
   group_by(Site, Transect, Quadrat) %>%
-  summarise(presence_richness = sum(as.numeric(species_presence),
-                                    na.rm=TRUE))
+  summarise(presence_richness = sum(as.numeric(species_presence)))
 ```
 
 ```{r seedling_abundance_cover}
@@ -92,6 +92,7 @@ seedling_count2 <- seedling_count %>%
   summarise(day1_abundance = n(),
             day1_av_height = mean(Height))
 
+# quadrat_seedling_count2below verifies that the Species Richness data in species_id3 is equivalent to what was collected on Day 1
 # We want to get richness and abundance at a quadrat level
 quadrat_seedling_count2 <- seedling_count2 %>%
   ungroup() %>%
@@ -136,7 +137,7 @@ shannon_calculation <- dom_seedling_count2 %>%
          lnp = -log(p),
          shannon_calc = p*lnp) %>%
   summarise(dom_shannon = sum(shannon_calc, na.rm = TRUE),
-            dom_total_seedling_cover = sum(`Dom Seedling Cover`),
+            dom_total_seedling_cover = sum(`Dom Seedling Cover`, na.rm=TRUE),
             overall_seedling_cover = first(`Overall Seedling Cover`)/100)
 
 quadrat_dom_seedling_count2 <- simpson_calculation %>%
@@ -173,26 +174,40 @@ leaf_traits2 <- leaf_traits %>%
 dom_leaf_area2 <- dom_leaf_area %>%
   filter(is.na(Unuseable)) %>%
   group_by(Site, Transect, Quadrat, `Dom Species ID`) %>%
-  # mutate(av_dom_leaf_dry_weight = `Total Dom Leaf Dry Weight`/`Dom Leaf Count`,
-  #        sla1 = `Dom Leaf Area 1`/av_dom_leaf_dry_weight,
-  #        sla2 = `Dom Leaf Area 2`/av_dom_leaf_dry_weight,
-  #        sla3 = `Dom Leaf Area 3`/av_dom_leaf_dry_weight,
-  #        sla4 = `Dom Leaf Area 4`/av_dom_leaf_dry_weight,
-  #        sla5 = `Dom Leaf Area 5`/av_dom_leaf_dry_weight,
-  #        sla6 = `Dom Leaf Area 6`/av_dom_leaf_dry_weight,
-  #        av_dom_sla_meanweight = sum(sla1, sla2, sla3, sla4, sla5, sla6, na.rm=TRUE)/`Dom Leaf Count`) %>%
-  summarise(total_dom_leaf_area = sum(`Dom Leaf Area 1`,
-                                   `Dom Leaf Area 2`,
-                                   `Dom Leaf Area 3`,
-                                   `Dom Leaf Area 4`,
-                                   `Dom Leaf Area 5`,
-                                   `Dom Leaf Area 6`,
-                                   na.rm = TRUE),
-            total_dom_leaf_dry_weight = sum(`Total Dom Leaf Dry Weight`, na.rm=TRUE),
-            # av_dom_sla_meanweight = mean(av_dom_sla_meanweight, na.rm=TRUE),
-            dom_leaf_count = sum(`Dom Leaf Count`, na.rm = TRUE)) %>%
-  mutate(av_dom_sla = total_dom_leaf_area/total_dom_leaf_dry_weight) %>% 
+  mutate(av_dom_leaf_dry_weight = `Total Dom Leaf Dry Weight`/`Dom Leaf Count`) %>%
+  rename(total_dom_leaf_dry_weight = `Total Dom Leaf Dry Weight`)
+
+specieslvl_dom_leaf_area2 <- dom_leaf_area2 %>%
+  select(Site, Transect, Quadrat, `Dom Species ID`, `Dom Leaf Area 1`, `Dom Leaf Area 2`,
+         `Dom Leaf Area 3`, `Dom Leaf Area 4`, `Dom Leaf Area 5`, `Dom Leaf Area 6`, 
+         av_dom_leaf_dry_weight, total_dom_leaf_dry_weight) %>%
+  gather(sample, leaf_area, -Site, -Transect, -Quadrat, -`Dom Species ID`, -av_dom_leaf_dry_weight, -total_dom_leaf_dry_weight) %>%
+  mutate(dom_sla = leaf_area/av_dom_leaf_dry_weight) %>%
+  ungroup() %>%
+  filter(!is.na(leaf_area)) %>% 
   left_join(species_id %>% select(`Species ID`, `Dom Species ID`), by="Dom Species ID") 
+
+# Check for balance of dataset
+# specieslvl_dom_leaf_area2 %>%
+#   group_by(Site, Transect, Quadrat, `Dom Species ID`) %>%
+#   summarise(obs = n()) %>%
+#   arrange(desc(obs))
+
+# Some doubled up measurements.. not sure if any are incorrect
+# The disturbed double up occur from the 3 3* labelling issue. COrrected now in raw data
+# Assumption is that the Pristine was meant to be Quadrat 2
+# specieslvl_dom_leaf_area2 %>%
+#   filter((Site == "D" & Transect == 2 & Quadrat == 3 & `Dom Species ID` == 2) |
+#            (Site == "D" & Transect == 2 & Quadrat == 3 & `Dom Species ID` == 3) |
+#            (Site == "P" & Transect == 1 & Quadrat == 1 & `Dom Species ID` == 3))
+
+# Now get a dataset at quadrat level
+quadrat_dom_leaf_area2 <- specieslvl_dom_leaf_area2 %>%
+  group_by(Site, Transect, Quadrat) %>%
+  summarise(total_dom_leaf_area = sum(leaf_area),
+            total_dom_leaf_dry_weight = sum(total_dom_leaf_dry_weight),
+            av_dom_sla_from_ind = mean(dom_sla)) %>%
+  mutate(av_dom_sla_from_total = total_dom_leaf_area/total_dom_leaf_dry_weight)
 
 # There is one stupid sla value.. investigae why
 # dom_leaf_area %>% 
@@ -206,17 +221,6 @@ dom_leaf_area2 <- dom_leaf_area %>%
 # And the weight of 0.005 (< 0.01) is unreadable from the scale and produces an SLA of 234.. unreliable data and is excluded
 # It is filtered out in the datastep above. Remove the filter 'filter(is.na(Unuseable))' if you want to see the values
 
-
-
-specieslvl_dom_leaf_area2 <- dom_leaf_area2
-
-
-quadrat_dom_leaf_area2 <- dom_leaf_area2 %>%
-  group_by(Site, Transect, Quadrat) %>%
-  summarise(total_quad_dom_leaf_area = sum(total_dom_leaf_area),
-            total_quad_dom_leaf_dry_weight = sum(total_dom_leaf_dry_weight),
-            av_total_dom_sla_frommean = mean(av_dom_sla)) %>%
-  mutate(av_total_dom_sla_fromsum = total_quad_dom_leaf_area/total_quad_dom_leaf_dry_weight)
 ```
 
 ```{r soil_abiotic}
@@ -225,10 +229,11 @@ filter_paper2 <- filter_paper %>%
   group_by(Site, Transect) %>%
   filter(is.na(Eaten)) %>%
   mutate(decomposition = (`Initial Weight`-`Dry Weight`)/`Days in Ground`) %>%
-  select(Site, Transect, decomposition)
+  select(Site, Transect, decomposition) %>%
+  filter(!is.na(decomposition))
 
 transect_filter_paper2 <- filter_paper2 %>%
-  summarise(av_decomposition = mean(decomposition, na.rm=TRUE))
+  summarise(av_trans_decomposition = mean(decomposition, na.rm=TRUE))
 
 # canopy_cover dataframe contains the LAI and the subjective weather conditions. If there are overlaps between weather and quadrats, we can test for a difference in LAI.
 # LAI is highly variable though...
@@ -249,12 +254,16 @@ transect_filter_paper2 <- filter_paper2 %>%
 # Anyways, group to quadrat level the average LAI. No lai data is available for Disturbed Transect 2 or 3
 # LAI will need to be removed from thorough analysis of all transects
 canopy_cover2 <- canopy_cover %>%
-  rename(lai = LAI) %>%
-  select(Site, Transect, Quadrat, lai)
+  rename(lai = `Leaf Area Index`, gft = `Gap Fraction Threshold`) %>%
+  select(Site, Transect, Quadrat, lai, gft)
 
 quadrat_canopy_cover2 <- canopy_cover2  %>%
   group_by(Site, Transect, Quadrat) %>%
-  summarise(av_lai = mean(lai)) 
+  summarise(av_quad_lai = mean(lai), av_quad_gft = mean(gft)) 
+
+transect_canopy_cover2 <- canopy_cover2  %>%
+  group_by(Site, Transect) %>%
+  summarise(av_trans_lai = mean(lai), av_trans_gft = mean(gft)) 
 
 # penetrometer dataframe contains the soil compaction measurements. 
 # The extra 8 measurements throughout the transect should be investigated separately,
@@ -266,12 +275,14 @@ penetrometer2 <- penetrometer  %>%
 
 quadrat_penetrometer2 <- penetrometer2 %>%
   group_by(Site, Transect, Quadrat) %>%
-  summarise(av_compaction = mean(compaction))
+  summarise(av_quad_compaction = mean(compaction))
 
+transect_penetrometer2 <- penetrometer2 %>%
+  group_by(Site, Transect) %>%
+  summarise(av_trans_compaction = mean(compaction))
 ```
 
 ```{r hobo_cleaning_data}
-
 # hobo_id dataframe contains the start and end times for the Hobo times series data
 # hobo dataframe contains the times series data for temperature and relative humidity
 # Group this to a transect level
@@ -292,6 +303,7 @@ max_min_hobo2 <- hobo2 %>%
             min_rel_humid = min(rel_humid),
             max_rel_humid = max(rel_humid))
 
+# Create time series hobo dataframe, with min, mean, max variables
 hobo3 <- hobo2 %>%
   left_join(max_min_hobo2, by=c("Site", "Transect", "hobo_id", 
                                 "start_hobo", "end_hobo"))
@@ -307,7 +319,28 @@ transect_hobo2 <- hobo2 %>%
 
 ```
 
-```{r combining_datasets}
+```{r rq1_seedlingcover}
+
+```
+
+```{r rq1_shannons}
+
+```
+
+```{r rq1_sla}
+
+```
+
+```{r rq2_hobo_timeseries}
+
+```
+
+```{r rq3_species_richness}
+
+```
+
+
+```{r}
 ############################################################
 # Quadrat Level Dataset
 ############################################################
@@ -329,8 +362,8 @@ quadrat_modelling.df <- quadrat %>%
   left_join(transect_filter_paper2, by=c("Site", "Transect")) %>%
   left_join(transect_hobo2, by=c("Site", "Transect"))
 
-save(quadrat_modelling.df, file = paste0(dropbox, "quadrat_modelling.RData"))
-write.csv(quadrat_modelling.df, file = paste0(dropbox, "quadrat_modelling.csv"))
+save(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.RData"))
+write.csv(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.csv"))
 
 ############################################################
 # Species ID Level Dataset
@@ -410,8 +443,8 @@ species_modelling.df %<>%
          site = Site, transect = Transect, quadrat = Quadrat)
 
 # Save the dataset
-save(species_modelling.df, file = paste0(dropbox, "species_modelling.RData"))
-write.csv(species_modelling.df, file = paste0(dropbox, "species_modelling.csv"))
+save(species_modelling.df, file = paste0(data_folder, "species_modelling.RData"))
+write.csv(species_modelling.df, file = paste0(data_folder, "species_modelling.csv"))
 
 ############################################################
 # Species ID with Individual Abiotic Data
@@ -432,8 +465,8 @@ species_rawabiotic_modelling.df <- species_modelling.df %>%
             by = c("site", "transect", "quadrat"))
 
 # Save the dataset
-save(species_rawabiotic_modelling.df, file = paste0(dropbox, "species_rawabiotic_modelling.RData"))
-write.csv(species_rawabiotic_modelling.df, file = paste0(dropbox, "species_rawabiotic_modelling.csv"))
+save(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.RData"))
+write.csv(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.csv"))
 
 ############################################################
 # Transect Level Hobo Time Series Data
@@ -443,8 +476,8 @@ hobo_modelling.df <- hobo3 %>%
   left_join(transect2,
             by = c("site"="Site", "transect"="Transect"))
   
-save(hobo_modelling.df, file = paste0(dropbox, "hobo_modelling.RData"))
-write.csv(hobo_modelling.df, file = paste0(dropbox, "hobo_modelling.csv"))
+save(hobo_modelling.df, file = paste0(data_folder, "hobo_modelling.RData"))
+write.csv(hobo_modelling.df, file = paste0(data_folder, "hobo_modelling.csv"))
 ```
 
 
