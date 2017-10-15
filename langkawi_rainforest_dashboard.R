@@ -49,13 +49,15 @@ theme_project <- function() {
 # Importing Data
 ######################################################################
 # downloads <- "C:\\Users\\Jacob\\Downloads\\"
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\"
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
-location <- ""
+location <- dropbox
 
-load(file = paste0(location, "quadrat_modelling.RData"))
-load(file = paste0(location, "species_modelling.RData"))
-load(file = paste0(location, "hobo_modelling.RData"))
+load(file = paste0(location, "domseedlingcover_rq1.RData"))
+load(file = paste0(location, "domshannons_rq1.RData"))
+load(file = paste0(location, "domsla_rq1.RData"))
+load(file = paste0(location, "hobo_rq2.RData"))
+load(file = paste0(location, "species_richness_rq3.RData"))
 load(file = paste0(location, "species_rawabiotic_modelling.RData"))
 
 
@@ -88,59 +90,7 @@ dashboard_ui <- shinyUI(
     dashboardBody(
       navbarPage(
         title = "Limestone Rainforest",
-        tabPanel("Quadrat",
-                 fluidRow(
-                   column(6,
-                          box(title = "Graph", solidHeader = TRUE,
-                              status = "primary", width = 200,
-                              plotOutput("exploratoryPlot")
-                          )
-                   ),
-                   column(3,
-                          selectInput("response", "Response",
-                                      choices = names(quadrat_modelling.df),
-                                      selected = "dom_simpson"),
-                          selectInput("predictor", "Predictor",
-                                      choices = names(quadrat_modelling.df),
-                                      selected = "site")
-                   ),
-                   column(3,
-                          selectInput("colour_group", "Colour Grouping",
-                                      choices = names(quadrat_modelling.df),
-                                      selected = "site"),
-                          selectInput("plotDesign", "Plot Design",
-                                      choices = c("Line", "Point", "Box Plot"),
-                                      selected = "Point")
-                   )
-                 )
-        ),
-        tabPanel("Species ID",
-                 fluidRow(
-                   column(6,
-                          box(title = "Graph", solidHeader = TRUE,
-                              status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_s")
-                          )
-                   ),
-                   column(3,
-                          selectInput("response_s", "Response",
-                                      choices = names(species_modelling.df),
-                                      selected = "dom_simpson"),
-                          selectInput("predictor_s", "Predictor",
-                                      choices = names(species_modelling.df),
-                                      selected = "site")
-                   ),
-                   column(3,
-                          selectInput("colour_group_s", "Colour Grouping",
-                                      choices = names(species_modelling.df),
-                                      selected = "site"),
-                          selectInput("plotDesign_s", "Plot Design",
-                                      choices = c("Line", "Point", "Box Plot"),
-                                      selected = "Point")
-                   )
-                 )
-        ),
-        tabPanel("Species and Raw Abiotic ID",
+        tabPanel("All Raw Data",
                  fluidRow(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
@@ -161,12 +111,90 @@ dashboard_ui <- shinyUI(
                                       choices = names(species_rawabiotic_modelling.df),
                                       selected = "site"),
                           selectInput("plotDesign_sa", "Plot Design",
+                                      choices = c("Point"),
+                                      selected = "Point")
+                   )
+                 )
+        ),
+        tabPanel("RQ1 - Seedling Cover",
+                 fluidRow(
+                   column(6,
+                          box(title = "Graph", solidHeader = TRUE,
+                              status = "primary", width = 200,
+                              plotOutput("exploratoryPlot")
+                          )
+                   ),
+                   column(3,
+                          selectInput("response", "Response",
+                                      choices = names(domseedlingcover_rq1.df),
+                                      selected = "dom_seedling_cover"),
+                          selectInput("predictor", "Predictor",
+                                      choices = names(domseedlingcover_rq1.df),
+                                      selected = "site")
+                   ),
+                   column(3,
+                          selectInput("colour_group", "Colour Grouping",
+                                      choices = names(domseedlingcover_rq1.df),
+                                      selected = "site"),
+                          selectInput("plotDesign", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Point")
                    )
                  )
         ),
-        tabPanel("Hobo",
+        tabPanel("RQ1 - Shannons Index",
+                 fluidRow(
+                   column(6,
+                          box(title = "Graph", solidHeader = TRUE,
+                              status = "primary", width = 200,
+                              plotOutput("exploratoryPlot_s")
+                          )
+                   ),
+                   column(3,
+                          selectInput("response_s", "Response",
+                                      choices = names(domshannons_rq1.df),
+                                      selected = "dom_shannon"),
+                          selectInput("predictor_s", "Predictor",
+                                      choices = names(domshannons_rq1.df),
+                                      selected = "site")
+                   ),
+                   column(3,
+                          selectInput("colour_group_s", "Colour Grouping",
+                                      choices = names(domshannons_rq1.df),
+                                      selected = "site"),
+                          selectInput("plotDesign_s", "Plot Design",
+                                      choices = c("Line", "Point", "Box Plot"),
+                                      selected = "Point")
+                   )
+                 )
+        ),
+        tabPanel("RQ1 - SLA",
+                 fluidRow(
+                   column(6,
+                          box(title = "Graph", solidHeader = TRUE,
+                              status = "primary", width = 200,
+                              plotOutput("exploratoryPlot_s")
+                          )
+                   ),
+                   column(3,
+                          selectInput("response_s", "Response",
+                                      choices = names(domsla_rq1.df),
+                                      selected = "av_dom_sla_from_ind"),
+                          selectInput("predictor_s", "Predictor",
+                                      choices = names(domsla_rq1.df),
+                                      selected = "site")
+                   ),
+                   column(3,
+                          selectInput("colour_group_s", "Colour Grouping",
+                                      choices = names(domsla_rq1.df),
+                                      selected = "site"),
+                          selectInput("plotDesign_s", "Plot Design",
+                                      choices = c("Line", "Point", "Box Plot"),
+                                      selected = "Point")
+                   )
+                 )
+        ),
+        tabPanel("RQ2 - Hobo",
                  fluidRow(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
@@ -176,28 +204,54 @@ dashboard_ui <- shinyUI(
                    ),
                    column(3,
                           selectInput("response_h", "Response",
-                                      choices = names(hobo_modelling.df),
+                                      choices = names(hobo_rq2.df),
                                       selected = "temp"),
                           selectInput("predictor_h", "Predictor",
-                                      choices = names(hobo_modelling.df),
+                                      choices = names(hobo_rq2.df),
                                       selected = "date_time")
                    ),
                    column(3,
                           selectInput("colour_group_h", "Colour Grouping",
-                                      choices = names(hobo_modelling.df),
+                                      choices = names(hobo_rq2.df),
                                       selected = "hobo_id"),
                           selectInput("plotDesign_h", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Line"),
                           selectInput("min_date_time", "From:",
-                                      choices = sort(unique(hobo_modelling.df$date_time)),
-                                      selected = sort(unique(hobo_modelling.df$date_time))[60]),
+                                      choices = sort(unique(hobo_rq2.df$date_time)),
+                                      selected = sort(unique(hobo_rq2.df$date_time))[60]),
                           selectInput("max_date_time", "To:",
-                                      choices = sort((unique(hobo_modelling.df$date_time)),
+                                      choices = sort((unique(hobo_rq2.df$date_time)),
                                                      decreasing = TRUE)),
                          checkboxGroupInput("hobo_choice", "Hobo ID",
-                                            choices = sort(unique(hobo_modelling.df$hobo_id)),
+                                            choices = sort(unique(hobo_rq2.df$hobo_id)),
                                             selected = c(3, 6, 8, 13))
+                   )
+                 )
+        ),
+        tabPanel("RQ3 - Species Richness",
+                 fluidRow(
+                   column(6,
+                          box(title = "Graph", solidHeader = TRUE,
+                              status = "primary", width = 200,
+                              plotOutput("exploratoryPlot_s")
+                          )
+                   ),
+                   column(3,
+                          selectInput("response_s", "Response",
+                                      choices = names(species_richness_rq3.df),
+                                      selected = "richness"),
+                          selectInput("predictor_s", "Predictor",
+                                      choices = names(species_richness_rq3.df),
+                                      selected = "site")
+                   ),
+                   column(3,
+                          selectInput("colour_group_s", "Colour Grouping",
+                                      choices = names(species_richness_rq3.df),
+                                      selected = "site"),
+                          selectInput("plotDesign_s", "Plot Design",
+                                      choices = c("Line", "Point", "Box Plot"),
+                                      selected = "Point")
                    )
                  )
         )
