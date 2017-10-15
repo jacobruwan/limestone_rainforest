@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r importing_data}
 googledrive <- "https://drive.google.com/open?id=1LHGvQbdIjKGPbATLVsnVDwYIX_Tj4Uqfyrn9bbhNdYE"
 
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Code Repository\\limestone_rainforest\\"
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 # load(paste0(dropbox, "quadrat_modelling.RData"))
 # load(paste0(dropbox, "species_modelling.RData"))
