@@ -177,7 +177,7 @@ dom_leaf_area2 <- dom_leaf_area %>%
   mutate(av_dom_leaf_dry_weight = `Total Dom Leaf Dry Weight`/`Dom Leaf Count`) %>%
   rename(total_dom_leaf_dry_weight = `Total Dom Leaf Dry Weight`)
 
-specieslvl_dom_leaf_area2 <- dom_leaf_area2 %>%
+dom_leaf_area3 <- dom_leaf_area2 %>%
   select(Site, Transect, Quadrat, `Dom Species ID`, `Dom Leaf Area 1`, `Dom Leaf Area 2`,
          `Dom Leaf Area 3`, `Dom Leaf Area 4`, `Dom Leaf Area 5`, `Dom Leaf Area 6`, 
          av_dom_leaf_dry_weight, total_dom_leaf_dry_weight) %>%
@@ -201,8 +201,16 @@ specieslvl_dom_leaf_area2 <- dom_leaf_area2 %>%
 #            (Site == "D" & Transect == 2 & Quadrat == 3 & `Dom Species ID` == 3) |
 #            (Site == "P" & Transect == 1 & Quadrat == 1 & `Dom Species ID` == 3))
 
+# Now get a unique species lvl dataset
+specieslvl_dom_leaf_area3 <- dom_leaf_area3 %>%
+  group_by(Site, Transect, Quadrat, `Dom Species ID`) %>%
+  summarise(total_dom_leaf_area = sum(leaf_area),
+            total_dom_leaf_dry_weight = sum(total_dom_leaf_dry_weight),
+            av_dom_sla_from_ind = mean(dom_sla)) %>%
+  mutate(av_dom_sla_from_total = total_dom_leaf_area/total_dom_leaf_dry_weight)
+
 # Now get a dataset at quadrat level
-quadrat_dom_leaf_area2 <- specieslvl_dom_leaf_area2 %>%
+quadrat_dom_leaf_area3 <- dom_leaf_area3 %>%
   group_by(Site, Transect, Quadrat) %>%
   summarise(total_dom_leaf_area = sum(leaf_area),
             total_dom_leaf_dry_weight = sum(total_dom_leaf_dry_weight),
@@ -320,22 +328,118 @@ transect_hobo2 <- hobo2 %>%
 ```
 
 ```{r rq1_seedlingcover}
+domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
+  left_join(specieslvl_dom_leaf_area3,
+            by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  # left_join(quadrat_canopy_cover2,
+            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)
 
+save(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.RData"))
+write.csv(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.csv"))
 ```
 
 ```{r rq1_shannons}
+domshannons_rq1.df <- quadrat_dom_seedling_count2 %>%
+  left_join(quadrat_dom_leaf_area3,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  # left_join(quadrat_canopy_cover2,
+            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat)
 
+save(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.RData"))
+write.csv(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.csv"))
 ```
 
 ```{r rq1_sla}
+domsla_rq1.df <- specieslvl_dom_leaf_area3 %>%
+  left_join(specieslvl_dom_seedling_count2,
+            by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  # left_join(quadrat_canopy_cover2,
+            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)
 
+save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
+write.csv(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.csv"))
 ```
 
 ```{r rq2_hobo_timeseries}
-
+hobo_rq2.df <- hobo3 %>%
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_penetrometer2,
+            by = c("Site", "Transect")) %>%
+  # left_join(quadrat_canopy_cover2,
+            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect"))
+  
+save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
+write.csv(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.csv"))
 ```
 
 ```{r rq3_species_richness}
+# Spread each variable to a quadrat level
+abundance_spread <- specieslvl_dom_seedling_count2 %>%
+  mutate(abundance_sample = paste0("dom_", `Dom Species ID`, "_abundance")) %>%
+  select(Site, Transect, Quadrat, abundance_sample, dom_abundance) %>%
+  spread(abundance_sample, dom_abundance)
+
+seedlingcover_spread <- specieslvl_dom_seedling_count2 %>%
+  mutate(seedlingcover_sample = paste0("dom_", `Dom Species ID`, "_seedling_cover")) %>%
+  select(Site, Transect, Quadrat, seedlingcover_sample, dom_seedling_cover) %>%
+  spread(seedlingcover_sample, dom_seedling_cover)
+
+sla_spread <- specieslvl_dom_leaf_area3 %>%
+  mutate(sla_sample = paste0("dom_", `Dom Species ID`, "_sla")) %>%
+  select(Site, Transect, Quadrat, sla_sample, av_dom_sla_from_ind) %>%
+  spread(sla_sample, av_dom_sla_from_ind)
+
+species_richness_rq3.df <- species_id3 %>%
+  left_join(abundance_spread,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(seedlingcover_spread,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(sla_spread,
+            by = c("Site", "Transect", "Quadrat"))%>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  # left_join(quadrat_canopy_cover2,
+            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat)
+
+save(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.RData"))
+write.csv(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.csv"))
 
 ```
 
@@ -468,16 +572,7 @@ species_rawabiotic_modelling.df <- species_modelling.df %>%
 save(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.RData"))
 write.csv(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.csv"))
 
-############################################################
-# Transect Level Hobo Time Series Data
-############################################################
-hobo_modelling.df <- hobo3 %>%
-  rename(site = Site, transect = Transect) %>%
-  left_join(transect2,
-            by = c("site"="Site", "transect"="Transect"))
-  
-save(hobo_modelling.df, file = paste0(data_folder, "hobo_modelling.RData"))
-write.csv(hobo_modelling.df, file = paste0(data_folder, "hobo_modelling.csv"))
+
 ```
 
 
