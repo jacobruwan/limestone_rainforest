@@ -10,19 +10,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load_datasets_exploratory_analysis}
 # This code should be removed when entire process is productionised
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\"
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
-load(paste0(dropbox, "quadrat_modelling.RData"))
-load(paste0(dropbox, "species_modelling.RData"))
-load(paste0(dropbox, "species_rawabiotic_modelling.RData"))
-load(paste0(dropbox, "hobo_modelling.RData"))
+load(paste0(dropbox, "domseedlingcover_rq1.RData"))
+load(paste0(dropbox, "domshannons_rq1.RData"))
+load(paste0(dropbox, "domsla_rq1.RData"))
+load(paste0(dropbox, "species_richness_rq3.RData"))
+load(paste0(dropbox, "hobo_rq2.RData"))
 ```
 
 This section provides an insight to the trends in the collected data. This analysis will be focused on individual research questions. This will provide interpretability when developing the statistical model.
 
-## Research Question 1: Dominant Species
+## Research Question 1: Dominant Species Seedling Cover
 ```{r}
-dataq1 <- species_modelling.df
+domseedlingcover_rq1.df
 
 ```
 
@@ -35,7 +36,7 @@ In the figure below, we observe:
   * the coverage dominant species 4 is insignificant in comparison to the other 3
   
 ```{r}
-dataq1 %>%
+domseedlingcover_rq1.df %>%
   select(dom_species_id, site, dom_seedling_cover, transect, quadrat) %>%
   distinct() %>%
   filter(!is.na(dom_species_id)) %>%
@@ -46,3 +47,64 @@ dataq1 %>%
   ggtitle("Dominant Seedling Cover vs Site")
 
 ```
+
+
+
+
+## Research Question 1: Dominant Species Shannons index of Diversity
+```{r}
+domshannons_rq1.df %>% str()
+```
+
+```{r}
+
+
+
+```
+
+
+## Research Question 1: Dominant Species Specific Leaf Area
+```{r}
+dataq3 <- domsla_rq1.df
+```
+
+  * leaf area - photosynthetic aparatus of the plant
+  * amount of investment of dry matter (plant investment into growth defence trade off) -> Most dominant species most compettitive, higher specific leaf area
+
+
+```{r}
+dataq3 %>%
+  ggplot(aes(x=factor(dom_species_id), y = dom_sla, col=site)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("SLA vs Site and Dominant Species ID")
+
+```
+
+
+## Abiotic
+```{r}
+penetrometer2 %>% ggplot(aes(x=Site, y=Compaction)) + geom_boxplot()
+
+filter_paper2 %>% ggplot(aes(x=Site, y=decomposition)) + geom_boxplot()
+
+canopy_cover2 %>% ggplot(aes(x=Site, y=decomposition)) + geom_boxplot()
+
+
+```
+
+## Leaf Traits
+```{r}
+specieslvl_dom_seedling_count2 %>%
+  left_join
+
+leaf_traits2 %>%
+  ggplot(aes)
+
+
+```
+
+
+
+
