@@ -76,6 +76,34 @@ Is there a relationship between understory diversity and forest disturbance.
 ## Research Question 1
 $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
 
+
+  * leaf economic spectrum (energy from the sun)
+    * most important: its an important investment
+    * SLA weighted by species abundance
+      * Garnier paper
+    * Resource conservation and resource acquisition
+      * Defence invests in tissue (retaining water)
+      * Acquisition (high sla)
+  * Shannons diversity index
+    * Can use a different measure?
+  * Seedling cover
+  * Leaf Traits
+    * 1. Why care about them?
+  * 'Couched' ina  topic
+  * Explain what we don't know about the study
+  * standardised major size correlation??
+  * Plastic response: geno type -> triggered phenotype -> 
+  * Structural equation model
+  * ASK JENN FOR HER POWERPOINT
+  * Catharsis.. Need to focus on the bigger picture
+  
+  
+  
+  * Function consequences
+    * Use cover for shannons and simpsons, rather than abundance
+    * 
+
+
 ## Research Question 2
 $H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
 
