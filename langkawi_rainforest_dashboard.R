@@ -121,22 +121,22 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot")
+                              plotOutput("exploratoryPlot_rq1cover")
                           )
                    ),
                    column(3,
-                          selectInput("response", "Response",
+                          selectInput("response_rq1cover", "Response",
                                       choices = names(domseedlingcover_rq1.df),
                                       selected = "dom_seedling_cover"),
-                          selectInput("predictor", "Predictor",
+                          selectInput("predictor_rq1cover", "Predictor",
                                       choices = names(domseedlingcover_rq1.df),
                                       selected = "site")
                    ),
                    column(3,
-                          selectInput("colour_group", "Colour Grouping",
+                          selectInput("colour_group_rq1cover", "Colour Grouping",
                                       choices = names(domseedlingcover_rq1.df),
                                       selected = "site"),
-                          selectInput("plotDesign", "Plot Design",
+                          selectInput("plotDesign_rq1cover", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Point")
                    )
@@ -147,22 +147,22 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_s")
+                              plotOutput("exploratoryPlot_rq1shannon")
                           )
                    ),
                    column(3,
-                          selectInput("response_s", "Response",
+                          selectInput("response_rq1shannon", "Response",
                                       choices = names(domshannons_rq1.df),
                                       selected = "dom_shannon"),
-                          selectInput("predictor_s", "Predictor",
+                          selectInput("predictor_rq1shannon", "Predictor",
                                       choices = names(domshannons_rq1.df),
                                       selected = "site")
                    ),
                    column(3,
-                          selectInput("colour_group_s", "Colour Grouping",
+                          selectInput("colour_group_rq1shannon", "Colour Grouping",
                                       choices = names(domshannons_rq1.df),
                                       selected = "site"),
-                          selectInput("plotDesign_s", "Plot Design",
+                          selectInput("plotDesign_rq1shannon", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Point")
                    )
@@ -173,22 +173,22 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_s")
+                              plotOutput("exploratoryPlot_rq1sla")
                           )
                    ),
                    column(3,
-                          selectInput("response_s", "Response",
+                          selectInput("response_rq1sla", "Response",
                                       choices = names(domsla_rq1.df),
-                                      selected = "av_dom_sla_from_ind"),
-                          selectInput("predictor_s", "Predictor",
+                                      selected = "dom_sla"),
+                          selectInput("predictor_rq1sla", "Predictor",
                                       choices = names(domsla_rq1.df),
                                       selected = "site")
                    ),
                    column(3,
-                          selectInput("colour_group_s", "Colour Grouping",
+                          selectInput("colour_group_rq1sla", "Colour Grouping",
                                       choices = names(domsla_rq1.df),
                                       selected = "site"),
-                          selectInput("plotDesign_s", "Plot Design",
+                          selectInput("plotDesign_rq1sla", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Point")
                    )
@@ -199,7 +199,7 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_h")
+                              plotOutput("exploratoryPlot_rq2hobo")
                           )
                    ),
                    column(3,
@@ -234,22 +234,22 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_s")
+                              plotOutput("exploratoryPlot_rq3richness")
                           )
                    ),
                    column(3,
-                          selectInput("response_s", "Response",
+                          selectInput("response_rq3richness", "Response",
                                       choices = names(species_richness_rq3.df),
-                                      selected = "richness"),
-                          selectInput("predictor_s", "Predictor",
+                                      selected = "species_richness"),
+                          selectInput("predictor_rq3richness", "Predictor",
                                       choices = names(species_richness_rq3.df),
                                       selected = "site")
                    ),
                    column(3,
-                          selectInput("colour_group_s", "Colour Grouping",
+                          selectInput("colour_group_rq3richness", "Colour Grouping",
                                       choices = names(species_richness_rq3.df),
                                       selected = "site"),
-                          selectInput("plotDesign_s", "Plot Design",
+                          selectInput("plotDesign_rq3richness", "Plot Design",
                                       choices = c("Line", "Point", "Box Plot"),
                                       selected = "Point")
                    )
@@ -336,96 +336,182 @@ dashboard_ui <- shinyUI(
 dashboard_server <- function(input, output, server) {
   
   ######################################################
-  # Quadrat lvl dataset exporation
+  # Research Question 1 Seedling Cover dataset exporation
   ########################################################
-  exploratoryData <- reactive({
-    quadrat_modelling.df %>%
-      mutate_("response_var" = input$response,
-              "predictor_var" = input$predictor,
-              "col_var" = input$colour_group) %>%
+  exploratoryData_rq1cover <- reactive({
+    domseedlingcover_rq1.df %>%
+      mutate_("response_var" = input$response_rq1cover,
+              "predictor_var" = input$predictor_rq1cover,
+              "col_var" = input$colour_group_rq1cover) %>%
       mutate(col_var = factor(col_var, ordered = TRUE))
     
   })
   
   
-  output$exploratoryPlot <- renderPlot({
-    if (!is.numeric(exploratoryData()[[input$predictor]][1]) & input$plotDesign == "Box Plot") {
-      exploratoryData() %>%
+  output$exploratoryPlot_rq1cover <- renderPlot({
+    if (!is.numeric(exploratoryData_rq1cover()[[input$predictor_rq1cover]][1]) & input$plotDesign_rq1cover == "Box Plot") {
+      exploratoryData_rq1cover() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         geom_boxplot() +
         theme_project() +
-        xlab(input$predictor) +
-        ylab(input$response) +
-        scale_colour_tableau(name = input$colour_group)
+        xlab(input$predictor_rq1cover) +
+        ylab(input$response_rq1cover) +
+        scale_colour_tableau(name = input$colour_group_rq1cover)
     } else if (input$plotDesign == "Line"){
-      exploratoryData() %>%
+      exploratoryData_rq1cover() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         geom_line() +
         theme_project() +
-        xlab(input$predictor) +
-        ylab(input$response) +
-        scale_colour_tableau(name = input$colour_group)
+        xlab(input$predictor_rq1cover) +
+        ylab(input$response_rq1cover) +
+        scale_colour_tableau(name = input$colour_group_rq1cover)
     } else {
-      exploratoryData() %>%
+      exploratoryData_rq1cover() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         theme_project() +
-        xlab(input$predictor) +
-        ylab(input$response) +
-        scale_colour_tableau(name = input$colour_group)
+        xlab(input$predictor_rq1cover) +
+        ylab(input$response_rq1cover) +
+        scale_colour_tableau(name = input$colour_group_rq1cover)
     }
   })
   
-  ###################################################
-  # Species Exploratory Analysis
-  ###################################################
-  exploratoryData_s <- reactive({
-    species_modelling.df %>%
-      mutate_("response_var" = input$response_s,
-              "predictor_var" = input$predictor_s,
-              "col_var" = input$colour_group_s) %>%
+  ######################################################
+  # Research Question 1 Shannons Index dataset exporation
+  ########################################################
+  exploratoryData_rq1shannon <- reactive({
+    domshannons_rq1.df %>%
+      mutate_("response_var" = input$response_rq1shannon,
+              "predictor_var" = input$predictor_rq1shannon,
+              "col_var" = input$colour_group_rq1shannon) %>%
       mutate(col_var = factor(col_var, ordered = TRUE))
     
   })
   
   
-  output$exploratoryPlot_s <- renderPlot({
-    if (!is.numeric(exploratoryData_s()[[input$predictor_s]][1]) & input$plotDesign_s == "Box Plot") {
-      exploratoryData_s() %>%
+  output$exploratoryPlot_rq1shannon <- renderPlot({
+    if (!is.numeric(exploratoryData_rq1shannon()[[input$predictor_rq1shannon]][1]) & input$plotDesign_rq1shannon == "Box Plot") {
+      exploratoryData_rq1shannon() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         geom_boxplot() +
         theme_project() +
-        xlab(input$predictor_s) +
-        ylab(input$response_s) +
-        scale_colour_tableau(name = input$colour_group_s)
-    } else if (input$plotDesign_s == "Line"){
-      exploratoryData_s() %>%
+        xlab(input$predictor_rq1shannon) +
+        ylab(input$response_rq1shannon) +
+        scale_colour_tableau(name = input$colour_group_rq1shannon)
+    } else if (input$plotDesign == "Line"){
+      exploratoryData_rq1shannon() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         geom_line() +
         theme_project() +
-        xlab(input$predictor_s) +
-        ylab(input$response_s) +
-        scale_colour_tableau(name = input$colour_group_s)
+        xlab(input$predictor_rq1shannon) +
+        ylab(input$response_rq1shannon) +
+        scale_colour_tableau(name = input$colour_group_rq1shannon)
     } else {
-      exploratoryData_s() %>%
+      exploratoryData_rq1shannon() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
         theme_project() +
-        xlab(input$predictor_s) +
-        ylab(input$response_s) +
-        scale_colour_tableau(name = input$colour_group_s)
+        xlab(input$predictor_rq1shannon) +
+        ylab(input$response_rq1shannon) +
+        scale_colour_tableau(name = input$colour_group_rq1shannon)
+    }
+  })
+  
+  ######################################################
+  # Research Question 1 SLA
+  ########################################################
+  exploratoryData_rq1sla <- reactive({
+    domsla_rq1.df %>%
+      mutate_("response_var" = input$response_rq1sla,
+              "predictor_var" = input$predictor_rq1sla,
+              "col_var" = input$colour_group_rq1sla) %>%
+      mutate(col_var = factor(col_var, ordered = TRUE))
+    
+  })
+  
+  
+  output$exploratoryPlot_rq1sla <- renderPlot({
+    if (!is.numeric(exploratoryData_rq1sla()[[input$predictor_rq1sla]][1]) & input$plotDesign_rq1sla == "Box Plot") {
+      exploratoryData_rq1sla() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        geom_boxplot() +
+        theme_project() +
+        xlab(input$predictor_rq1sla) +
+        ylab(input$response_rq1sla) +
+        scale_colour_tableau(name = input$colour_group_rq1sla)
+    } else if (input$plotDesign == "Line"){
+      exploratoryData_rq1sla() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        geom_line() +
+        theme_project() +
+        xlab(input$predictor_rq1sla) +
+        ylab(input$response_rq1sla) +
+        scale_colour_tableau(name = input$colour_group_rq1sla)
+    } else {
+      exploratoryData_rq1sla() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        theme_project() +
+        xlab(input$predictor_rq1sla) +
+        ylab(input$response_rq1sla) +
+        scale_colour_tableau(name = input$colour_group_rq1sla)
+    }
+  })
+  
+  ######################################################
+  # Research Question 3: Species Richness
+  ########################################################
+  exploratoryData_rq3richness <- reactive({
+    species_richness_rq3.df %>%
+      mutate_("response_var" = input$response_rq3richness,
+              "predictor_var" = input$predictor_rq3richness,
+              "col_var" = input$colour_group_rq3richness) %>%
+      mutate(col_var = factor(col_var, ordered = TRUE))
+    
+  })
+  
+  
+  output$exploratoryPlot_rq3richness <- renderPlot({
+    if (!is.numeric(exploratoryData_rq3richness()[[input$predictor_rq3richness]][1]) & input$plotDesign_rq3richness == "Box Plot") {
+      exploratoryData_rq3richness() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        geom_boxplot() +
+        theme_project() +
+        xlab(input$predictor_rq3richness) +
+        ylab(input$response_rq3richness) +
+        scale_colour_tableau(name = input$colour_group_rq3richness)
+    } else if (input$plotDesign == "Line"){
+      exploratoryData_rq3richness() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        geom_line() +
+        theme_project() +
+        xlab(input$predictor_rq3richness) +
+        ylab(input$response_rq3richness) +
+        scale_colour_tableau(name = input$colour_group_rq3richness)
+    } else {
+      exploratoryData_rq3richness() %>%
+        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+        geom_point(size=3) +
+        theme_project() +
+        xlab(input$predictor_rq3richness) +
+        ylab(input$response_rq3richness) +
+        scale_colour_tableau(name = input$colour_group_rq3richness)
     }
   })
   
   ###################################################
-  # Species and Raw Abiotic Exploratory Analysis
+  # All Raw Data Exploratory Analysis
   ###################################################
   exploratoryData_sa <- reactive({
-    species_modelling.df %>%
+    species_rawabiotic_modelling.df %>%
       mutate_("response_var" = input$response_sa,
               "predictor_var" = input$predictor_sa,
               "col_var" = input$colour_group_sa) %>%
@@ -465,10 +551,10 @@ dashboard_server <- function(input, output, server) {
   })
   
   ###################################################
-  # Hobo Exploratory Analysis
+  # Research Question 2: Hobo
   ###################################################
   exploratoryData_h <- reactive({
-    output <- hobo_modelling.df %>%
+    output <- hobo_rq2.df %>%
       mutate_("response_var" = input$response_h,
               "predictor_var" = input$predictor_h,
               "col_var" = input$colour_group_h) %>%
@@ -480,7 +566,7 @@ dashboard_server <- function(input, output, server) {
   })
   
   
-  output$exploratoryPlot_h <- renderPlot({
+  output$exploratoryPlot_rq2hobo <- renderPlot({
     if (!is.numeric(exploratoryData_h()[[input$predictor_h]][1]) & input$plotDesign_h == "Box Plot") {
       exploratoryData_h() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
