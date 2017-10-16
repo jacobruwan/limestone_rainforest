@@ -185,7 +185,9 @@ dom_leaf_area3 <- dom_leaf_area2 %>%
   mutate(dom_sla = leaf_area/av_dom_leaf_dry_weight) %>%
   ungroup() %>%
   filter(!is.na(leaf_area)) %>% 
-  left_join(species_id %>% select(`Species ID`, `Dom Species ID`), by="Dom Species ID") 
+  left_join(species_id %>% select(`Species ID`, `Dom Species ID`), by="Dom Species ID") %>%
+  arrange(Site, Transect, Quadrat, `Dom Species ID`) %>%
+  select(Site, Transect, Quadrat, `Dom Species ID`, dom_sla, leaf_area, av_dom_leaf_dry_weight, total_dom_leaf_dry_weight, `Species ID`)
 
 # Check for balance of dataset
 # specieslvl_dom_leaf_area2 %>%
@@ -368,9 +370,11 @@ write.csv(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.csv"))
 ```
 
 ```{r rq1_sla}
-domsla_rq1.df <- specieslvl_dom_leaf_area3 %>%
-  left_join(specieslvl_dom_seedling_count2,
-            by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+domsla_rq1.df <- dom_leaf_area3 %>%
+  # left_join(specieslvl_dom_leaf_area3,
+  #           by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+  # left_join(specieslvl_dom_seedling_count2,
+  #           by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(quadrat_penetrometer2,
             by = c("Site", "Transect", "Quadrat")) %>%
   # left_join(quadrat_canopy_cover2,
@@ -464,7 +468,7 @@ quadrat_modelling.df <- quadrat %>%
             by=c("Site", "Transect", "Quadrat")) %>%
   left_join(quadrat_dom_seedling_count2, 
             by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_dom_leaf_area2, 
+  left_join(quadrat_dom_leaf_area3, 
             by=c("Site", "Transect", "Quadrat")) %>%
   left_join(quadrat_canopy_cover2, 
             by=c("Site", "Transect", "Quadrat")) %>%
@@ -525,8 +529,8 @@ species_modelling.df <- quadrat_species_base %>%
             by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
   left_join(specieslvl_dom_seedling_count2,
             by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
-  left_join(specieslvl_dom_leaf_area2,
-            by=c("Site", "Transect", "Quadrat", "Species ID", "Dom Species ID")) %>%
+  left_join(specieslvl_dom_leaf_area3,
+            by=c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(species_id2 %>% select(-`Species Pseudo Name`),
             by=c("Site", "Transect", "Quadrat", "Species ID", "Dom Species ID")) %>%
   left_join(leaf_traits2,
