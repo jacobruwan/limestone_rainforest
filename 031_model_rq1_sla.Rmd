@@ -31,7 +31,9 @@ sla.df <- domsla_rq1.df %>%
          dom_species_id = factor(dom_species_id)) %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
-         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total)
+         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total) %>%
+  mutate(dom_sla = dom_sla/max(dom_sla),
+         dom_abundance = dom_abundance/max(dom_abundance))
 
 # In the INLA model, predictions are made on a dataset with response variables as NA's
 # Recreate the dataset with all NA's, then append this dataset onto the original dataset
@@ -121,33 +123,65 @@ summary(fit)
 # expected result from exploratory plots
 ```
 
-### Bayesian OOS Predictions
+#### OOS Predictions
 ```{r}
-set.seed(220713)
-inTest <- sample(nrow(sla.df), 40)
+# set.seed(220713)
+# inTest <- sample(nrow(sla.df), 40)
+# predictions.df <- rbind(sla.df[-inTest,], pred.sla.df[inTest,])
 
-predictions.df <- rbind(sla.df[-inTest,], pred.sla.df[inTest,])
+inla_formula <- as.formula("dom_sla ~ site + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = predictions.df)
+            data = sla.df,
+            control.compute = list(cpo=TRUE),
+            control.inla = list(strategy = "laplace", 
+                                npoints = 21))
 
+summary(fit)
+
+sla.df %>%
+  mutate(dom_sla_pred = summary(fit)$cpo$pit) %>%
+  ggplot() +
+  geom_point(aes(x = site, y = dom_sla_pred))
+
+```
+
+#### Parameter Credible Intervals
+```{r }
 ## How to look at predictions and compare to original???
+fixed <- summary(fit)$fixed
+vec <- fixed[1:length(fixed)]
+# random <- summary(fit)$random
+n <- length(summary(fit)$fixed)
+n1 <- n/7
 
+# Collect and plot the intercals
+# How to standardise the intervals?
+# Standardise the response variable?
+fixed.df <- data.frame(Estimate = row.names(fixed),
+           Mean = vec[1:n1],
+           SD = vec[(n1+1):(2*n1)],
+           quant0.025 = vec[(2*n1+1):(3*n1)],
+           quant0.5 = vec[(3*n1+1):(4*n1)],
+           quant0.975 = vec[(4*n1+1):(5*n1)],
+           mode = vec[(5*n1+1):(6*n1)])
 
+fixed.df %>%
+  ggplot(aes(y = Estimate, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Standardised Predictors: Parameter Estimate Confidence Intervals") +
+  xlab("Median")
+```
 
-eg <- fit %>% names()
-# summary(fit) %>% names()
-
-for (i in 1:length(eg)) {
-  
-  print(fit[[eg[i]]])
-}
+#### Cross Validation
+```{r}
 
 
 ```
 
-### Bayesian Model Fit
+#### Model Fit
 ```{r}
 
 
