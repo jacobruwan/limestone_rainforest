@@ -106,12 +106,8 @@ top5 <- Log_Likelihood_Summary %>%
 
 # top5
 
-top3vars <- c("dom_species_id",
-          "av_quad_compaction",
-          "site")
-
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla ~ site + dom_species_id + av_quad_compaction + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla ~ site + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -124,6 +120,40 @@ summary(fit)
 # Only dominant species id demonstrates any significant difference
 # expected result from exploratory plots
 ```
+
+### Bayesian OOS Predictions
+```{r}
+set.seed(220713)
+inTest <- sample(nrow(sla.df), 40)
+
+predictions.df <- rbind(sla.df[-inTest,], pred.sla.df[inTest,])
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = predictions.df)
+
+## How to look at predictions and compare to original???
+
+
+
+eg <- fit %>% names()
+# summary(fit) %>% names()
+
+for (i in 1:length(eg)) {
+  
+  print(fit[[eg[i]]])
+}
+
+
+```
+
+### Bayesian Model Fit
+```{r}
+
+
+
+```
+
 
 ### Frequentist Approach
 
@@ -162,7 +192,7 @@ top5 <- Log_Likelihood_Summary2 %>%
 
 # RUn a model and investigate the estimate confidence intervals
 
-fit2 <- glmer(dom_sla ~ site + dom_species_id + av_quad_compaction + av_trans_elevation + av_trans_decomposition + min_temp + max_temp + (1|transect/quadrat),
+fit2 <- glmer(dom_sla ~ site + dom_species_id + dom_abundance + dom_seedling_cover + av_quad_compaction + av_trans_elevation + av_trans_decomposition + min_temp + max_temp + (1|transect/quadrat),
              data = sla.df,
              family = "gaussian")
 
@@ -171,12 +201,4 @@ confint(fit2)
 # Once again, only dom_species_id excludes 0 in the confidence interval
 # Dom species 2 and 3 overlapp however, demonstrating no significant difference between each other
 ```
-
-### Bayesian Model Fit
-```{r}
-
-
-
-```
-
 
