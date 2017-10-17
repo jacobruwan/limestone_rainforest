@@ -23,18 +23,18 @@ load(paste0(dropbox, "domsla_rq1.RData"))
 
 ```{r}
 # Go through the variables and unselect predictor variable that don't make sense
+domsla_rq1.df %>% str()
+
 sla.df <- domsla_rq1.df %>%
   mutate(transect = factor(transect),
          quadrat = factor(quadrat),
          dom_species_id = factor(dom_species_id)) %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
-         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area)
+         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
+         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total)
 
 # Look at structure of modelling df
 sla.df %>% str()
-
-library(lme4)
-library(INLA)
 ```
 
 ```{r}
@@ -173,16 +173,4 @@ confint(fit2)
 
 ```
 
-
-```{r}
-# install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
-# options(repos = c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/testing"))
-# update.packages("INLA")
-# library(INLA)
-
-
-
-#result = inla(formula,family="gaussian",data=data.full,control.compute =list(dic=TRUE, waic= TRUE, cpo = TRUE, mlik = TRUE,config=TRUE), control.predictor=list(compute=T))
-
-```
 

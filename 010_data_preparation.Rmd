@@ -346,7 +346,6 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)
 
 save(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.RData"))
-write.csv(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.csv"))
 ```
 
 ```{r rq1_shannons}
@@ -366,13 +365,14 @@ domshannons_rq1.df <- quadrat_dom_seedling_count2 %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
 save(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.RData"))
-write.csv(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.csv"))
 ```
 
 ```{r rq1_sla}
 domsla_rq1.df <- dom_leaf_area3 %>%
-  # left_join(specieslvl_dom_leaf_area3,
-  #           by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+  left_join(specieslvl_dom_seedling_count2,
+            by = c("Site", "Transect", "Quadrat", "Dom Species ID", "Species ID"))%>%
+  left_join(specieslvl_dom_leaf_area3 %>% select(-total_dom_leaf_dry_weight),
+            by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   # left_join(specieslvl_dom_seedling_count2,
   #           by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(quadrat_penetrometer2,
@@ -385,10 +385,9 @@ domsla_rq1.df <- dom_leaf_area3 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
-write.csv(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.csv"))
 ```
 
 ```{r rq2_hobo_timeseries}
@@ -403,7 +402,6 @@ hobo_rq2.df <- hobo3 %>%
             by = c("Site", "Transect"))
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
-write.csv(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.csv"))
 ```
 
 ```{r rq3_species_richness}
@@ -451,8 +449,6 @@ species_richness_rq3.df <- species_id3 %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
 save(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.RData"))
-write.csv(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.csv"))
-
 ```
 
 
@@ -582,9 +578,6 @@ species_rawabiotic_modelling.df <- species_modelling.df %>%
 
 # Save the dataset
 save(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.RData"))
-write.csv(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.csv"))
-
-
 ```
 
 
