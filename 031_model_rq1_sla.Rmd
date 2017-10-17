@@ -26,7 +26,8 @@ sla.df <- domsla_rq1.df %>%
   mutate(transect = factor(transect),
          quadrat = factor(quadrat),
          dom_species_id = factor(dom_species_id)) %>%
-  select(-av_dom_leaf_dry_weight, -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area)
+  select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
+         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area)
 
 sla.df %>% str()
 
@@ -84,9 +85,30 @@ Log_Likelihood_Summary <- Log_Likelihood_Summary %>%
                    Log_Likelihood = summary(fit)[["mlik"]][2]))
 
 }
-
-
 ```
+
+```{r}
+top5 <- Log_Likelihood_Summary %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(5)
+
+# top5
+
+top3vars <- c("dom_species_id",
+          "av_quad_compaction",
+          "site")
+
+inla_formula <- as.formula("dom_sla ~ site + dom_species_id + av_quad_compaction + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sla.df)
+
+# Although the 
+summary(fit)
+```
+
+
 
 ```{r}
 # SiteP is significant. intercept -0.515, coefficient - 0.133
