@@ -8,7 +8,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Mixed Effects Model
+## Model Design
+
+  * Model design is based of experimental design
+    * Random effects structure is quadrats nested in transects
+  * Primary modelling approach is bayesian, with the INLA package. This implements a Laplace approximation to the posterior distribution of the estimate parameters.
+    * Effective when parameter estimates follow a Gaussian distribution (normally distributed)
+    * Computationally efficient
+    * WHY IS BAYESIAN SO GOOD FOR ECOLOGY?
+    
+The model development section is organised as follows. Five models will be developed and evaluated in the next five sections, relating to different aspects of the research questions. These five models correspond to the five data sets summarised in the Data Build section. Each sub-model development will include:
+
+  1. Assessment of predictors that maximise the marginal log-likehood.
+  2. Summary of credible intervals of parameter estimates.
+  3. MODEL FIT?
+  4. Brief summary comparison to the results from a frequentist approach with confidence intervals.
+
+
 ```{r load_datasets}
 dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\"
 
@@ -131,7 +147,3 @@ summary(fit3)
 #result = inla(formula,family="gaussian",data=data.full,control.compute =list(dic=TRUE, waic= TRUE, cpo = TRUE, mlik = TRUE,config=TRUE), control.predictor=list(compute=T))
 
 ```
-
-# GLMM
-'There is likely to be variability among the females and variability among the males. That is, some females will be more likely to mate than other females, and we would
-like the model to reflect the tendencies of the individual salamanders.'
