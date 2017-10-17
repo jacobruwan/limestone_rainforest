@@ -22,6 +22,7 @@ load(paste0(dropbox, "domsla_rq1.RData"))
 ```
 
 ```{r}
+# Go through the variables and unselect predictor variable that don't make sense
 sla.df <- domsla_rq1.df %>%
   mutate(transect = factor(transect),
          quadrat = factor(quadrat),
@@ -29,6 +30,7 @@ sla.df <- domsla_rq1.df %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area)
 
+# Look at structure of modelling df
 sla.df %>% str()
 
 library(lme4)
@@ -36,9 +38,11 @@ library(INLA)
 ```
 
 ```{r}
+# define the vector of possible predictors, exclude random effects
 response <- "dom_sla"
 predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla", "transect", "quadrat")))]
 
+# Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
 possible_predictor_combinations <- list()
 index <- 1
 
@@ -67,10 +71,12 @@ for (i in 1:length(possible_predictor_combinations)) {
 }
 ```
 
+### Bayesian Approach
 ```{r all_inla_model_combinations}
-# Run all INLA models
+# Run all possible INLA models
 Log_Likelihood_Summary <- data.frame(Formula = "-", Log_Likelihood = NA)
 
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
 for (i in 1:length(formula_string_combinations)) {
 inla_formula <- as.formula(paste0("dom_sla ~ ",
                           formula_string_combinations[[i]],
@@ -98,55 +104,81 @@ top3vars <- c("dom_species_id",
           "av_quad_compaction",
           "site")
 
+# RUn a model on the top 3 variables identified
 inla_formula <- as.formula("dom_sla ~ site + dom_species_id + av_quad_compaction + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
             data = sla.df)
 
-# Although the 
+# analyse the output of the model
 summary(fit)
+
+# So SiteP and av_quad_compaction both contain 0 in their credible intervals..
+# Only dominant species id demonstrates any significant difference
+# expected result from exploratory plots
 ```
 
-
+### Frequentist Approach
 
 ```{r}
-# SiteP is significant. intercept -0.515, coefficient - 0.133
-# Compare to gaussian glmm in fit2
-fit.2 <- glmer(dom_sla ~ site + (1|transect/quadrat),
+# Try the same model using glmer
+# Run all possible glmer models
+Log_Likelihood_Summary2 <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+glmm_formula <- as.formula(paste0("dom_sla ~ ",
+                          formula_string_combinations[[i]],
+                          " + (1|transect/quadrat)"))
+
+fit2 <- glmer(glmm_formula,
              data = sla.df,
              family = "gaussian")
 
-summary(fit.2)
+Log_Likelihood_Summary2 <- Log_Likelihood_Summary2 %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit2)[["logLik"]][1]))
 
-confint(fit.2)
+}
+
+
 ```
 
+```{r}
+top5 <- Log_Likelihood_Summary2 %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(5)
 
+# top5
+
+# So all seven variables in the model minimises the log likelihood.. great..
+
+# RUn a model and investigate the estimate confidence intervals
+
+fit2 <- glmer(dom_sla ~ site + dom_species_id + av_quad_compaction + av_trans_elevation + av_trans_decomposition + min_temp + max_temp + (1|transect/quadrat),
+             data = sla.df,
+             family = "gaussian")
+
+confint(fit2)
+
+# Once again, only dom_species_id excludes 0 in the confidence interval
+# Dom species 2 and 3 overlapp however, demonstrating no significant difference between each other
+```
+
+### Bayesian Model Fit
 ```{r}
 
 
-fit2 <- glmer(dom_abundance ~ site + (1|transect/quadrat),
-             data = species_modelling.df,
-             family = "poisson")
-
-summary(fit2)
-
-
-
 
 ```
+
 
 ```{r}
 # install.packages("INLA", repos="https://inla.r-inla-download.org/R/stable")
 # options(repos = c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/testing"))
 # update.packages("INLA")
-library(INLA)
-#### Fit the model via INLA
-fit3 = inla(log(dom_shannon) ~ site + f(transect, model="iid") + f(quadrat:transect, model = "iid"),
-            family="gaussian",
-            data=quadrat_modelling.df)
-summary(fit3)
+# library(INLA)
 
 
 
