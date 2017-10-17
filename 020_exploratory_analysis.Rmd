@@ -83,25 +83,67 @@ dataq3 %>%
 ```
 
 
+# Data
+```{r}
+# Use the choose files function to get the location of the datasets on your computer
+choose.files()
+
+# Should get an output like:
+# "C:\\Users\\Jacob\Project\\Data\\biotic_leaftraits.RData"
+
+# Copy the folder spot below, and copy the """".RData file into the load function below
+
+location <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+
+# Load the datasets
+load(paste0(location, "biotic_leaftraits.RData"))
+load(paste0(location, "abiotic_filterpaper.RData"))
+load(paste0(location, "abiotic_canopycover.RData"))
+load(paste0(location, "abiotic_penetrometer.RData"))
+
+```
+
 ## Abiotic
 ```{r}
-penetrometer2 %>% ggplot(aes(x=Site, y=Compaction)) + geom_boxplot()
+# Decopmosition
+ggplot(aes(x=site, y=decomposition),
+       data = abiotic_filterpaper.df) + 
+  geom_boxplot() +
+  ggtitle("Abiotic Comparison") 
 
-filter_paper2 %>% ggplot(aes(x=Site, y=decomposition)) + geom_boxplot()
+# LAI
+ggplot(aes(x=site, y=lai, col = site),
+       data = abiotic_canopycover.df) + 
+  geom_boxplot() +
+  ggtitle("Abiotic Comparison") 
 
-canopy_cover2 %>% ggplot(aes(x=Site, y=decomposition)) + geom_boxplot()
+# Gap fResction THreshold
+ggplot(aes(x=site, y=gft, col = site),
+       data = abiotic_canopycover.df) + 
+  geom_boxplot() +
+  ggtitle("Abiotic Comparison") 
 
+# Compaction
+ggplot(aes(x=site, y=compaction, col = site),
+       data = abiotic_penetrometer.df) + 
+  geom_boxplot() +
+  ggtitle("Abiotic Comparison") 
 
 ```
 
 ## Leaf Traits
 ```{r}
-specieslvl_dom_seedling_count2 %>%
-  left_join
+count_data <- biotic_leaftraits.df %>%
+  filter(species_presence == 1) %>%
+  group_by(site, apex_shape) %>% # CHANGE LEAF TRAIT
+  summarise(number_observations = n())
 
-leaf_traits2 %>%
-  ggplot(aes)
-
+# CHANGE THE X VARIABLE LEAF TRAIT TO THE ONE ABOVE
+ggplot(aes(x=apex_shape, y=number_observations, fill = site),
+       data = count_data) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip() +
+  ggtitle("Leaf Trait Comparison") 
 
 ```
 
