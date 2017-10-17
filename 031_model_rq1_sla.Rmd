@@ -33,6 +33,12 @@ sla.df <- domsla_rq1.df %>%
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
          -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total)
 
+# In the INLA model, predictions are made on a dataset with response variables as NA's
+# Recreate the dataset with all NA's, then append this dataset onto the original dataset
+# when performing CV OOS predictions
+pred.sla.df <- sla.df %>%
+  mutate(dom_sla = NA)
+
 # Look at structure of modelling df
 sla.df %>% str()
 ```
