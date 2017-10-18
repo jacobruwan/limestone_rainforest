@@ -32,8 +32,7 @@ sla.df <- domsla_rq1.df %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
          -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total) %>%
-  mutate(dom_sla = dom_sla/max(dom_sla),
-         dom_abundance = dom_abundance/max(dom_abundance))
+  mutate(dom_abundance = dom_abundance/max(dom_abundance))
 
 # In the INLA model, predictions are made on a dataset with response variables as NA's
 # Recreate the dataset with all NA's, then append this dataset onto the original dataset
@@ -129,7 +128,7 @@ summary(fit)
 # inTest <- sample(nrow(sla.df), 40)
 # predictions.df <- rbind(sla.df[-inTest,], pred.sla.df[inTest,])
 
-inla_formula <- as.formula("dom_sla ~ site + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla ~ site + site:dom_species_id + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -140,10 +139,29 @@ fit <- inla(inla_formula,
 
 summary(fit)
 
-sla.df %>%
-  mutate(dom_sla_pred = summary(fit)$cpo$pit) %>%
+df <- cbind(sla.df,
+      data.frame(dom_sla_pred = fit$summary.fitted.values$mean)) %>%
+  data.frame()
+
+df %>%
   ggplot() +
-  geom_point(aes(x = site, y = dom_sla_pred))
+  geom_point(aes(x = dom_sla, y = dom_sla_pred)) +
+  xlab("Observed SLA") +
+  ylab("Predicted SLA") +
+  theme_project()
+
+# QQ-Plot
+
+# 
+qqnorm(fit$cpo$pit)
+qqline(fit$cpo$pit)
+
+# Histogram of predictions
+sla.df %>%
+  ggplot(aes(x = dom_sla_pred)) +
+  geom_histogram()
+  
+
 
 ```
 
@@ -183,7 +201,9 @@ fixed.df %>%
 
 #### Model Fit
 ```{r}
-
+# cpo
+# pit
+#
 
 
 ```
