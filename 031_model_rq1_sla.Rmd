@@ -19,9 +19,7 @@ dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 load(paste0(dropbox, "domsla_rq1.RData"))
 # load(paste0(dropbox, "species_richness_rq3.RData"))
 # load(paste0(dropbox, "hobo_rq2.RData"))
-```
 
-```{r}
 # Go through the variables and unselect predictor variable that don't make sense
 domsla_rq1.df %>% str()
 
@@ -141,7 +139,7 @@ summary(fit)
 
 df <- cbind(sla.df,
       data.frame(dom_sla_pred = fit$summary.fitted.values$mean)) %>%
-  data.frame()
+  tbl_df()
 
 df %>%
   ggplot() +
@@ -157,7 +155,7 @@ qqnorm(fit$cpo$pit)
 qqline(fit$cpo$pit)
 
 # Histogram of predictions
-sla.df %>%
+df %>%
   ggplot(aes(x = dom_sla_pred)) +
   geom_histogram()
   
@@ -193,11 +191,6 @@ fixed.df %>%
   xlab("Median")
 ```
 
-#### Cross Validation
-```{r}
-
-
-```
 
 #### Model Fit
 ```{r}

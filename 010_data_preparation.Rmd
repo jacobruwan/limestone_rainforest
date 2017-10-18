@@ -329,6 +329,50 @@ transect_hobo2 <- hobo2 %>%
 
 ```
 
+```{r}
+biotic_leaftraits.df <- species_id2 %>%
+  left_join(leaf_traits2,
+            by = c("Species ID")) %>%
+  rename(species_id = `Species ID`, 
+         dom_species_id = `Dom Species ID`,
+         species_name = `Species Pseudo Name`,
+         site = Site, transect = Transect,
+         quadrat = Quadrat) %>%
+  mutate(species_id = factor(species_id), 
+         dom_species_id = factor(dom_species_id))
+
+save(biotic_leaftraits.df, file = paste0(data_folder, "biotic_leaftraits.RData"))
+```
+
+```{r}
+abiotic_penetrometer.df <- penetrometer2 %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat)
+
+save(abiotic_penetrometer.df, 
+     file = paste0(data_folder, "abiotic_penetrometer.RData"))
+
+abiotic_canopycover.df <- canopy_cover2 %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat)
+
+save(abiotic_canopycover.df, 
+     file = paste0(data_folder, "abiotic_canopycover.RData"))
+
+abiotic_filterpaper.df <- filter_paper2 %>%
+  rename(site = Site, transect = Transect)
+
+save(abiotic_filterpaper.df, 
+     file = paste0(data_folder, "abiotic_filterpaper.RData"))
+
+```
+
+
+
+
+
+
+
+
+
 ```{r rq1_seedlingcover}
 domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
   left_join(specieslvl_dom_leaf_area3,
