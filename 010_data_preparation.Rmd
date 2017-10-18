@@ -90,7 +90,7 @@ species_id3 <- species_id2 %>%
 seedling_count2 <- seedling_count %>%
   group_by(Site, Transect, Quadrat, `Species ID`) %>%
   summarise(day1_abundance = n(),
-            day1_av_height = mean(Height))
+            day1_av_height = mean(`Height (cm)`))
 
 # quadrat_seedling_count2below verifies that the Species Richness data in species_id3 is equivalent to what was collected on Day 1
 # We want to get richness and abundance at a quadrat level
@@ -314,9 +314,15 @@ max_min_hobo2 <- hobo2 %>%
             max_rel_humid = max(rel_humid))
 
 # Create time series hobo dataframe, with min, mean, max variables
+min_time <- sort(unique(hobo2$date_time))[60]
+max_time <- sort(unique(hobo2$date_time))[288]
+
 hobo3 <- hobo2 %>%
   left_join(max_min_hobo2, by=c("Site", "Transect", "hobo_id", 
-                                "start_hobo", "end_hobo"))
+                                "start_hobo", "end_hobo"))%>%
+  mutate(filter_minhobo = min_time, 
+         filter_maxhobo = max_time) 
+
 
 transect_hobo2 <- hobo2 %>%
   group_by(Site, Transect) %>%
@@ -324,10 +330,27 @@ transect_hobo2 <- hobo2 %>%
             end_hobo = min(end_hobo),
             min_temp = min(temp),
             max_temp = max(temp),
+            range_temp = max_temp - min_temp,
             min_rel_humid = min(rel_humid),
             max_rel_humid = max(rel_humid))
 
 ```
+
+
+
+
+
+<!--##########################################################-->
+<!--##########################################################-->
+<!--##########################################################-->
+<!--      Now create the final datasets used for modelling    -->
+<!--##########################################################-->
+<!--##########################################################-->
+<!--##########################################################-->
+
+
+
+
 
 ```{r}
 biotic_leaftraits.df <- species_id2 %>%
@@ -339,7 +362,8 @@ biotic_leaftraits.df <- species_id2 %>%
          site = Site, transect = Transect,
          quadrat = Quadrat) %>%
   mutate(species_id = factor(species_id), 
-         dom_species_id = factor(dom_species_id))
+         dom_species_id = factor(dom_species_id)) %>%
+  filter(species_presence == 1)
 
 save(biotic_leaftraits.df, file = paste0(data_folder, "biotic_leaftraits.RData"))
 ```
@@ -429,7 +453,12 @@ domsla_rq1.df <- dom_leaf_area3 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) 
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)  %>%
+  mutate(species_id = factor(species_id), 
+         dom_species_id = factor(dom_species_id),
+         transect = factor(transect), quadrat = factor(quadrat)) %>%
+  mutate(dom_sla_weighted = dom_sla/dom_abundance)
+
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
 ```
@@ -443,7 +472,10 @@ hobo_rq2.df <- hobo3 %>%
   # left_join(quadrat_canopy_cover2,
             # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
   left_join(transect_filter_paper2,
-            by = c("Site", "Transect"))
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect= Transect)  %>%
+  mutate(transect = factor(transect))
+
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
 ```
@@ -490,7 +522,9 @@ species_richness_rq3.df <- species_id3 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat)
+  rename(site = Site, transect = Transect, quadrat = Quadrat) %>%
+  ungroup() %>%
+  mutate(transect = factor(transect), quadrat = factor(quadrat))
 
 save(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.RData"))
 ```

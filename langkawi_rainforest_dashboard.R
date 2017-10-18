@@ -35,7 +35,8 @@ instant_pkgs <- function(pkgs) {
 
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
                       "ggplot2", "shiny", "ggthemes",
-                      "shinydashboard", "lubridate")
+                      "shinydashboard", "lubridate", 
+                      "zoo")
 
 instant_pkgs(packages_to_load)
 
