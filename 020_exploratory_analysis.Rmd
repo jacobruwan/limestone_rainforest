@@ -57,10 +57,26 @@ domshannons_rq1.df %>% str()
 ```
 
 ```{r}
-
+domshannons_rq1.df %>%
+  ggplot(aes(x = paste0(site,transect), y = dom_shannon)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Dominant Shannons Index vs Site")
 
 
 ```
+
+
+  * overall
+  * differ between individuals
+  * Rao Tao (quadratic entropy)
+  * Shannon
+    * Diversty contrained by dominant
+    * Try and group by a specific species? Use just P*log(p)
+  * Just look at a the 'shannons for each species (3), for each site (so 6 in total, transect could make it 18.. but cant model it)
+  
+
 
 
 ## Research Question 1: Dominant Species Specific Leaf Area
