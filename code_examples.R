@@ -44,6 +44,28 @@ ggplot(aes(x=site, y=compaction, col = site),
   ggtitle("Abiotic Comparison") 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ####################################################
 ## Leaf Traits
 

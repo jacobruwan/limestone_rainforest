@@ -29,14 +29,11 @@ sla.df <- domsla_rq1.df %>%
          dom_species_id = factor(dom_species_id)) %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
-         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total) %>%
-  mutate(dom_abundance = dom_abundance/max(dom_abundance))
-
-# In the INLA model, predictions are made on a dataset with response variables as NA's
-# Recreate the dataset with all NA's, then append this dataset onto the original dataset
-# when performing CV OOS predictions
-pred.sla.df <- sla.df %>%
-  mutate(dom_sla = NA)
+         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total, -dom_sla, -dom_abundance) %>%
+  mutate(dom_seedling_cover = dom_seedling_cover/100,
+         overall_seedling_cover = overall_seedling_cover/100,
+         dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
+         overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)))
 
 # Look at structure of modelling df
 sla.df %>% str()
@@ -44,8 +41,8 @@ sla.df %>% str()
 
 ```{r}
 # define the vector of possible predictors, exclude random effects
-response <- "dom_sla"
-predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla", "transect", "quadrat")))]
+response <- "dom_sla_weighted"
+predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted", "transect", "quadrat")))]
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
 possible_predictor_combinations <- list()
@@ -83,7 +80,7 @@ Log_Likelihood_Summary <- data.frame(Formula = "-", Log_Likelihood = NA)
 
 # In for loop, run the model and combine the log likelihood estimate into a data.frame
 for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("dom_sla ~ ",
+inla_formula <- as.formula(paste0("dom_sla_weighted ~ ",
                           formula_string_combinations[[i]],
                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
 
@@ -98,6 +95,7 @@ Log_Likelihood_Summary <- Log_Likelihood_Summary %>%
 }
 ```
 
+#### Model: Minimum Marginal Log-Likelihood
 ```{r}
 top5 <- Log_Likelihood_Summary %>%
   arrange(desc(Log_Likelihood)) %>%
@@ -106,11 +104,13 @@ top5 <- Log_Likelihood_Summary %>%
 # top5
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla ~ site + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla_weighted ~ site + dom_species_id + dom_seedling_cover + overall_seedling_cover + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = sla.df)
+            data = sla.df,
+            control.compute = list(cpo=TRUE),
+            control.inla = list(strategy = "laplace"))
 
 # analyse the output of the model
 summary(fit)
@@ -120,44 +120,48 @@ summary(fit)
 # expected result from exploratory plots
 ```
 
-#### OOS Predictions
+#### Model Fit
 ```{r}
-# set.seed(220713)
-# inTest <- sample(nrow(sla.df), 40)
-# predictions.df <- rbind(sla.df[-inTest,], pred.sla.df[inTest,])
+# summary(fit)
+predictions <- fit$summary.fitted.values$mean
 
-inla_formula <- as.formula("dom_sla ~ site + site:dom_species_id + dom_species_id + dom_abundance + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sla.df,
-            control.compute = list(cpo=TRUE),
-            control.inla = list(strategy = "laplace", 
-                                npoints = 21))
+sla.df <- sla.df %>% 
+      mutate(pred_dom_sla_weighted = predictions,
+             residuals = dom_sla_weighted - pred_dom_sla_weighted,
+             std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)))
 
-summary(fit)
-
-df <- cbind(sla.df,
-      data.frame(dom_sla_pred = fit$summary.fitted.values$mean)) %>%
-  tbl_df()
-
-df %>%
-  ggplot() +
-  geom_point(aes(x = dom_sla, y = dom_sla_pred)) +
+## Fitted vs Predicted
+sla.df %>%
+  ggplot(aes(x = dom_sla_weighted, y = pred_dom_sla_weighted)) +
+  geom_point() +
   xlab("Observed SLA") +
-  ylab("Predicted SLA") +
-  theme_project()
+  ylab("Fitted Values") +
+  theme_project() +
+  coord_equal() +
+  geom_abline() +
+  ggtitle("Observed vs Fitted SLA")
+
+## Fitted vs Standardised Residuals
+sla.df %>%
+  ggplot(aes(x = pred_dom_sla_weighted, y = std_residuals)) +
+  geom_point() +
+  xlab("Fitted Values") +
+  ylab("Standardised Residuals") +
+  theme_project() +
+  geom_abline(slope = 0)+
+  geom_abline(slope = 0, intercept = 1.5)+
+  geom_abline(slope = 0, intercept = -1.5)
 
 # QQ-Plot
-
-# 
 qqnorm(fit$cpo$pit)
 qqline(fit$cpo$pit)
 
 # Histogram of predictions
 df %>%
   ggplot(aes(x = dom_sla_pred)) +
-  geom_histogram()
+  geom_histogram(bins=15) +
+  theme_project()
   
 
 
