@@ -457,7 +457,11 @@ domsla_rq1.df <- dom_leaf_area3 %>%
   mutate(species_id = factor(species_id), 
          dom_species_id = factor(dom_species_id),
          transect = factor(transect), quadrat = factor(quadrat)) %>%
-  mutate(dom_sla_weighted = dom_sla/dom_abundance)
+  mutate(dom_sla_weighted = dom_sla/dom_abundance) %>%
+  mutate(dom_seedling_cover = dom_seedling_cover/100,
+         overall_seedling_cover = overall_seedling_cover/100,
+         scaled_dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
+         scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)))
 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
