@@ -306,7 +306,14 @@ hobo2 <- hobo %>%
   select(-`Data Back Up Photo`, -`Time Hobo`, -index) %>%
   arrange(hobo_id, date_time)
 
+# THere is a ten hour lag in datetime to min/max time (min time in future)..
+min_time <- as.POSIXct(strftime("2017-09-26 10:00:00", "%Y-%m-%d %H:%M:%S")) #midnight on the 26th
+max_time <- as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S"))
+
+
 max_min_hobo2 <- hobo2 %>%
+  mutate(filter_minhobo = min_time, 
+         filter_maxhobo = max_time) %>%
   group_by(Site, Transect, hobo_id, start_hobo, end_hobo) %>%
   summarise(min_temp = min(temp),
             max_temp = max(temp),
@@ -314,15 +321,12 @@ max_min_hobo2 <- hobo2 %>%
             max_rel_humid = max(rel_humid))
 
 # Create time series hobo dataframe, with min, mean, max variables
-min_time <- sort(unique(hobo2$date_time))[60]
-max_time <- sort(unique(hobo2$date_time))[288]
+
 
 hobo3 <- hobo2 %>%
   left_join(max_min_hobo2, by=c("Site", "Transect", "hobo_id", 
-                                "start_hobo", "end_hobo"))%>%
-  mutate(filter_minhobo = min_time, 
-         filter_maxhobo = max_time) 
-
+                                "start_hobo", "end_hobo")) %>%
+  mutate(hobo_id = factor(hobo_id))
 
 transect_hobo2 <- hobo2 %>%
   group_by(Site, Transect) %>%
@@ -332,7 +336,9 @@ transect_hobo2 <- hobo2 %>%
             max_temp = max(temp),
             range_temp = max_temp - min_temp,
             min_rel_humid = min(rel_humid),
-            max_rel_humid = max(rel_humid))
+            max_rel_humid = max(rel_humid)) %>%
+  mutate(hobo_id = factor(hobo_id))
+
 
 ```
 
@@ -478,7 +484,13 @@ hobo_rq2.df <- hobo3 %>%
   left_join(transect_filter_paper2,
             by = c("Site", "Transect")) %>%
   rename(site = Site, transect= Transect)  %>%
-  mutate(transect = factor(transect))
+  mutate(transect = factor(transect)) %>%
+  arrange(desc(hobo_id), date_time) %>%
+  filter(hobo_id %in% c("3", "8", "13", "6")) %>%
+  filter(date_time > as.POSIXct(strftime("2017-09-26 3:00:00", 
+                                         "%Y-%m-%d %H:%M:%S")),
+         date_time < as.POSIXct(strftime("2017-09-28 22:00:00", 
+                                         "%Y-%m-%d %H:%M:%S"))) 
 
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
