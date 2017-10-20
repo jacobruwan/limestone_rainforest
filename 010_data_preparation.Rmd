@@ -358,7 +358,7 @@ transect_hobo2 <- hobo2 %>%
 
 
 
-```{r}
+```{r biotic_dataframe}
 biotic_leaftraits.df <- species_id2 %>%
   left_join(leaf_traits2,
             by = c("Species ID")) %>%
@@ -374,7 +374,7 @@ biotic_leaftraits.df <- species_id2 %>%
 save(biotic_leaftraits.df, file = paste0(data_folder, "biotic_leaftraits.RData"))
 ```
 
-```{r}
+```{r abiotic}
 abiotic_penetrometer.df <- penetrometer2 %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
@@ -395,16 +395,9 @@ save(abiotic_filterpaper.df,
 
 ```
 
-
-
-
-
-
-
-
-
 ```{r rq1_seedlingcover}
 domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
+  filter(`Dom Species ID` != 4) %>%
   left_join(specieslvl_dom_leaf_area3,
             by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(quadrat_penetrometer2,
@@ -417,7 +410,13 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) %>%
+  mutate(species_id = factor(species_id),
+         dom_species_id = factor(species_id)) %>%
+  left_join(biotic_leaftraits.df,
+            by = c("species_id", "dom_species_id", "site", "transect", "quadrat")) %>%
+  mutate(species_id = factor(species_id),
+         dom_species_id = factor(species_id))
 
 save(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.RData"))
 ```
@@ -459,15 +458,18 @@ domsla_rq1.df <- dom_leaf_area3 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`)  %>%
-  mutate(species_id = factor(species_id), 
-         dom_species_id = factor(dom_species_id),
-         transect = factor(transect), quadrat = factor(quadrat)) %>%
-  mutate(dom_sla_weighted = dom_sla/dom_abundance) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) %>%
+  mutate(dom_sla_weighted_abundance = dom_sla/dom_abundance) %>%
   mutate(dom_seedling_cover = dom_seedling_cover/100,
          overall_seedling_cover = overall_seedling_cover/100,
          scaled_dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
-         scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)))
+         scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)))  %>%
+  left_join(biotic_leaftraits.df %>% mutate(species_id = as.numeric(species_id),
+                                            dom_species_id = as.numeric(dom_species_id)),
+            by = c("species_id", "dom_species_id", "site", "transect", "quadrat"))  %>%
+  mutate(species_id = factor(species_id), 
+         dom_species_id = factor(dom_species_id),
+         transect = factor(transect), quadrat = factor(quadrat)) 
 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
