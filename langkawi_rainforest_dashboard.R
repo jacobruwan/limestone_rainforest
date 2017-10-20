@@ -34,9 +34,8 @@ instant_pkgs <- function(pkgs) {
 } 
 
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
-                      "ggplot2", "shiny", "ggthemes",
-                      "shinydashboard", "lubridate", 
-                      "zoo")
+                      "ggplot2", "ggthemes", "lubridate",
+                      "lme4", "INLA", "stringr", "shiny", "shinydashboard")
 
 instant_pkgs(packages_to_load)
 
@@ -183,7 +182,10 @@ dashboard_ui <- shinyUI(
                                       selected = "dom_sla"),
                           selectInput("predictor_rq1sla", "Predictor",
                                       choices = names(domsla_rq1.df),
-                                      selected = "site")
+                                      selected = "site"),
+                          selectInput("factor_predictor_rq1sla", "Factor Predictor",
+                                      choices = c("Yes", "No"),
+                                      selected = "No")
                    ),
                    column(3,
                           selectInput("colour_group_rq1sla", "Colour Grouping",
@@ -235,7 +237,7 @@ dashboard_ui <- shinyUI(
                    column(6,
                           box(title = "Graph", solidHeader = TRUE,
                               status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_rq3richness")
+                              plotOutput("exploratoryPlot_rq3")
                           )
                    ),
                    column(3,
@@ -359,7 +361,7 @@ dashboard_server <- function(input, output, server) {
         xlab(input$predictor_rq1cover) +
         ylab(input$response_rq1cover) +
         scale_colour_tableau(name = input$colour_group_rq1cover)
-    } else if (input$plotDesign == "Line"){
+    } else if (input$plotDesign_rq1cover == "Line"){
       exploratoryData_rq1cover() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
@@ -402,7 +404,7 @@ dashboard_server <- function(input, output, server) {
         xlab(input$predictor_rq1shannon) +
         ylab(input$response_rq1shannon) +
         scale_colour_tableau(name = input$colour_group_rq1shannon)
-    } else if (input$plotDesign == "Line"){
+    } else if (input$plotDesign_rq1shannon == "Line"){
       exploratoryData_rq1shannon() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
@@ -426,11 +428,28 @@ dashboard_server <- function(input, output, server) {
   # Research Question 1 SLA
   ########################################################
   exploratoryData_rq1sla <- reactive({
-    domsla_rq1.df %>%
-      mutate_("response_var" = input$response_rq1sla,
-              "predictor_var" = input$predictor_rq1sla,
-              "col_var" = input$colour_group_rq1sla) %>%
-      mutate(col_var = factor(col_var, ordered = TRUE))
+
+    
+    
+    if(input$factor_predictor_rq1sla == "Yes") {
+      
+      domsla_rq1.df %>%
+        mutate_("response_var" = input$response_rq1sla,
+                "predictor_var" = input$predictor_rq1sla,
+                "col_var" = input$colour_group_rq1sla) %>%
+        mutate(col_var = factor(col_var, ordered = TRUE)) %>%
+        arrange(predictor_var) %>%
+        mutate(predictor_var = factor(predictor_var))
+      
+    } else {
+      
+      domsla_rq1.df %>%
+        mutate_("response_var" = input$response_rq1sla,
+                "predictor_var" = input$predictor_rq1sla,
+                "col_var" = input$colour_group_rq1sla) %>%
+        mutate(col_var = factor(col_var, ordered = TRUE))
+      
+    }
     
   })
   
@@ -445,7 +464,7 @@ dashboard_server <- function(input, output, server) {
         xlab(input$predictor_rq1sla) +
         ylab(input$response_rq1sla) +
         scale_colour_tableau(name = input$colour_group_rq1sla)
-    } else if (input$plotDesign == "Line"){
+    } else if (input$plotDesign_rq1sla == "Line"){
       exploratoryData_rq1sla() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
@@ -478,7 +497,7 @@ dashboard_server <- function(input, output, server) {
   })
   
   
-  output$exploratoryPlot_rq3richness <- renderPlot({
+  output$exploratoryPlot_rq3 <- renderPlot({
     if (!is.numeric(exploratoryData_rq3richness()[[input$predictor_rq3richness]][1]) & input$plotDesign_rq3richness == "Box Plot") {
       exploratoryData_rq3richness() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
@@ -488,7 +507,7 @@ dashboard_server <- function(input, output, server) {
         xlab(input$predictor_rq3richness) +
         ylab(input$response_rq3richness) +
         scale_colour_tableau(name = input$colour_group_rq3richness)
-    } else if (input$plotDesign == "Line"){
+    } else if (input$plotDesign_rq3richness == "Line"){
       exploratoryData_rq3richness() %>%
         ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
         geom_point(size=3) +
@@ -517,6 +536,7 @@ dashboard_server <- function(input, output, server) {
               "predictor_var" = input$predictor_sa,
               "col_var" = input$colour_group_sa) %>%
       mutate(col_var = factor(col_var, ordered = TRUE))
+
     
   })
   
