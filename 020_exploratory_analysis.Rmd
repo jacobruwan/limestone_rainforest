@@ -99,10 +99,88 @@ dataq3 %>%
 ```
 
 
+### Species Diversity: Abundance vs SLA
+```{r}
+dataq3 %>%
+  ggplot(aes(x = dom_sla, y = dom_abundance, col = factor(dom_species_id))) +
+  geom_density()
+
+
+```
+
+
+
+## Research Question 2: Hobo Time Series
+```{r}
+library(scales)
+
+# Create 6 hour intervals for time series graphs
+start <- as.POSIXct(strptime("2017-09-25 04:00:00", "%Y-%m-%d %H:%M:%S"))
+interval <- 60*6
+end <- start + as.difftime(4, units="days")
+labels = seq(from=start, by=interval*60, to=end)
+
+# Filter the data between useable dates
+datarq2 <- hobo_rq2.df # Ten Hour Lag..
+
+
+# Get shading for different days
+hobo_days <- data.frame(startday = c(as.POSIXct(strftime("2017-09-26 3:00:01", "%Y-%m-%d %H:%M:%S")),
+                                     as.POSIXct(strftime("2017-09-26 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-27 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-28 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins")),
+                        endday =   c(as.POSIXct(strftime("2017-09-25 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-26 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-27 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S")))) %>%
+                        mutate(day = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+                               day = factor(day,
+                                            levels = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+                                            ordered = TRUE)) %>% 
+  tbl_df()
+
+# Plot the graphs
+ggplot() +
+  theme_project() +
+  scale_x_datetime(breaks = labels
+                   # labels = labels
+                   # limits = c(as.POSIXct(strptime("2017-09-25 18:00:00",
+                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"),
+                              # as.POSIXct(strptime("2017-09-28 12:00:00",
+                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"))
+                   ) +
+  theme(axis.text.x = element_text(angle = 45, 
+                                   vjust = 1,
+                                   hjust = 1)) +
+  geom_rect(aes(xmin=startday, xmax=endday, ymin = 25.8, ymax = 28, fill = day),
+            data = hobo_days, alpha = 0.4)   +
+  scale_fill_tableau(name = "Day")+
+  # geom_line(aes(x=date_time, y=temp, col=hobo_id),
+             # data = datarq2, size=1) +
+  # scale_colour_pander(name = "Hobo ID")+
+  geom_line(aes(x=date_time, y=temp, col=site),
+             data = datarq2, size=1) +
+  scale_colour_pander(name = "Site") +
+  ggtitle("Temperature over Time") +
+  xlab("Time of Day") +
+  ylab("Temperature (Degrees Celsius)")
+
+```
+
+
+
+
+
+
+
+
+
+
+
 # Data
 ```{r}
 # Use the choose files function to get the location of the datasets on your computer
-choose.files()
+# choose.files()
 
 # Should get an output like:
 # "C:\\Users\\Jacob\Project\\Data\\biotic_leaftraits.RData"
@@ -126,6 +204,8 @@ ggplot(aes(x=site, y=decomposition),
        data = abiotic_filterpaper.df) + 
   geom_boxplot() +
   ggtitle("Abiotic Comparison") 
+
+
 
 # LAI
 ggplot(aes(x=site, y=lai, col = site),
