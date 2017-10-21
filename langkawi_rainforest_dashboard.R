@@ -58,7 +58,7 @@ load(file = paste0(location, "domshannons_rq1.RData"))
 load(file = paste0(location, "domsla_rq1.RData"))
 load(file = paste0(location, "hobo_rq2.RData"))
 load(file = paste0(location, "species_richness_rq3.RData"))
-load(file = paste0(location, "species_rawabiotic_modelling.RData"))
+# load(file = paste0(location, "species_rawabiotic_modelling.RData"))
 
 
 # df2.data <- read_excel(paste0(location, "jenn_data.xls"), sheet = "seedling")

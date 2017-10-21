@@ -455,18 +455,33 @@ domsla_rq1.df <- dom_leaf_area3 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) 
+
+
+# Mutate variables for modelling with
+domsla_rq1.df %<>%
   mutate(dom_sla_weighted_abundance = dom_sla/dom_abundance) %>%
   mutate(dom_seedling_cover = dom_seedling_cover/100,
          overall_seedling_cover = overall_seedling_cover/100,
          scaled_dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
-         scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)))  %>%
+         scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)),
+         scaled_av_trans_elevation = (av_trans_elevation - mean(av_trans_elevation))/sqrt(var(av_trans_elevation)))  %>%
   left_join(biotic_leaftraits.df %>% mutate(species_id = as.numeric(species_id),
                                             dom_species_id = as.numeric(dom_species_id)),
             by = c("species_id", "dom_species_id", "site", "transect", "quadrat"))  %>%
   mutate(species_id = factor(species_id), 
          dom_species_id = factor(dom_species_id),
          transect = factor(transect), quadrat = factor(quadrat)) 
+
+# Calculate Functional Richness, Functional Evenness and Functional Divergence
+domsla_rq1.df %<>%
+  group_by(site, transect, quadrat) %>%
+  select(dom_species_id, dom_sla) %>%
+  mutate(sla_character_range = max(dom_sla) - min(dom_sla)) %>%
+  group_by(site, transect, quadrat, dom_species_id) %>%
+  mutate(sla_species_niche_space = max(dom_sla - min(dom_sla))) %>%
+  ungroup() %>%
+  mutate(sla_functional_richness = species_niche_space/character_range)
 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))

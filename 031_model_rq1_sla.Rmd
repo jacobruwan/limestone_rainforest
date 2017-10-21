@@ -3,10 +3,6 @@ title: "model_development"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 
 ## Research Question 1: SLA
 In this analysis, SLA is investigated to quantify the difference between dominant species and between disturbed and pristine forest conditions.
@@ -24,12 +20,10 @@ load(paste0(dropbox, "domsla_rq1.RData"))
 # domsla_rq1.df %>% str()
 
 sla.df <- domsla_rq1.df %>%
-  mutate(transect = factor(transect),
-         quadrat = factor(quadrat),
-         dom_species_id = factor(dom_species_id)) %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
          -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
-         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total, -dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover) 
+         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total, 
+         -dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
 
 
 # Look at structure of modelling df
@@ -38,8 +32,8 @@ sla.df <- domsla_rq1.df %>%
 
 ```{r}
 # define the vector of possible predictors, exclude random effects
-response <- "dom_sla_weighted"
-predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted", "transect", "quadrat")))]
+response <- "dom_sla_weighted_abundance"
+predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat")))]
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
 possible_predictor_combinations <- list()
@@ -77,7 +71,7 @@ Log_Likelihood_Summary <- data.frame(Formula = "-", Log_Likelihood = NA)
 
 # In for loop, run the model and combine the log likelihood estimate into a data.frame
 for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("dom_sla_weighted ~ ",
+inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
                           formula_string_combinations[[i]],
                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
 
@@ -102,11 +96,11 @@ top5 <- Log_Likelihood_Summary %>%
 
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla_weighted ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_overall_seedling_cover + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_overall_seedling_cover + av_trans_elevation + leaf_arrangement + site:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = sla.df,
+            data = domsla_rq1.df,
             control.compute = list(cpo=TRUE),
             control.inla = list(strategy = "laplace"))
 
@@ -124,14 +118,14 @@ summary(fit)
 predictions <- fit$summary.fitted.values$mean
 
 
-sla.df <- sla.df %>% 
-      mutate(pred_dom_sla_weighted = predictions,
-             residuals = dom_sla_weighted - pred_dom_sla_weighted,
+pred.df <- domsla_rq1.df %>% 
+      mutate(pred_dom_sla_weighted_abundance = predictions,
+             residuals = dom_sla_weighted_abundance - pred_dom_sla_weighted_abundance,
              std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)))
 
 ## Fitted vs Predicted
-sla.df %>%
-  ggplot(aes(x = dom_sla_weighted, y = pred_dom_sla_weighted)) +
+pred.df %>%
+  ggplot(aes(x = dom_sla_weighted_abundance, y = pred_dom_sla_weighted_abundance)) +
   geom_point() +
   xlab("Observed Abundance Weighted SLA") +
   ylab("Fitted Values") +
@@ -141,8 +135,8 @@ sla.df %>%
   ggtitle("Observed vs Fitted SLA")
 
 ## Fitted vs Standardised Residuals
-sla.df %>%
-  ggplot(aes(x = pred_dom_sla_weighted, y = std_residuals)) +
+pred.df %>%
+  ggplot(aes(x = pred_dom_sla_weighted_abundance, y = std_residuals)) +
   geom_point() +
   xlab("Fitted Values") +
   ylab("Standardised Residuals") +
@@ -156,8 +150,8 @@ qqnorm(fit$cpo$pit)
 qqline(fit$cpo$pit)
 
 # Histogram of predictions
-sla.df %>%
-  ggplot(aes(x = pred_dom_sla_weighted)) +
+pred.df %>%
+  ggplot(aes(x = pred_dom_sla_weighted_abundance)) +
   geom_histogram(bins=15) +
   theme_project()
   

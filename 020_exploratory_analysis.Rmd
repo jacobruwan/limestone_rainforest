@@ -79,7 +79,9 @@ domsla_rq1.df %>%
   geom_boxplot() +
   theme_project() +
   scale_colour_tableau() +
-  ggtitle("SLA vs Site and Dominant Species ID")
+  ggtitle("Weighted SLA vs Site and Dominant Species ID")+
+  xlab("Dominant Species") +
+  ylab("Abundance-Weighted SLA")
 
 ```
 
@@ -90,38 +92,61 @@ domsla_rq1.df %>%
 #   ggplot(aes(dom_sla, col = dom_species_id)) +
 #   geom_density()
 
-domsla_rq1.df %>%
+slagroup.df <- domsla_rq1.df %>%
   mutate(sla_group = cut(dom_sla,
                          breaks = seq(0, max(dom_sla), 25))) %>%
   group_by(dom_species_id, sla_group) %>%
-  summarise(sla_group_abundance = sum(dom_abundance)) %>%
-  ggplot(aes(x=sla_group, y = sla_group_abundance, fill = dom_species_id)) +
-  geom_bar(stat = "identity", position = "dodge") +
+  # summarise(sla_group_abundance = sum(dom_abundance)) %>% # Incorrect logic here.. since they all have the same abundance ata  quadrat level
+  summarise(obs = n()) %>%
+  mutate(index = as.numeric(sla_group)) %>%
+  arrange(index)
+
+
+slagroup.df %>%
+  ggplot(aes(x=index, y = obs, fill = dom_species_id, col = dom_species_id)) +
+  # geom_bar(stat = "identity", position = "dodge") +
+  geom_point() +
+  geom_smooth(span = 0.4) +
   theme_project() +
   theme(axis.text.x = element_text(angle = 45, 
                                    vjust = 1,
                                    hjust = 1))  +
   ggtitle("Functional Evenness of SLA for Dominant Species") +
-  xlab("Dominant Species Abundance") +
-  ylab("SLA Group") +
-  scale_fill_tableau(name = "Dominant Species")
+  ylab("Number of Leaf Samples") +
+  xlab("Bucketed SLA") +
+  # scale_fill_tableau(name = "Dominant Species") +
+  scale_colour_tableau(name = "Dominant Species") +
+  scale_x_continuous(breaks = unique(slagroup.df$index),
+                     labels = unique(slagroup.df$sla_group),
+                     lim  = c(1, 15))
   
 
+slagroup.df$index %>% unique
 
 ```
 
 ### SLA vs Species Richness
 ```{r}
 domsla_rq1.df %>%
-  ggplot(aes(x = species_richness, y = dom_sla, 
+  ggplot(aes(x = species_richness, y = dom_sla_weighted_abundance, 
              col = site)) +
   geom_point(size = 1) +
   theme_project() +
   scale_colour_manual(name = "Site", values = colours.site) +
   ggtitle("Domiant Species: SLA vs Species Richness (12 Quadrats)") +
   xlab("Species Richness") +
-  ylab("SLA") +
+  ylab("Abundance-Weighted SLA") +
   facet_wrap("dom_species_id")
+
+
+```
+
+### SLA vs Dominant Species Leaf Traits
+```{r}
+leaf_trait_choice <- "leaf_arrangement"
+
+domsla_rq1.df %>%
+  select(dom_sla)
 
 
 ```
