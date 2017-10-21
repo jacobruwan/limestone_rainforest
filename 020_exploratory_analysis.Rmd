@@ -3,11 +3,6 @@ title: "model_development"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-
 ```{r load_datasets_exploratory_analysis}
 # This code should be removed when entire process is productionised
 dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
@@ -72,16 +67,14 @@ domshannons_rq1.df %>%
 
 
 ## Research Question 1: Dominant Species Specific Leaf Area
-```{r}
-dataq3 <- domsla_rq1.df
-```
+
 
   * leaf area - photosynthetic aparatus of the plant
   * amount of investment of dry matter (plant investment into growth defence trade off) -> Most dominant species most compettitive, higher specific leaf area
 
 ### Abundance-Weighted SLA vs Dominant Species ID
 ```{r}
-dataq3 %>%
+domsla_rq1.df %>%
   ggplot(aes(x=dom_species_id, y = dom_sla_weighted_abundance, col=site)) +
   geom_boxplot() +
   theme_project() +
@@ -97,7 +90,7 @@ dataq3 %>%
 #   ggplot(aes(dom_sla, col = dom_species_id)) +
 #   geom_density()
 
-dataq3 %>%
+domsla_rq1.df %>%
   mutate(sla_group = cut(dom_sla,
                          breaks = seq(0, max(dom_sla), 25))) %>%
   group_by(dom_species_id, sla_group) %>%
@@ -117,7 +110,21 @@ dataq3 %>%
 
 ```
 
+### SLA vs Species Richness
+```{r}
+domsla_rq1.df %>%
+  ggplot(aes(x = species_richness, y = dom_sla, 
+             col = site)) +
+  geom_point(size = 1) +
+  theme_project() +
+  scale_colour_manual(name = "Site", values = colours.site) +
+  ggtitle("Domiant Species: SLA vs Species Richness (12 Quadrats)") +
+  xlab("Species Richness") +
+  ylab("SLA") +
+  facet_wrap("dom_species_id")
 
+
+```
 
 ## Research Question 2: Hobo Time Series
 ```{r}
@@ -210,46 +217,116 @@ load(paste0(location, "abiotic_penetrometer.RData"))
 ggplot(aes(x=site, y=decomposition),
        data = abiotic_filterpaper.df) + 
   geom_boxplot() +
-  ggtitle("Abiotic Comparison") 
-
+  ggtitle("Abiotic Comparison") +
+  theme_project()
 
 
 # LAI
-ggplot(aes(x=site, y=lai, col = site),
+ggplot(aes(x=site, y=lai),
        data = abiotic_canopycover.df) + 
   geom_boxplot() +
-  ggtitle("Abiotic Comparison") 
+  ggtitle("Abiotic Comparison") +
+  theme_project()
 
 # Gap fResction THreshold
-ggplot(aes(x=site, y=gft, col = site),
+ggplot(aes(x=site, y=gft),
        data = abiotic_canopycover.df) + 
   geom_boxplot() +
-  ggtitle("Abiotic Comparison") 
+  ggtitle("Abiotic Comparison") +
+  theme_project()
 
 # Compaction
-ggplot(aes(x=site, y=compaction, col = site),
+ggplot(aes(x=site, y=compaction),
        data = abiotic_penetrometer.df) + 
   geom_boxplot() +
-  ggtitle("Abiotic Comparison") 
+  ggtitle("Abiotic Comparison") +
+  theme_project()
 
 ```
 
-## Leaf Traits
+## Number of Leaf Traits evident in each Quadrat
 ```{r}
+leaf_trait_choice <- "leaf_arrangement"
+
+for (leaf_trait_choice in names(biotic_leaftraits.df)[8:15]) {
+
 count_data <- biotic_leaftraits.df %>%
-  filter(species_presence == 1) %>%
-  group_by(site, apex_shape) %>% # CHANGE LEAF TRAIT
-  summarise(number_observations = n())
+  rename_("leaf_trait" = leaf_trait_choice) %>%
+  group_by(site, leaf_trait) %>% # CHANGE LEAF TRAIT
+  summarise(number_observations = n())%>%
+  mutate(leaf_trait = ifelse(number_observations < 3, 
+                             "Other (variety of uncommon)",
+                             leaf_trait))  %>%
+  arrange(desc(site), desc(number_observations)) %>%
+  mutate(leaf_trait = factor(leaf_trait, 
+                             levels = leaf_trait,
+                             ordered = TRUE))
 
 # CHANGE THE X VARIABLE LEAF TRAIT TO THE ONE ABOVE
-ggplot(aes(x=apex_shape, y=number_observations, fill = site),
+p1 <- ggplot(aes(x=leaf_trait, y=number_observations, fill = site),
        data = count_data) + 
   geom_bar(stat = "identity", position = "dodge") +
-  coord_flip() +
-  ggtitle("Leaf Trait Comparison") 
+  ggtitle(paste(leaf_trait_choice, "Comparison")) +
+  theme_project() +
+  scale_fill_manual(name = "Site", values = colours.site) +
+  # coord_flip()
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1, vjust = 1)) +
+  scale_y_continuous(breaks = seq(0, 30, 5)) +
+  ylab("Number of Species") +
+  xlab(leaf_trait_choice)
+
+print(p1)
+}
 
 ```
 
 
+```{r}
+leaf_trait_choice <- "leaf_arrangement"
 
+count_data <- biotic_leaftraits.df %>%
+  select(-transect, -quadrat) %>%
+  distinct() %>%
+  select(-dom_species_id, -species_name, -species_presence) %>%
+  gather(leaf_trait, composition, -site, -species_id) %>%
+  filter(leaf_trait != "other")
+
+count_data %>%
+  group_by(site, leaf_trait, composition) %>%
+  summarise(obs = n()) %>%
+  arrange(desc(obs)) %>%
+  ggplot(aes(x = site, y = composition)) +
+  geom_point() +
+  facet_wrap("leaf_trait", scale="free_y")
+  
+
+# CHANGE THE X VARIABLE LEAF TRAIT TO THE ONE ABOVE
+p1 <- ggplot(aes(y=leaf_trait, x=site, fill = site),
+       data = count_data) + 
+  geom_point()
+
+print(p1)
+
+
+```
+
+```{r}
+count_data %>%
+  select(site, leaf_trait, composition) %>% 
+  distinct() %>%
+  ggplot(aes(x = site, y = composition)) +
+  geom_point() +
+  facet_wrap("leaf_trait", scale="free_y", nrow=4)
+
+species_rawabiotic_modelling.df %>%
+  select(site, leaf_arrangement) %>% 
+  distinct() %>% arrange(leaf_arrangement)
+
+
+biotic_leaftraits.df%>%
+  select(site, leaf_arrangement) %>% 
+  distinct()  %>% arrange(leaf_arrangement)
+
+```
 
