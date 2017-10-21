@@ -3,10 +3,6 @@ title: "data_preparation"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
 # Modelling Data Preparation
 ```{r importing_data}
 data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
@@ -80,7 +76,7 @@ species_id2 <- species_id %>%
 # So, we have our research question 3 dataset started below
 species_id3 <- species_id2 %>%
   group_by(Site, Transect, Quadrat) %>%
-  summarise(presence_richness = sum(as.numeric(species_presence)))
+  summarise(species_richness = sum(as.numeric(species_presence)))
 ```
 
 ```{r seedling_abundance_cover}
@@ -336,8 +332,7 @@ transect_hobo2 <- hobo2 %>%
             max_temp = max(temp),
             range_temp = max_temp - min_temp,
             min_rel_humid = min(rel_humid),
-            max_rel_humid = max(rel_humid)) %>%
-  mutate(hobo_id = factor(hobo_id))
+            max_rel_humid = max(rel_humid))
 
 
 ```
@@ -442,6 +437,8 @@ save(domshannons_rq1.df, file = paste0(data_folder, "domshannons_rq1.RData"))
 
 ```{r rq1_sla}
 domsla_rq1.df <- dom_leaf_area3 %>%
+  left_join(species_id3,
+            by = c("Site", "Transect", "Quadrat")) %>%
   left_join(specieslvl_dom_seedling_count2,
             by = c("Site", "Transect", "Quadrat", "Dom Species ID", "Species ID"))%>%
   left_join(specieslvl_dom_leaf_area3 %>% select(-total_dom_leaf_dry_weight),
@@ -549,131 +546,129 @@ save(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.R
 
 
 ```{r}
-############################################################
-# Quadrat Level Dataset
-############################################################
-quadrat_modelling.df <- quadrat %>%
-  select(Site, Transect, Quadrat) %>%
-  left_join(species_id3, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_seedling_count2, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_dom_seedling_count2, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_dom_leaf_area3, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_canopy_cover2, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(quadrat_penetrometer2, 
-            by=c("Site", "Transect", "Quadrat")) %>%
-  left_join(transect2, by=c("Site", "Transect")) %>%
-  left_join(transect_filter_paper2, by=c("Site", "Transect")) %>%
-  left_join(transect_hobo2, by=c("Site", "Transect"))
-
-# save(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.RData"))
-# write.csv(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.csv"))
-
-############################################################
-# Species ID Level Dataset
-############################################################
-# Need to create a base dataset with all species ID in every plot
-# So that every specieslvl dataset can be left_join without losing information
-# extra observations will be fitlered out of final species_modelling.df
-quadrat_species_base <- species_id %>%
-  select(`Species ID`) %>% 
-  mutate(Site = "-", Transect = NA, Quadrat = NA)
-
-quadrat_species_base <- quadrat_species_base %>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 1)) %>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 5))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 1))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 5))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 1))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 5))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 1)) %>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 5))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 1))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 5))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 1))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 2))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 3))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 4))%>%
-  rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 5)) %>%
-  filter(Site != "-")
-
-species_modelling.df <- quadrat_species_base %>%
-  left_join(seedling_count2,
-            by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
-  left_join(specieslvl_dom_seedling_count2,
-            by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
-  left_join(specieslvl_dom_leaf_area3,
-            by=c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
-  left_join(species_id2 %>% select(-`Species Pseudo Name`),
-            by=c("Site", "Transect", "Quadrat", "Species ID", "Dom Species ID")) %>%
-  left_join(leaf_traits2,
-            by = "Species ID")
-  
-# join abiotic factors from quadrat level to species level
-quad_vars <- quadrat_modelling.df %>% names()
-
-quad_df_join <- quadrat_modelling.df[-which(quad_vars %in% names(species_modelling.df)[-c(2,3,4)])]
-
-## Checking quadrat_modelling.df variables excluded
-# quadrat_modelling.df[which(quad_vars %in% names(species_modelling.df))]
+# ############################################################
+# # Quadrat Level Dataset
+# ############################################################
+# quadrat_modelling.df <- quadrat %>%
+#   select(Site, Transect, Quadrat) %>%
+#   left_join(species_id3, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(quadrat_seedling_count2, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(quadrat_dom_seedling_count2, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(quadrat_dom_leaf_area3, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(quadrat_canopy_cover2, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(quadrat_penetrometer2, 
+#             by=c("Site", "Transect", "Quadrat")) %>%
+#   left_join(transect2, by=c("Site", "Transect")) %>%
+#   left_join(transect_filter_paper2, by=c("Site", "Transect")) %>%
+#   left_join(transect_hobo2, by=c("Site", "Transect"))
 # 
-# species_modelling.df %>%
-#   select(Site, Transect, Quadrat, `Species ID`,
-#          day1_abundance, day1_av_height, overall_seedling_cover,
-#          total_dom_leaf_area, total_dom_leaf_dry_weight)
-
-# equivalent variables in the quadrat_modelling.df aggregate the species ID to quadrat level. Since Species lvl is available, we use it instead
-
-species_modelling.df %<>% 
-  left_join(quad_df_join, by=c("Site", "Transect", "Quadrat")) %>%
-  filter(!is.na(day1_abundance) |
-         !is.na(`Dom Species ID`)) %>%
-  rename(species_id = `Species ID`, dom_species_id = `Dom Species ID`,
-         site = Site, transect = Transect, quadrat = Quadrat)
-
-# Save the dataset
-# save(species_modelling.df, file = paste0(data_folder, "species_modelling.RData"))
-# write.csv(species_modelling.df, file = paste0(data_folder, "species_modelling.csv"))
-
-############################################################
-# Species ID with Individual Abiotic Data
-############################################################
-#filter_paper2, canopy_cover2 and penetrometer2 can be joined by Site and Transect
-abiotic_modelling.df <- quadrat %>%
-  select(Site, Transect, Quadrat)  %>%
-  left_join(filter_paper2,
-            by = c("Site", "Transect"))  %>%
-  left_join(penetrometer2,
-            by = c("Site", "Transect", "Quadrat")) %>%
-  left_join(canopy_cover2,
-            by = c("Site", "Transect", "Quadrat")) %>%
-  rename(site = Site, transect = Transect, quadrat = Quadrat)
-
-species_rawabiotic_modelling.df <- species_modelling.df %>%
-  left_join(abiotic_modelling.df,
-            by = c("site", "transect", "quadrat"))
-
-# Save the dataset
-save(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.RData"))
+# # save(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.RData"))
+# # write.csv(quadrat_modelling.df, file = paste0(data_folder, "quadrat_modelling.csv"))
+# 
+# ############################################################
+# # Species ID Level Dataset
+# ############################################################
+# # Need to create a base dataset with all species ID in every plot
+# # So that every specieslvl dataset can be left_join without losing information
+# # extra observations will be fitlered out of final species_modelling.df
+# quadrat_species_base <- species_id %>%
+#   select(`Species ID`) %>% 
+#   mutate(Site = "-", Transect = NA, Quadrat = NA) %>%
+#   left_join(leaf_traits2,
+#             by = "Species ID")
+# 
+# quadrat_species_base <- quadrat_species_base %>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 1)) %>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 1, Quadrat = 5))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 1))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 2, Quadrat = 5))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 1))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "D", Transect = 3, Quadrat = 5))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 1)) %>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 1, Quadrat = 5))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 1))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 2, Quadrat = 5))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 1))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 2))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 3))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 4))%>%
+#   rbind(quadrat_species_base %>% mutate(Site = "P", Transect = 3, Quadrat = 5)) %>%
+#   filter(Site != "-")
+# 
+# species_modelling.df <- quadrat_species_base %>%
+#   left_join(seedling_count2,
+#             by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
+#   left_join(specieslvl_dom_seedling_count2,
+#             by=c("Site", "Transect", "Quadrat", "Species ID")) %>%
+#   left_join(specieslvl_dom_leaf_area3,
+#             by=c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
+#   left_join(species_id2 %>% select(-`Species Pseudo Name`),
+#             by=c("Site", "Transect", "Quadrat", "Species ID", "Dom Species ID"))
+#   
+# # join abiotic factors from quadrat level to species level
+# quad_vars <- quadrat_modelling.df %>% names()
+# 
+# quad_df_join <- quadrat_modelling.df[-which(quad_vars %in% names(species_modelling.df)[-c(2,3,4)])]
+# 
+# ## Checking quadrat_modelling.df variables excluded
+# # quadrat_modelling.df[which(quad_vars %in% names(species_modelling.df))]
+# # 
+# # species_modelling.df %>%
+# #   select(Site, Transect, Quadrat, `Species ID`,
+# #          day1_abundance, day1_av_height, overall_seedling_cover,
+# #          total_dom_leaf_area, total_dom_leaf_dry_weight)
+# 
+# # equivalent variables in the quadrat_modelling.df aggregate the species ID to quadrat level. Since Species lvl is available, we use it instead
+# 
+# species_modelling.df %<>% 
+#   left_join(quad_df_join, by=c("Site", "Transect", "Quadrat")) %>%
+#   rename(species_id = `Species ID`, dom_species_id = `Dom Species ID`,
+#          site = Site, transect = Transect, quadrat = Quadrat)
+# 
+# # Save the dataset
+# # save(species_modelling.df, file = paste0(data_folder, "species_modelling.RData"))
+# # write.csv(species_modelling.df, file = paste0(data_folder, "species_modelling.csv"))
+# 
+# ############################################################
+# # Species ID with Individual Abiotic Data
+# ############################################################
+# #filter_paper2, canopy_cover2 and penetrometer2 can be joined by Site and Transect
+# abiotic_modelling.df <- quadrat %>%
+#   select(Site, Transect, Quadrat)  %>%
+#   left_join(filter_paper2,
+#             by = c("Site", "Transect"))  %>%
+#   left_join(penetrometer2,
+#             by = c("Site", "Transect", "Quadrat")) %>%
+#   left_join(canopy_cover2,
+#             by = c("Site", "Transect", "Quadrat")) %>%
+#   rename(site = Site, transect = Transect, quadrat = Quadrat)
+# 
+# species_rawabiotic_modelling.df <- species_modelling.df %>%
+#   left_join(abiotic_modelling.df,
+#             by = c("site", "transect", "quadrat"))
+# 
+# # Save the dataset
+# save(species_rawabiotic_modelling.df, file = paste0(data_folder, "species_rawabiotic_modelling.RData"))
 ```
 
 
