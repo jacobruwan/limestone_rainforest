@@ -65,6 +65,8 @@ theme_project <- function() {
   theme_bw() +
     theme(legend.position = "top") 
 }
+
+colours.site = c("#d62121", "#30d621")
 ```
 
 # Abstract
@@ -126,9 +128,12 @@ $H_0$: Can species richness be predicted based on other data which are much chea
 ```{r, child = '030_model_development.Rmd'}
 ```
 
-# Results
-```{r, child = '040_model_results.Rmd'}
+```{r, child = '031_model_rq1_sla.Rmd'}
 ```
+
+# Results
+<!-- # ```{r, child = '040_model_results.Rmd'} -->
+<!-- # ``` -->
 
 # Conclusion
 
