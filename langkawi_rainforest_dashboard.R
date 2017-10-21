@@ -530,46 +530,46 @@ dashboard_server <- function(input, output, server) {
   ###################################################
   # All Raw Data Exploratory Analysis
   ###################################################
-  exploratoryData_sa <- reactive({
-    species_rawabiotic_modelling.df %>%
-      mutate_("response_var" = input$response_sa,
-              "predictor_var" = input$predictor_sa,
-              "col_var" = input$colour_group_sa) %>%
-      mutate(col_var = factor(col_var, ordered = TRUE))
-
-    
-  })
-  
-  
-  output$exploratoryPlot_sa <- renderPlot({
-    if (!is.numeric(exploratoryData_sa()[[input$predictor_sa]][1]) & input$plotDesign_sa == "Box Plot") {
-      exploratoryData_sa() %>%
-        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
-        geom_point(size=3) +
-        geom_boxplot() +
-        theme_project() +
-        xlab(input$predictor_sa) +
-        ylab(input$response_sa) +
-        scale_colour_tableau(name = input$colour_group_sa)
-    } else if (input$plotDesign_sa == "Line"){
-      exploratoryData_sa() %>%
-        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
-        geom_point(size=3) +
-        geom_line() +
-        theme_project() +
-        xlab(input$predictor_sa) +
-        ylab(input$response_sa) +
-        scale_colour_tableau(name = input$colour_group_sa)
-    } else {
-      exploratoryData_sa() %>%
-        ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
-        geom_point(size=3) +
-        theme_project() +
-        xlab(input$predictor_sa) +
-        ylab(input$response_sa) +
-        scale_colour_tableau(name = input$colour_group_sa)
-    }
-  })
+  # exploratoryData_sa <- reactive({
+  #   species_rawabiotic_modelling.df %>%
+  #     mutate_("response_var" = input$response_sa,
+  #             "predictor_var" = input$predictor_sa,
+  #             "col_var" = input$colour_group_sa) %>%
+  #     mutate(col_var = factor(col_var, ordered = TRUE))
+  # 
+  #   
+  # })
+  # 
+  # 
+  # output$exploratoryPlot_sa <- renderPlot({
+  #   if (!is.numeric(exploratoryData_sa()[[input$predictor_sa]][1]) & input$plotDesign_sa == "Box Plot") {
+  #     exploratoryData_sa() %>%
+  #       ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+  #       geom_point(size=3) +
+  #       geom_boxplot() +
+  #       theme_project() +
+  #       xlab(input$predictor_sa) +
+  #       ylab(input$response_sa) +
+  #       scale_colour_tableau(name = input$colour_group_sa)
+  #   } else if (input$plotDesign_sa == "Line"){
+  #     exploratoryData_sa() %>%
+  #       ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+  #       geom_point(size=3) +
+  #       geom_line() +
+  #       theme_project() +
+  #       xlab(input$predictor_sa) +
+  #       ylab(input$response_sa) +
+  #       scale_colour_tableau(name = input$colour_group_sa)
+  #   } else {
+  #     exploratoryData_sa() %>%
+  #       ggplot(aes(x=predictor_var, y=response_var, col=col_var)) +
+  #       geom_point(size=3) +
+  #       theme_project() +
+  #       xlab(input$predictor_sa) +
+  #       ylab(input$response_sa) +
+  #       scale_colour_tableau(name = input$colour_group_sa)
+  #   }
+  # })
   
   ###################################################
   # Research Question 2: Hobo
