@@ -20,20 +20,54 @@ load(paste0(dropbox, "domsla_rq1.RData"))
 # domsla_rq1.df %>% str()
 
 sla.df <- domsla_rq1.df %>%
-  select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
-         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
-         -species_id, -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total, 
-         -dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
+  select(-dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
 
 
 # Look at structure of modelling df
 # sla.df %>% str()
 ```
 
+```{r correlation_analysis}
+# Look at correlations between variables
+names(domsla_rq1.df)
+
+## Abiotic variables
+abiotic_vars <- c("av_quad_compaction", "av_trans_decomposition", "min_temp", "max_temp", "range_temp", "av_trans_elevation")
+
+domsla_rq1.df %>%
+  select(one_of(abiotic_vars)) %>%
+  pairs(lower.panel = NULL)
+
+domsla_rq1.df %>%
+  select(one_of(abiotic_vars)) %>%
+  cor() %>%
+  round(digits=2)
+
+# correlation results
+# elevation will account for decopmosition and min_temperature, however we will leave compaction in the model for now as it is at the transect level
+# range_temp will account for max_temp
+
+biotic_vars <- c("dom_sla", "dom_abundance", "dom_seedling_cover", "overall_seedling_cover", "dom_species_id",
+                 "sla_character_range", "sla_species_niche_space", "sla_functional_richness")
+
+domsla_rq1.df %>%
+  select(one_of(biotic_vars)) %>%
+  pairs(lower.panel = NULL)
+
+domsla_rq1.df %>%
+  mutate(dom_species_id = as.numeric(dom_species_id)) %>%
+  select(one_of(biotic_vars)) %>%
+  cor()
+
+# correlation results
+# 
+```
+
 ```{r}
 # define the vector of possible predictors, exclude random effects
 response <- "dom_sla_weighted_abundance"
-predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat")))]
+predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
+                                                         "min_temp", "max_temp", "av_trans_decomposition")))]
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
 possible_predictor_combinations <- list()

@@ -56,7 +56,7 @@ instant_pkgs <- function(pkgs) {
 # Define packages to load run instant_pkgs
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
                       "ggplot2", "ggthemes", "lubridate",
-                      "lme4", "INLA", "stringr", "scales")
+                      "lme4", "INLA", "stringr", "scales", "nnet")
 
 instant_pkgs(packages_to_load)
 
