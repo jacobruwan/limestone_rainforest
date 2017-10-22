@@ -15,11 +15,15 @@ load(paste0(dropbox, "biotic_leaftraits.RData"))
 # Go through the variables and unselect predictor variable that don't make sense
 # biotic_leaftraits.df %>% str()
 
-leaf.df <- biotic_leaftraits.df
+leaf.df <- biotic_leaftraits.df %>%
+  left_join(transect2,
+            by = c("site"="Site", "transect"="Transect"))
 
 # Look at structure of modelling df
 # sla.df %>% str()
 ```
+
+
 
 ### Bayesian Mutlimonial
 ```{r}
@@ -32,9 +36,14 @@ leaf.df <- biotic_leaftraits.df
 ```{r}
 library(nnet)
 
-fit.lfmulti <- multinom(leaf_arrangement ~ site + av_trans_elevation,
+fit.lfmulti <- multinom(leaf_arrangement ~ av_trans_elevation,
                         data = leaf.df)
 
+summary(fit.lfmulti)
 
+n <- length(unique(leaf.df$leaf_arrangement)[-which(is.na(unique(leaf.df$leaf_arrangement)))]) - 1
+
+data.frame(Leaf_Traits = 1:n,
+           Intercepts = coefficients(fit.lfmulti)[1:n])
 
 ```
