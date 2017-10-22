@@ -1,0 +1,40 @@
+---
+title: "model_development"
+output: html_document
+---
+
+
+## Species Composition: Leaf Trait Analysis
+In this analysis, the differences in leaf trait are investigated. 
+
+```{r load_datasets}
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+
+load(paste0(dropbox, "biotic_leaftraits.RData"))
+
+# Go through the variables and unselect predictor variable that don't make sense
+# biotic_leaftraits.df %>% str()
+
+leaf.df <- biotic_leaftraits.df
+
+# Look at structure of modelling df
+# sla.df %>% str()
+```
+
+### Bayesian Mutlimonial
+```{r}
+
+
+
+```
+
+### Frequentist Multinomial
+```{r}
+library(nnet)
+
+fit.lfmulti <- multinom(leaf_arrangement ~ site + av_trans_elevation,
+                        data = leaf.df)
+
+
+
+```

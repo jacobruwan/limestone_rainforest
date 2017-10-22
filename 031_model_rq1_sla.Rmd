@@ -67,7 +67,8 @@ domsla_rq1.df %>%
 # define the vector of possible predictors, exclude random effects
 response <- "dom_sla_weighted_abundance"
 predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
-                                                         "min_temp", "max_temp", "av_trans_decomposition")))]
+                                                         "min_temp", "max_temp", "av_trans_decomposition",
+                                                         "secondary_venetion", "tertiary_venetion", "other")))]
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
 possible_predictor_combinations <- list()
@@ -118,19 +119,21 @@ Log_Likelihood_Summary <- Log_Likelihood_Summary %>%
                    Log_Likelihood = summary(fit)[["mlik"]][2]))
 
 }
+
+save(Log_Likelihood_Summary, file = paste0(data_folder, "inla_mlik_rank.RData"))
 ```
 
 #### Model: Minimum Marginal Log-Likelihood
 ```{r}
-top5 <- Log_Likelihood_Summary %>%
+top10 <- Log_Likelihood_Summary %>%
   arrange(desc(Log_Likelihood)) %>%
-  head(5)
+  head(10)
 
-# top5
+top10
 
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_overall_seedling_cover + av_trans_elevation + leaf_arrangement + site:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_av_trans_elevation + site:dom_species_id + dom_species_id:scaled_dom_seedling_cover + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -187,7 +190,8 @@ qqline(fit$cpo$pit)
 pred.df %>%
   ggplot(aes(x = pred_dom_sla_weighted_abundance)) +
   geom_histogram(bins=15) +
-  theme_project()
+  theme_project() +
+  ggtitle("Histograms of Fitted Values")
   
 
 
@@ -217,8 +221,10 @@ fixed.df %>%
   ggplot(aes(y = Estimate, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("Standardised Predictors: Parameter Estimate Confidence Intervals") +
-  xlab("Median")
+  ggtitle("Standardised Predictors: Parameter Estimate Credible Intervals") +
+  xlab("Estimated Value") +
+  ylab("Parameter") +
+  geom_vline(xintercept = 0)
 ```
 
 
