@@ -291,6 +291,15 @@ transect_penetrometer2 <- penetrometer2 %>%
 ```{r hobo_cleaning_data}
 # hobo_id dataframe contains the start and end times for the Hobo times series data
 # hobo dataframe contains the times series data for temperature and relative humidity
+# THere is a ten hour lag in datetime to min/max time (min time in future)..
+min_time <- as.POSIXct(strftime("2017-09-26 10:00:00", "%Y-%m-%d %H:%M:%S")) #midnight on the 26th
+min_new_time <- as.POSIXct(strftime("2017-09-28 03:00:00", "%Y-%m-%d %H:%M:%S"))
+max_time <- as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S"))
+
+
+
+
+
 # Group this to a transect level
 hobo2 <- hobo %>%
   left_join(hobo_index_time, by="Index") %>%
@@ -300,16 +309,17 @@ hobo2 <- hobo %>%
          rel_humid = `Relative Humidity`, date_time = Time,
          start_hobo = `Hobo Start Time`, end_hobo = `Hobo End Time`) %>%
   select(-`Data Back Up Photo`, -`Time Hobo`, -index) %>%
-  arrange(hobo_id, date_time)
-
-# THere is a ten hour lag in datetime to min/max time (min time in future)..
-min_time <- as.POSIXct(strftime("2017-09-26 10:00:00", "%Y-%m-%d %H:%M:%S")) #midnight on the 26th
-max_time <- as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S"))
-
-
-max_min_hobo2 <- hobo2 %>%
-  mutate(filter_minhobo = min_time, 
+  arrange(hobo_id, date_time)%>%
+  mutate(filter_minhobo = ifelse(!(hobo_id %in% c("3", "8", "13", "6")),
+                                 min_new_time,
+                                 min_time), 
          filter_maxhobo = max_time) %>%
+  filter(date_time > filter_minhobo, date_time < filter_maxhobo)
+
+
+
+
+max_min_hobo2 <- hobo2  %>%
   group_by(Site, Transect, hobo_id, start_hobo, end_hobo) %>%
   summarise(min_temp = min(temp),
             max_temp = max(temp),
@@ -471,17 +481,21 @@ domsla_rq1.df %<>%
             by = c("species_id", "dom_species_id", "site", "transect", "quadrat"))  %>%
   mutate(species_id = factor(species_id), 
          dom_species_id = factor(dom_species_id),
-         transect = factor(transect), quadrat = factor(quadrat)) 
+         transect = factor(transect), quadrat = factor(quadrat))  %>%
+  select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
+         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
+         -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total,
+         -species_name, -species_presence, -species_richness)
 
 # Calculate Functional Richness, Functional Evenness and Functional Divergence
 domsla_rq1.df %<>%
   group_by(site, transect, quadrat) %>%
-  select(dom_species_id, dom_sla) %>%
+  # select(dom_species_id, dom_sla) %>%
   mutate(sla_character_range = max(dom_sla) - min(dom_sla)) %>%
   group_by(site, transect, quadrat, dom_species_id) %>%
   mutate(sla_species_niche_space = max(dom_sla - min(dom_sla))) %>%
   ungroup() %>%
-  mutate(sla_functional_richness = species_niche_space/character_range)
+  mutate(sla_functional_richness = sla_species_niche_space/sla_character_range)
 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
@@ -500,7 +514,7 @@ hobo_rq2.df <- hobo3 %>%
   rename(site = Site, transect= Transect)  %>%
   mutate(transect = factor(transect)) %>%
   arrange(desc(hobo_id), date_time) %>%
-  filter(hobo_id %in% c("3", "8", "13", "6")) %>%
+  # filter(hobo_id %in% c("3", "8", "13", "6")) %>%
   filter(date_time > as.POSIXct(strftime("2017-09-26 3:00:00", 
                                          "%Y-%m-%d %H:%M:%S")),
          date_time < as.POSIXct(strftime("2017-09-28 22:00:00", 
