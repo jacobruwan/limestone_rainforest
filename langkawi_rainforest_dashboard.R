@@ -90,32 +90,32 @@ dashboard_ui <- shinyUI(
     dashboardBody(
       navbarPage(
         title = "Limestone Rainforest",
-        tabPanel("All Raw Data",
-                 fluidRow(
-                   column(6,
-                          box(title = "Graph", solidHeader = TRUE,
-                              status = "primary", width = 200,
-                              plotOutput("exploratoryPlot_sa")
-                          )
-                   ),
-                   column(3,
-                          selectInput("response_sa", "Response",
-                                      choices = names(species_rawabiotic_modelling.df),
-                                      selected = "dom_simpson"),
-                          selectInput("predictor_sa", "Predictor",
-                                      choices = names(species_rawabiotic_modelling.df),
-                                      selected = "site")
-                   ),
-                   column(3,
-                          selectInput("colour_group_sa", "Colour Grouping",
-                                      choices = names(species_rawabiotic_modelling.df),
-                                      selected = "site"),
-                          selectInput("plotDesign_sa", "Plot Design",
-                                      choices = c("Point"),
-                                      selected = "Point")
-                   )
-                 )
-        ),
+        # tabPanel("All Raw Data",
+        #          fluidRow(
+        #            column(6,
+        #                   box(title = "Graph", solidHeader = TRUE,
+        #                       status = "primary", width = 200,
+        #                       plotOutput("exploratoryPlot_sa")
+        #                   )
+        #            ),
+        #            column(3,
+        #                   selectInput("response_sa", "Response",
+        #                               choices = names(species_rawabiotic_modelling.df),
+        #                               selected = "dom_simpson"),
+        #                   selectInput("predictor_sa", "Predictor",
+        #                               choices = names(species_rawabiotic_modelling.df),
+        #                               selected = "site")
+        #            ),
+        #            column(3,
+        #                   selectInput("colour_group_sa", "Colour Grouping",
+        #                               choices = names(species_rawabiotic_modelling.df),
+        #                               selected = "site"),
+        #                   selectInput("plotDesign_sa", "Plot Design",
+        #                               choices = c("Point"),
+        #                               selected = "Point")
+        #            )
+        #          )
+        # ),
         tabPanel("RQ1 - Seedling Cover",
                  fluidRow(
                    column(6,
