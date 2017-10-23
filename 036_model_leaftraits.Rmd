@@ -15,9 +15,7 @@ load(paste0(dropbox, "biotic_leaftraits.RData"))
 # Go through the variables and unselect predictor variable that don't make sense
 # biotic_leaftraits.df %>% str()
 
-leaf.df <- biotic_leaftraits.df %>%
-  left_join(transect2,
-            by = c("site"="Site", "transect"="Transect"))
+leaf.df <- biotic_leaftraits.df
 
 # Look at structure of modelling df
 # sla.df %>% str()
@@ -47,3 +45,6 @@ data.frame(Leaf_Traits = 1:n,
            Intercepts = coefficients(fit.lfmulti)[1:n])
 
 ```
+
+
+

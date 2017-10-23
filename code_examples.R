@@ -12,8 +12,12 @@ location <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\
 # Load the datasets
 load(paste0(location, "biotic_leaftraits.RData"))
 load(paste0(location, "abiotic_filterpaper.RData"))
-load(paste0(location, "abiotic_canopycover.RData"))
+# load(paste0(location, "abiotic_canopycover.RData"))
 load(paste0(location, "abiotic_penetrometer.RData"))
+load(paste0(location, 'domseedlingcover_spread.RData'))
+
+library(ggplot2)
+library(dplyr)
 
 
 
@@ -69,27 +73,33 @@ ggplot(aes(x=site, y=compaction, col = site),
 ####################################################
 ## Leaf Traits
 
-count_data <- biotic_leaftraits.df %>%
-  filter(species_presence == 1) %>%
-  group_by(site, apex_shape) %>% # CHANGE LEAF TRAIT
-  summarise(number_observations = n())
-
-# CHANGE THE X VARIABLE LEAF TRAIT TO THE ONE ABOVE
-ggplot(aes(x=apex_shape, y=number_observations, fill = site),
-       data = count_data) + 
-  geom_bar(stat = "identity", position = "dodge") +
-  coord_flip() +
-  ggtitle("Leaf Trait Comparison") 
+biotic_leaftraits.df %>%
+  filter(!is.na(leaf_arrangement)) %>%
+  ggplot(aes(x = av_trans_elevation, y = leaf_arrangement,
+             col = site)) +
+  geom_point() +
+  theme_bw()
 
 
+#########################3
+## Dominant Seedling Coverage
+domseedlingcover_spread.df %>% head()
 
 
-###########################3
-# Model example
 
-fit <- glm(lai ~ site,
-           family = "gaussian",
-           data = abiotic_canopycover.df)
 
-# In the output below, you want a significant siteP Estimate
-summary(fit)
+
+
+
+
+
+
+################################################
+###### Look at correlations
+## Add/remove variables from the select(var1, var2, etc.) section
+domseedlingcover_spread.df %>%
+  select(dom_1_abundance, dom_2_abundance, dom_3_abundance,
+         dom_1_seedling_cover, dom_2_seedling_cover, dom_3_seedling_cover) %>%
+  cor()
+
+

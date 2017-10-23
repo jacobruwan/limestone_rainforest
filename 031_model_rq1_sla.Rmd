@@ -27,6 +27,16 @@ sla.df <- domsla_rq1.df %>%
 # sla.df %>% str()
 ```
 
+```{r}
+domsla_rq1.df %>% 
+  filter(dom_species_id %in% c("1", "2", "3")) %>% 
+  select(-species_id, -site, -transect, -quadrat) %>%
+  distinct() %>%
+  t()
+
+
+```
+
 ```{r correlation_analysis}
 # Look at correlations between variables
 names(domsla_rq1.df)
