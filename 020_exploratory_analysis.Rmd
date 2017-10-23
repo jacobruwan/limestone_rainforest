@@ -337,21 +337,12 @@ print(p1)
 ```
 
 ```{r}
-count_data %>%
-  select(site, leaf_trait, composition) %>% 
-  distinct() %>%
-  ggplot(aes(x = site, y = composition)) +
+biotic_leaftraits.df %>%
+  filter(!is.na(leaf_arrangement)) %>%
+  ggplot(aes(x = av_trans_elevation, y = leaf_arrangement,
+             col = site)) +
   geom_point() +
-  facet_wrap("leaf_trait", scale="free_y", nrow=4)
-
-species_rawabiotic_modelling.df %>%
-  select(site, leaf_arrangement) %>% 
-  distinct() %>% arrange(leaf_arrangement)
-
-
-biotic_leaftraits.df%>%
-  select(site, leaf_arrangement) %>% 
-  distinct()  %>% arrange(leaf_arrangement)
+  theme_bw()
 
 ```
 
