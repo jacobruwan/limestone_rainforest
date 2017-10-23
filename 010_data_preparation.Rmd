@@ -342,7 +342,8 @@ transect_hobo2 <- hobo2 %>%
             max_temp = max(temp),
             range_temp = max_temp - min_temp,
             min_rel_humid = min(rel_humid),
-            max_rel_humid = max(rel_humid))
+            max_rel_humid = max(rel_humid))  %>% 
+  select(Site, Transect, min_temp, max_temp, range_temp) # The other variables are cr
 
 
 ```
@@ -367,6 +368,14 @@ transect_hobo2 <- hobo2 %>%
 biotic_leaftraits.df <- species_id2 %>%
   left_join(leaf_traits2,
             by = c("Species ID")) %>%
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat"))%>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect"))%>%
   rename(species_id = `Species ID`, 
          dom_species_id = `Dom Species ID`,
          species_name = `Species Pseudo Name`,
@@ -374,7 +383,8 @@ biotic_leaftraits.df <- species_id2 %>%
          quadrat = Quadrat) %>%
   mutate(species_id = factor(species_id), 
          dom_species_id = factor(dom_species_id)) %>%
-  filter(species_presence == 1)
+  filter(species_presence == 1) %>%
+  select(-species_presence)
 
 save(biotic_leaftraits.df, file = paste0(data_folder, "biotic_leaftraits.RData"))
 ```
@@ -405,16 +415,16 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
   filter(`Dom Species ID` != 4) %>%
   left_join(specieslvl_dom_leaf_area3,
             by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
-  left_join(quadrat_penetrometer2,
-            by = c("Site", "Transect", "Quadrat")) %>%
+  # left_join(quadrat_penetrometer2,
+  #           by = c("Site", "Transect", "Quadrat")) %>%
   # left_join(quadrat_canopy_cover2,
             # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
-  left_join(transect2,
-            by = c("Site", "Transect")) %>%
-  left_join(transect_filter_paper2,
-            by = c("Site", "Transect")) %>%
-  left_join(transect_hobo2,
-            by = c("Site", "Transect")) %>%
+  # left_join(transect2,
+  #           by = c("Site", "Transect")) %>%
+  # left_join(transect_filter_paper2,
+  #           by = c("Site", "Transect")) %>%
+  # left_join(transect_hobo2,
+  #           by = c("Site", "Transect")) %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) %>%
   mutate(species_id = factor(species_id),
          dom_species_id = factor(species_id)) %>%
@@ -572,6 +582,55 @@ species_richness_rq3.df <- species_id3 %>%
 
 save(species_richness_rq3.df, file = paste0(data_folder, "species_richness_rq3.RData"))
 ```
+
+
+```{r domseedlingcover_improved}
+# Alicia's seedling cover dataset: Probably for ricky as well...
+abundance_spread <- specieslvl_dom_seedling_count2 %>%
+  filter(`Dom Species ID` != 4) %>%
+  mutate(abundance_sample = paste0("dom_", `Dom Species ID`, "_abundance")) %>%
+  select(Site, Transect, Quadrat, abundance_sample, dom_abundance) %>%
+  spread(abundance_sample, dom_abundance)
+
+seedlingcover_spread <- specieslvl_dom_seedling_count2 %>%
+  mutate(seedlingcover_sample = paste0("dom_", `Dom Species ID`, "_seedling_cover")) %>%
+  select(Site, Transect, Quadrat, seedlingcover_sample, dom_seedling_cover) %>%
+  mutate(dom_seedling_cover = dom_seedling_cover/100) %>%
+  spread(seedlingcover_sample, dom_seedling_cover)
+
+overall_seedling_cover_spread <-specieslvl_dom_seedling_count2%>%
+  select(Site, Transect, Quadrat, overall_seedling_cover) %>%
+  mutate(overall_seedling_cover = overall_seedling_cover/100) %>%
+  distinct()
+
+sla_spread <- specieslvl_dom_leaf_area3 %>%
+  mutate(sla_sample = paste0("dom_", `Dom Species ID`, "_sla")) %>%
+  select(Site, Transect, Quadrat, sla_sample, av_dom_sla_from_ind) %>%
+  spread(sla_sample, av_dom_sla_from_ind)
+
+domseedlingcover_spread.df <- overall_seedling_cover_spread %>%
+  left_join(abundance_spread,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(seedlingcover_spread,
+            by = c("Site", "Transect", "Quadrat"))  %>%
+  left_join(sla_spread,
+            by = c("Site", "Transect", "Quadrat"))%>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat) %>%
+  ungroup() %>%
+  mutate(transect = factor(transect), quadrat = factor(quadrat))
+
+save(domseedlingcover_spread.df, file = paste0(data_folder, "domseedlingcover_spread.RData"))
+```
+
+
 
 
 ```{r}
