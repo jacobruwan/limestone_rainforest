@@ -415,21 +415,19 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
   filter(`Dom Species ID` != 4) %>%
   left_join(specieslvl_dom_leaf_area3,
             by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
-  # left_join(quadrat_penetrometer2,
-  #           by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
   # left_join(quadrat_canopy_cover2,
             # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
-  # left_join(transect2,
-  #           by = c("Site", "Transect")) %>%
-  # left_join(transect_filter_paper2,
-  #           by = c("Site", "Transect")) %>%
-  # left_join(transect_hobo2,
-  #           by = c("Site", "Transect")) %>%
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat, species_id = `Species ID`, dom_species_id = `Dom Species ID`) %>%
-  mutate(species_id = factor(species_id),
-         dom_species_id = factor(species_id)) %>%
-  left_join(biotic_leaftraits.df,
-            by = c("species_id", "dom_species_id", "site", "transect", "quadrat")) %>%
+  left_join(leaf_traits2,
+            by = c("species_id" = "Species ID")) %>%
   mutate(species_id = factor(species_id),
          dom_species_id = factor(species_id))
 
@@ -442,8 +440,6 @@ domshannons_rq1.df <- quadrat_dom_seedling_count2 %>%
             by = c("Site", "Transect", "Quadrat")) %>%
   left_join(quadrat_penetrometer2,
             by = c("Site", "Transect", "Quadrat")) %>%
-  # left_join(quadrat_canopy_cover2,
-            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
   left_join(transect2,
             by = c("Site", "Transect")) %>%
   left_join(transect_filter_paper2,
@@ -480,22 +476,20 @@ domsla_rq1.df <- dom_leaf_area3 %>%
 
 # Mutate variables for modelling with
 domsla_rq1.df %<>%
-  mutate(dom_sla_weighted_abundance = dom_sla/dom_abundance) %>%
+  mutate(dom_sla_weighted_abundance = dom_sla/dom_abundance)   %>%
+  left_join(leaf_traits2 %>% mutate(species_id = as.numeric(`Species ID`)) %>% select(-`Species ID`),
+            by = c("species_id")) %>%
   mutate(dom_seedling_cover = dom_seedling_cover/100,
          overall_seedling_cover = overall_seedling_cover/100,
          scaled_dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
          scaled_overall_seedling_cover = (overall_seedling_cover - mean(overall_seedling_cover))/sqrt(var(overall_seedling_cover)),
-         scaled_av_trans_elevation = (av_trans_elevation - mean(av_trans_elevation))/sqrt(var(av_trans_elevation)))  %>%
-  left_join(biotic_leaftraits.df %>% mutate(species_id = as.numeric(species_id),
-                                            dom_species_id = as.numeric(dom_species_id)),
-            by = c("species_id", "dom_species_id", "site", "transect", "quadrat"))  %>%
+         scaled_av_trans_elevation = (av_trans_elevation - mean(av_trans_elevation))/sqrt(var(av_trans_elevation))) %>%
   mutate(species_id = factor(species_id), 
          dom_species_id = factor(dom_species_id),
          transect = factor(transect), quadrat = factor(quadrat))  %>%
-  select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight,
-         -start_hobo, -end_hobo, -min_rel_humid, -max_rel_humid, -species_id, -leaf_area,
+  select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight, -species_id, -leaf_area,
          -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total,
-         -species_name, -species_presence, -species_richness)
+         -species_richness)
 
 # Calculate Functional Richness, Functional Evenness and Functional Divergence
 domsla_rq1.df %<>%
