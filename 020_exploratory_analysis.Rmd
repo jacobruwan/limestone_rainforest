@@ -43,8 +43,38 @@ domseedlingcover_rq1.df %>%
 
 ```
 
+### Dominant Seedling Cover vs Elevation
+```{r}
+domseedlingcover_rq1.df  %>%
+  ggplot(aes(x=factor(round(av_trans_elevation)), 
+             y = dom_seedling_cover, 
+             col=dom_species_id)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Seedling Cover vs Elevation")+
+  xlab("Transect Elevation") +
+  ylab("Seedling Cover (%)")
 
 
+```
+
+
+### Dominant Seedling Abundance vs Elevation
+```{r}
+domseedlingcover_rq1.df  %>%
+  ggplot(aes(x=factor(round(av_trans_elevation)), 
+             y = dom_abundance, 
+             col=dom_species_id)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Seedling Abundance vs Elevation")+
+  xlab("Transect Elevation") +
+  ylab("Seedling Abundance")
+
+
+```
 
 ## Research Question 1: Dominant Species Shannons index of Diversity
 ```{r}
@@ -85,6 +115,28 @@ domsla_rq1.df %>%
 
 ```
 
+### Abundance-Weighted SLA vs Dominant Species ID
+```{r}
+domsla_rq1.df %>%
+  ggplot(aes(x=factor(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=dom_species_id)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Elevation")+
+  xlab("Transect Elevation") +
+  ylab("Abundance-Weighted SLA")
+
+domsla_rq1.df %>%
+  ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=dom_species_id)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Elevation")+
+  xlab("Transect Elevation") +
+  ylab("Abundance-Weighted SLA")
+
+```
+
 
 ### Functional Diversity: Abundance vs SLA
 ```{r}
@@ -103,7 +155,8 @@ slagroup.df <- domsla_rq1.df %>%
 
 
 slagroup.df %>%
-  ggplot(aes(x=index, y = obs, fill = dom_species_id, col = dom_species_id)) +
+  ggplot(aes(x=index, y = obs, 
+             fill = dom_species_id, col = dom_species_id)) +
   # geom_bar(stat = "identity", position = "dodge") +
   geom_point() +
   geom_smooth(span = 0.4) +
@@ -121,7 +174,7 @@ slagroup.df %>%
                      lim  = c(1, 15))
   
 
-slagroup.df$index %>% unique
+# slagroup.df$index %>% unique
 
 ```
 

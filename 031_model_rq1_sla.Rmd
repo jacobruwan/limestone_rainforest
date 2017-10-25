@@ -27,16 +27,8 @@ sla.df <- domsla_rq1.df %>%
 # sla.df %>% str()
 ```
 
-```{r}
-domsla_rq1.df %>% 
-  filter(dom_species_id %in% c("1", "2", "3")) %>% 
-  select(-species_id, -site, -transect, -quadrat) %>%
-  distinct() %>%
-  t()
 
-
-```
-
+### Correlation
 ```{r correlation_analysis}
 # Look at correlations between variables
 names(domsla_rq1.df)
@@ -57,8 +49,7 @@ domsla_rq1.df %>%
 # elevation will account for decopmosition and min_temperature, however we will leave compaction in the model for now as it is at the transect level
 # range_temp will account for max_temp
 
-biotic_vars <- c("dom_sla", "dom_abundance", "dom_seedling_cover", "overall_seedling_cover", "dom_species_id",
-                 "sla_character_range", "sla_species_niche_space", "sla_functional_richness")
+biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id", "sla_character_range", "sla_species_niche_space", "sla_functional_richness")
 
 domsla_rq1.df %>%
   select(one_of(biotic_vars)) %>%
@@ -73,6 +64,7 @@ domsla_rq1.df %>%
 # 
 ```
 
+### All Possible Models
 ```{r}
 # define the vector of possible predictors, exclude random effects
 response <- "dom_sla_weighted_abundance"
@@ -109,7 +101,6 @@ for (i in 1:length(possible_predictor_combinations)) {
 }
 ```
 
-### Bayesian Approach
 ```{r all_inla_model_combinations}
 # Run all possible INLA models
 Log_Likelihood_Summary <- data.frame(Formula = "-", Log_Likelihood = NA)
@@ -140,10 +131,18 @@ top10 <- Log_Likelihood_Summary %>%
   head(10)
 
 top10
+```
+
+```{r}
+
+# site:dom_species_id +
+domsla_rq1.df %<>%
+  mutate(log_av_trans_elevation = log(av_trans_elevation),
+         scaled_log_av_trans_elevation = (log_av_trans_elevation-mean(log_av_trans_elevation))/sqrt(var(log_av_trans_elevation)))
 
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_av_trans_elevation + site:dom_species_id + dom_species_id:scaled_dom_seedling_cover + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_av_trans_elevation +  dom_species_id:scaled_av_trans_elevation +  f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -153,6 +152,7 @@ fit <- inla(inla_formula,
 
 # analyse the output of the model
 summary(fit)
+
 
 # So SiteP and av_quad_compaction both contain 0 in their credible intervals..
 # Only dominant species id demonstrates any significant difference
