@@ -1,0 +1,60 @@
+---
+title: "model_development"
+output: html_document
+---
+
+```{r}
+# Use the choose files function to get the location of the datasets on your computer
+# choose.files()
+
+# Should get an output like:
+# "C:\\Users\\Jacob\Project\\Data\\biotic_leaftraits.RData"
+
+# Copy the folder spot below, and copy the """".RData file into the load function below
+
+location <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+
+# Load the datasets
+load(paste0(location, "abiotic_quadrat.RData"))
+load(paste0(location, "abiotic_filterpaper.RData"))
+load(paste0(location, "abiotic_canopycover.RData"))
+load(paste0(location, "abiotic_penetrometer.RData"))
+```
+
+## Abiotic Indicators
+```{r}
+abiotic_quadrat.df
+
+
+# Decopmosition
+ggplot(aes(x=site, y=decomposition, col = site),
+       data = abiotic_filterpaper.df) + 
+  geom_boxplot() +
+  ggtitle("Decomposition") +
+  theme_project() +
+  scale_colour_manual(values = colours.site) +
+  xlab("Site") +
+  ylab("Decomposition")
+
+# LAI
+ggplot(aes(x=site, y=lai, col = site),
+       data = abiotic_canopycover.df) + 
+  geom_boxplot() +
+  ggtitle("Leaf Area Index (Canopy Cover)") +
+  theme_project()+
+  scale_colour_manual(values = colours.site) +
+  xlab("Site") +
+  ylab("Leaf Area Index")
+
+
+# Compaction
+ggplot(aes(x=site, y=compaction, col = site),
+       data = abiotic_penetrometer.df) + 
+  geom_boxplot() +
+  ggtitle("Penetrometer") +
+  theme_project()+
+  scale_colour_manual(values = colours.site) +
+  xlab("Site") +
+  ylab("Compaction")
+
+```
