@@ -376,6 +376,8 @@ biotic_leaftraits.df <- species_id2 %>%
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
             by = c("Site", "Transect"))%>%
+  left_join(quadrat_canopy_cover2,
+            by = c("Site", "Transect", "Quadrat")) %>%
   rename(species_id = `Species ID`, 
          dom_species_id = `Dom Species ID`,
          species_name = `Species Pseudo Name`,
@@ -407,6 +409,24 @@ abiotic_filterpaper.df <- filter_paper2 %>%
 
 save(abiotic_filterpaper.df, 
      file = paste0(data_folder, "abiotic_filterpaper.RData"))
+
+# Make a abiotic dataframe at the quadrat level
+abiotic_quadrat.df <- quadrat %>%
+  select(Site, Transect, Quadrat)  %>%
+  left_join(transect2, 
+            by = c("Site", "Transect")) %>%
+  left_join(transect_hobo2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect"))  %>%
+  left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(quadrat_canopy_cover2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  rename(site = Site, transect = Transect, quadrat = Quadrat)
+
+save(abiotic_quadrat.df, 
+     file = paste0(data_folder, "abiotic.RData"))
 
 ```
 
