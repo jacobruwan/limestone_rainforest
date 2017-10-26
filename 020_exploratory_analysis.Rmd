@@ -96,113 +96,6 @@ domshannons_rq1.df %>%
 
 
 
-## Research Question 1: Dominant Species Specific Leaf Area
-
-
-  * leaf area - photosynthetic aparatus of the plant
-  * amount of investment of dry matter (plant investment into growth defence trade off) -> Most dominant species most compettitive, higher specific leaf area
-
-### Abundance-Weighted SLA vs Dominant Species ID
-```{r}
-domsla_rq1.df %>%
-  ggplot(aes(x=dom_species_id, y = dom_sla_weighted_abundance, col=site)) +
-  geom_boxplot() +
-  theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Site and Dominant Species ID")+
-  xlab("Dominant Species") +
-  ylab("Abundance-Weighted SLA")
-
-```
-
-### Abundance-Weighted SLA vs Dominant Species ID
-```{r}
-domsla_rq1.df %>%
-  ggplot(aes(x=factor(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=dom_species_id)) +
-  geom_boxplot() +
-  theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Abundance-Weighted SLA")
-
-domsla_rq1.df %>%
-  ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=dom_species_id)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Abundance-Weighted SLA")
-
-```
-
-
-### Functional Diversity: Abundance vs SLA
-```{r}
-# dataq3 %>%
-#   ggplot(aes(dom_sla, col = dom_species_id)) +
-#   geom_density()
-
-slagroup.df <- domsla_rq1.df %>%
-  mutate(sla_group = cut(dom_sla,
-                         breaks = seq(0, max(dom_sla), 25))) %>%
-  group_by(dom_species_id, sla_group) %>%
-  # summarise(sla_group_abundance = sum(dom_abundance)) %>% # Incorrect logic here.. since they all have the same abundance ata  quadrat level
-  summarise(obs = n()) %>%
-  mutate(index = as.numeric(sla_group)) %>%
-  arrange(index)
-
-
-slagroup.df %>%
-  ggplot(aes(x=index, y = obs, 
-             fill = dom_species_id, col = dom_species_id)) +
-  # geom_bar(stat = "identity", position = "dodge") +
-  geom_point() +
-  geom_smooth(span = 0.4) +
-  theme_project() +
-  theme(axis.text.x = element_text(angle = 45, 
-                                   vjust = 1,
-                                   hjust = 1))  +
-  ggtitle("Functional Evenness of SLA for Dominant Species") +
-  ylab("Number of Leaf Samples") +
-  xlab("Bucketed SLA") +
-  # scale_fill_tableau(name = "Dominant Species") +
-  scale_colour_tableau(name = "Dominant Species") +
-  scale_x_continuous(breaks = unique(slagroup.df$index),
-                     labels = unique(slagroup.df$sla_group),
-                     lim  = c(1, 15))
-  
-
-# slagroup.df$index %>% unique
-
-```
-
-### SLA vs Species Richness
-```{r}
-domsla_rq1.df %>%
-  ggplot(aes(x = species_richness, y = dom_sla_weighted_abundance, 
-             col = site)) +
-  geom_point(size = 1) +
-  theme_project() +
-  scale_colour_manual(name = "Site", values = colours.site) +
-  ggtitle("Domiant Species: SLA vs Species Richness (12 Quadrats)") +
-  xlab("Species Richness") +
-  ylab("Abundance-Weighted SLA") +
-  facet_wrap("dom_species_id")
-
-
-```
-
-### SLA vs Dominant Species Leaf Traits
-```{r}
-leaf_trait_choice <- "leaf_arrangement"
-
-domsla_rq1.df %>%
-  select(dom_sla)
-
-
-```
 
 ## Research Question 2: Hobo Time Series
 ```{r}
@@ -283,44 +176,10 @@ location <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\
 
 # Load the datasets
 load(paste0(location, "biotic_leaftraits.RData"))
-load(paste0(location, "abiotic_filterpaper.RData"))
-load(paste0(location, "abiotic_canopycover.RData"))
-load(paste0(location, "abiotic_penetrometer.RData"))
+
 
 ```
 
-## Abiotic
-```{r}
-# Decopmosition
-ggplot(aes(x=site, y=decomposition),
-       data = abiotic_filterpaper.df) + 
-  geom_boxplot() +
-  ggtitle("Abiotic Comparison") +
-  theme_project()
-
-
-# LAI
-ggplot(aes(x=site, y=lai),
-       data = abiotic_canopycover.df) + 
-  geom_boxplot() +
-  ggtitle("Abiotic Comparison") +
-  theme_project()
-
-# Gap fResction THreshold
-ggplot(aes(x=site, y=gft),
-       data = abiotic_canopycover.df) + 
-  geom_boxplot() +
-  ggtitle("Abiotic Comparison") +
-  theme_project()
-
-# Compaction
-ggplot(aes(x=site, y=compaction),
-       data = abiotic_penetrometer.df) + 
-  geom_boxplot() +
-  ggtitle("Abiotic Comparison") +
-  theme_project()
-
-```
 
 ## Number of Leaf Traits evident in each Quadrat
 ```{r}
