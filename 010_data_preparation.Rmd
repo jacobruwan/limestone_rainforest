@@ -49,6 +49,8 @@ penetrometer <- read_excel(paste0(location), sheet = "Penetrometer")
 # transect dataframe contains elevation information
 # get average elevation of each 
 # Is this a modelling variable?
+
+
 transect2 <- transect %>%
   group_by(Site, Transect) %>%
   summarise(av_trans_elevation = mean(Elevation))
@@ -314,7 +316,7 @@ hobo2 <- hobo %>%
                                  min_new_time,
                                  min_time), 
          filter_maxhobo = max_time) %>%
-  filter(date_time > filter_minhobo, date_time < filter_maxhobo)
+  filter(date_time >= filter_minhobo, date_time <= filter_maxhobo)
 
 
 
@@ -410,6 +412,12 @@ abiotic_filterpaper.df <- filter_paper2 %>%
 save(abiotic_filterpaper.df, 
      file = paste0(data_folder, "abiotic_filterpaper.RData"))
 
+abiotic_elevation.df <- transect %>%
+  rename(elevation = Elevation, site = Site, transect = Transect)
+
+save(abiotic_elevation.df, 
+     file = paste0(data_folder, "abiotic_elevation.RData"))
+
 # Make a abiotic dataframe at the quadrat level
 abiotic_quadrat.df <- quadrat %>%
   select(Site, Transect, Quadrat)  %>%
@@ -426,7 +434,7 @@ abiotic_quadrat.df <- quadrat %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
 save(abiotic_quadrat.df, 
-     file = paste0(data_folder, "abiotic.RData"))
+     file = paste0(data_folder, "abiotic_quadrat.RData"))
 
 ```
 
