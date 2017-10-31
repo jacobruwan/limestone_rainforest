@@ -33,23 +33,9 @@ sla.df <- domsla_rq1.df %>%
 # Look at correlations between variables
 names(domsla_rq1.df)
 
-## Abiotic variables
-abiotic_vars <- c("av_quad_compaction", "av_trans_decomposition", "min_temp", "max_temp", "range_temp", "av_trans_elevation")
 
-domsla_rq1.df %>%
-  select(one_of(abiotic_vars)) %>%
-  pairs(lower.panel = NULL)
 
-domsla_rq1.df %>%
-  select(one_of(abiotic_vars)) %>%
-  cor() %>%
-  round(digits=2)
-
-# correlation results
-# elevation will account for decopmosition and min_temperature, however we will leave compaction in the model for now as it is at the transect level
-# range_temp will account for max_temp
-
-biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id", "sla_character_range", "sla_species_niche_space", "sla_functional_richness")
+biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id", "dom_abundance")
 
 domsla_rq1.df %>%
   select(one_of(biotic_vars)) %>%
@@ -69,7 +55,7 @@ domsla_rq1.df %>%
 # define the vector of possible predictors, exclude random effects
 response <- "dom_sla_weighted_abundance"
 predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
-                                                         "min_temp", "max_temp", "av_trans_decomposition",
+                                                         "min_temp", "range_temp", "av_trans_decomposition",
                                                          "secondary_venetion", "tertiary_venetion", "other")))]
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
@@ -124,8 +110,10 @@ Log_Likelihood_Summary <- Log_Likelihood_Summary %>%
 save(Log_Likelihood_Summary, file = paste0(data_folder, "inla_mlik_rank.RData"))
 ```
 
-#### Model: Minimum Marginal Log-Likelihood
+#### Model: Minimum Marginal Log-Likelihood (No Interactions)
 ```{r}
+load(paste0(dropbox, "inla_mlik_rank.RData"))
+
 top10 <- Log_Likelihood_Summary %>%
   arrange(desc(Log_Likelihood)) %>%
   head(10)
@@ -134,15 +122,15 @@ top10
 ```
 
 ```{r}
-
-# site:dom_species_id +
+# Try logged elevation
 domsla_rq1.df %<>%
   mutate(log_av_trans_elevation = log(av_trans_elevation),
-         scaled_log_av_trans_elevation = (log_av_trans_elevation-mean(log_av_trans_elevation))/sqrt(var(log_av_trans_elevation)))
-
+         scaled_log_av_trans_elevation = (log_av_trans_elevation-mean(log_av_trans_elevation))/sqrt(var(log_av_trans_elevation))) %>%
+  mutate(scaled_av_quad_lai = (av_quad_lai - mean(av_quad_lai))/sqrt(var(av_quad_lai)))
+# Did not work
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla_weighted_abundance ~ site + dom_species_id + scaled_dom_seedling_cover + scaled_av_trans_elevation +  dom_species_id:scaled_av_trans_elevation +  f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("dom_sla_weighted_abundance ~  scaled_av_trans_elevation  + dom_species_id +  dom_species_id:scaled_av_trans_elevation + scaled_dom_seedling_cover + site + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -158,6 +146,12 @@ summary(fit)
 # Only dominant species id demonstrates any significant difference
 # expected result from exploratory plots
 ```
+
+$$
+y_{sla} = \beta_0 + \beta_1x_e + \beta_2x_{id2} + \beta_3x_{id3} + \beta_4x_{cover} + \beta_5x_{siteP} + \beta_6x_{e:id2} + \beta_7x_{e:id3} + u_{transect} + v_{quadrat/transect} + \varepsilon_{residual}
+
+$$
+
 
 #### Model Fit
 ```{r}
@@ -225,16 +219,155 @@ fixed.df <- data.frame(Estimate = row.names(fixed),
            quant0.025 = vec[(2*n1+1):(3*n1)],
            quant0.5 = vec[(3*n1+1):(4*n1)],
            quant0.975 = vec[(4*n1+1):(5*n1)],
-           mode = vec[(5*n1+1):(6*n1)])
+           mode = vec[(5*n1+1):(6*n1)]) %>%
+  mutate(Estimate = factor(Estimate, levels = row.names(fixed)[n1:1], ordered = TRUE)) %>%
+  tbl_df() %>%
+  mutate(beta = 0:(n1-1)) %>%
+  mutate(Est2 = paste0(Estimate, " - b", beta),
+         Est2 = reorder(Est2, rev(beta)))
 
 fixed.df %>%
-  ggplot(aes(y = Estimate, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
+  ggplot(aes(y = Est2, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("Standardised Predictors: Parameter Estimate Credible Intervals") +
-  xlab("Estimated Value") +
+  ggtitle("Standardised Predictors") +
+  xlab("Credible Intervals") +
   ylab("Parameter") +
   geom_vline(xintercept = 0)
+```
+
+
+####
+```{r}
+mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.5[c(1)]),
+                   sum(fixed.df$quant0.5[c(2)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.5[c(1, 3)]),
+                   sum(fixed.df$quant0.5[c(2, 7)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.5[c(1, 4)]),
+                   sum(fixed.df$quant0.5[c(2, 8)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 6)]),
+                   sum(fixed.df$quant0.5[c(2)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.5[c(2, 7)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.5[c(2, 8)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  gather(Scenario, Median, -Parameter)
+
+lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.025[c(1)]),
+                   sum(fixed.df$quant0.025[c(2)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.025[c(1, 3)]),
+                   sum(fixed.df$quant0.025[c(2, 7)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.025[c(1, 4)]),
+                   sum(fixed.df$quant0.025[c(2, 8)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 6)]),
+                   sum(fixed.df$quant0.025[c(2)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.025[c(2, 7)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.025[c(2, 8)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  gather(Scenario, LB, -Parameter)
+
+ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.975[c(1)]),
+                   sum(fixed.df$quant0.975[c(2)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.975[c(1, 3)]),
+                   sum(fixed.df$quant0.975[c(2, 7)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.975[c(1, 4)]),
+                   sum(fixed.df$quant0.975[c(2, 8)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 6)]),
+                   sum(fixed.df$quant0.975[c(2)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.975[c(2, 7)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.975[c(2, 8)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  gather(Scenario, UB, -Parameter)
+
+
+realeffect.df <- lb_fixedeffect.df %>%
+  left_join(ub_fixedeffect.df,
+            by = c("Parameter", "Scenario")) %>%
+  left_join(mean_fixedeffect.df,
+            by = c("Parameter", "Scenario"))
+
+
+realeffect.df %>%
+  mutate(speciesid = substr(Scenario, 1, 3)) %>%
+  filter(Parameter == "Scaled_Elevation") %>%
+  select(speciesid, Median, UB, LB, Parameter) %>%
+  distinct() %>%
+  ggplot(aes(y = speciesid, x = Median, xmin = UB, xmax = LB)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Scaled Elevation") +
+  xlab("Real Elevation Effect - Credible Intervals") +
+  ylab("Dominant Species ID") +
+  geom_vline(xintercept = 0)
+
+realeffect.df %>%
+  filter(Parameter == "Intercept") %>%
+  ggplot(aes(y = Scenario, x = Median, xmin = UB, xmax = LB)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Site and Dominant Species ID") +
+  xlab("Real SLA Effect - Credible Intervals") +
+  ylab("Intercept Scenarios") +
+  geom_vline(xintercept = 0)
+```
+
+#### Variation Breakdown
+```{r}
+## How to look at predictions and compare to original???
+random <- summary(fit)$hyperpar
+random
+
+randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:Transect"),
+           precision = random[[1]],
+           lb = random[[3]],
+           ub = random[[5]]) %>%
+  mutate(variance = 1/precision,
+         varlb = 1/lb,
+         varub = 1/ub) %>%
+  mutate(totalvar = sum(variance),
+         totallb = sum(varlb),
+         totalub = sum(varub)) %>%
+  mutate(explained = variance/totalvar,
+         explainedlb = varlb/totallb,
+         explainedub = varub/totalub) %>%
+  arrange(desc(explained))
+
+# 
+randomeffects %>%
+  ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Hyperparameters") +
+  xlab("Credible Interval") +
+  ylab("Hyperparameter")
+
+randomeffects %>%
+  mutate(`Variation Explained` = percent(explained)) %>%
+  select(hyperparameter, `Variation Explained`)
+
 ```
 
 
