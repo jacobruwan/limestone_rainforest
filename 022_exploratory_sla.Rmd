@@ -33,40 +33,168 @@ domsla_rq1.df %>%
   ggplot(aes(x=dom_species_id, y = dom_sla_weighted_abundance, col=site)) +
   geom_boxplot() +
   theme_project() +
-  ggtitle("Weighted SLA vs Site and Dominant Species ID")+
-  xlab("Dominant Species") +
+  ggtitle("SLA vs Site")+
+  xlab("Dominant Species ID") +
   ylab("Abundance-Weighted SLA") +
-  scale_colour_manual(values = colours.site)
+  scale_colour_manual(values = colours.site, name = "Site")
 
 ```
 
 ### Abundance-Weighted SLA vs Elevation
 ```{r}
-domsla_rq1.df %>%
-  ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
-  geom_point() +
-  theme_project() +
-  ggtitle("Weighted SLA vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Abundance-Weighted SLA") +
-  scale_colour_manual(name = "Site",
-                      values = colours.site)
+# domsla_rq1.df %>%
+#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
+#   geom_point() +
+#   theme_project() +
+#   ggtitle("Weighted SLA vs Elevation")+
+#   xlab("Transect Elevation") +
+#   ylab("Abundance-Weighted SLA") +
+#   scale_colour_manual(name = "Site",
+#                       values = colours.site)
 
 domsla_rq1.df %>%
   ggplot(aes(x=paste0(site, ":", 
                       round(av_trans_elevation), "m"), 
              y = dom_sla_weighted_abundance,
              col=dom_species_id)) +
-  geom_boxplot() +
+  geom_boxplot()  +
+  # scale_y_continuous(lim = c(0, 80))+
   theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Elevation")+
+  scale_colour_tableau(name = "Dominant Species ID") +
+  ggtitle("SLA vs Elevation")+
   xlab("Transect Elevation") +
   ylab("Abundance-Weighted SLA")
 ```
 
+### Abundance-Weighted SLA vs Compaction
+```{r}
+# domsla_rq1.df %>%
+#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
+#   geom_point() +
+#   theme_project() +
+#   ggtitle("Weighted SLA vs Elevation")+
+#   xlab("Transect Elevation") +
+#   ylab("Abundance-Weighted SLA") +
+#   scale_colour_manual(name = "Site",
+#                       values = colours.site)
 
-### Functional Diversity: Abundance vs SLA
+domsla_rq1.df %>%
+  ggplot(aes(x = av_quad_compaction, 
+             y = dom_sla_weighted_abundance,
+             col=dom_species_id)) +
+  geom_point() + 
+  geom_smooth(method="lm",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Compaction")+
+  xlab("Quadrat Compaction") +
+  ylab("Abundance-Weighted SLA")
+```
+
+### Abundance-Weighted SLA vs LAI
+```{r}
+# domsla_rq1.df %>%
+#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
+#   geom_point() +
+#   theme_project() +
+#   ggtitle("Weighted SLA vs Elevation")+
+#   xlab("Transect Elevation") +
+#   ylab("Abundance-Weighted SLA") +
+#   scale_colour_manual(name = "Site",
+#                       values = colours.site)
+
+domsla_rq1.df %>%
+  filter(av_quad_lai != disturbed_mean_lai) %>%
+  ggplot(aes(x=av_quad_lai, 
+             y = dom_sla_weighted_abundance)) +
+  geom_point() + 
+  geom_smooth(method="lm",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Leaf Area Index (NA's)")+
+  xlab("Quadrat LAI") +
+  ylab("Abundance-Weighted SLA")
+
+domsla_rq1.df %>%
+  # filter(av_quad_lai != disturbed_mean_lai) %>%
+  ggplot(aes(x=av_quad_lai, 
+             y = dom_sla_weighted_abundance)) +
+  geom_point() + 
+  geom_smooth(method="lm",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Leaf Area Index (Imputed)")+
+  xlab("Quadrat LAI") +
+  ylab("Abundance-Weighted SLA")
+```
+
+### Abundance-Weighted SLA vs Temeprature Range
+```{r}
+# domsla_rq1.df %>%
+#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
+#   geom_point() +
+#   theme_project() +
+#   ggtitle("Weighted SLA vs Elevation")+
+#   xlab("Transect Elevation") +
+#   ylab("Abundance-Weighted SLA") +
+#   scale_colour_manual(name = "Site",
+#                       values = colours.site)
+
+domsla_rq1.df %>%
+  ggplot(aes(x=max_temp, 
+             y = dom_sla_weighted_abundance)) +
+  geom_point() + 
+  geom_smooth(method="loess",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Leaf Area Index (NA's)")+
+  xlab("Transect Temperature Range") +
+  ylab("Abundance-Weighted SLA")
+
+domsla_rq1.df %>%
+  # filter(av_quad_lai != disturbed_mean_lai) %>%
+  ggplot(aes(x=av_quad_lai, 
+             y = dom_sla_weighted_abundance,
+             col=dom_species_id)) +
+  geom_point() + 
+  geom_smooth(method="loess",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("Weighted SLA vs Leaf Area Index (Imputed)")+
+  xlab("Quadrat LAI") +
+  ylab("Abundance-Weighted SLA")
+```
+
+### Abundance-Weighted SLA vs Seedling Cover
+```{r}
+domsla_rq1.df %>%
+  ggplot(aes(x = dom_seedling_cover, 
+             y = dom_sla_weighted_abundance,
+             col = dom_species_id)) +
+  geom_point(size = 0.95) + 
+  geom_smooth(method="loess",se=FALSE, span = 0.8) +
+  theme_project() +
+  scale_colour_tableau(name = "Dominant Species ID") +
+  ggtitle("SLA vs Seedling Cover")+
+  xlab("Seedling Cover") +
+  ylab("Abundance-Weighted SLA") +
+  scale_x_continuous(labels = percent)
+
+domsla_rq1.df %>%
+  ggplot(aes(x = dom_seedling_cover, 
+             y = dom_sla_weighted_abundance)) +
+  geom_point(size = 0.95) + 
+  geom_smooth(method="lm",se=FALSE, span = 0.8) +
+  theme_project() +
+  # scale_colour_tableau(name = "Dominant Species ID") +
+  ggtitle("SLA vs Seedling Cover")+
+  xlab("Seedling Cover") +
+  ylab("Abundance-Weighted SLA") +
+  scale_x_continuous(labels = percent)
+```
+
+## Functional Diversity: 
+### Abundance vs SLA
 ```{r}
 # dataq3 %>%
 #   ggplot(aes(dom_sla, col = dom_species_id)) +
@@ -106,29 +234,4 @@ slagroup.df %>%
 
 ```
 
-### SLA vs Species Richness
-```{r}
-domsla_rq1.df %>%
-  ggplot(aes(x = species_richness, y = dom_sla_weighted_abundance, 
-             col = site)) +
-  geom_point(size = 1) +
-  theme_project() +
-  scale_colour_manual(name = "Site", values = colours.site) +
-  ggtitle("Domiant Species: SLA vs Species Richness (12 Quadrats)") +
-  xlab("Species Richness") +
-  ylab("Abundance-Weighted SLA") +
-  facet_wrap("dom_species_id")
-
-
-```
-
-### SLA vs Dominant Species Leaf Traits
-```{r}
-leaf_trait_choice <- "leaf_arrangement"
-
-domsla_rq1.df %>%
-  select(dom_sla)
-
-
-```
 
