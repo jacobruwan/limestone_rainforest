@@ -433,6 +433,19 @@ abiotic_quadrat.df <- quadrat %>%
             by = c("Site", "Transect", "Quadrat")) %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
+# Imputing LAI
+disturbed_mean_lai <- abiotic_quadrat.df %>% 
+  select(site, av_quad_lai) %>%
+  filter(site == "D") %>% 
+  distinct() %>%
+  summarise(mean = mean(av_quad_lai, na.rm = TRUE)) %>%
+  unlist(use.names = FALSE)
+
+abiotic_quadrat.df %<>%
+  mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
+  select(-av_quad_gft)
+
+
 save(abiotic_quadrat.df, 
      file = paste0(data_folder, "abiotic_quadrat.RData"))
 
@@ -491,8 +504,8 @@ domsla_rq1.df <- dom_leaf_area3 %>%
   #           by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(quadrat_penetrometer2,
             by = c("Site", "Transect", "Quadrat")) %>%
-  # left_join(quadrat_canopy_cover2,
-            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(quadrat_canopy_cover2,
+  by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
   left_join(transect2,
             by = c("Site", "Transect")) %>%
   left_join(transect_filter_paper2,
@@ -517,7 +530,19 @@ domsla_rq1.df %<>%
          transect = factor(transect), quadrat = factor(quadrat))  %>%
   select(-av_dom_leaf_dry_weight,-total_dom_leaf_dry_weight, -species_id, -leaf_area,
          -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total,
-         -species_richness)
+         -species_richness) 
+
+# impute LAI
+disturbed_mean_lai = domsla_rq1.df %>% 
+  select(site, av_quad_lai) %>%
+  filter(site == "D") %>% 
+  distinct() %>%
+  summarise(mean = mean(av_quad_lai, na.rm = TRUE)) %>%
+  unlist(use.names = FALSE)
+
+domsla_rq1.df %<>%
+  mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
+  select(-av_quad_gft)
 
 # Calculate Functional Richness, Functional Evenness and Functional Divergence
 domsla_rq1.df %<>%
