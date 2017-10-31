@@ -1,7 +1,7 @@
 ---
 title: "Langkawi Island Limestone Rainforest Project"
 author: "MXB344 Students: Jacob, Nick and Ricky"
-date: "Started: 24 August 2017"
+date: "Brainstorm: 24 August 2017. Analysis: 3rd October"
 output: 
   html_document:
     toc: true
@@ -60,10 +60,17 @@ packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr",
 
 instant_pkgs(packages_to_load)
 
+
+bg_green <- rgb(223, 241, 204, maxColorValue = 255)
+
 ## Setup ggplot theme
 theme_project <- function() {
   theme_bw() +
-    theme(legend.position = "top") 
+  theme(legend.position = "top") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green)) 
 }
 
 colours.site = c("#d62121", "#30d621")
