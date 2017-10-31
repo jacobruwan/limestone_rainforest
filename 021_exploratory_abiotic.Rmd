@@ -21,7 +21,6 @@ load(paste0(location, "abiotic_canopycover.RData"))
 load(paste0(location, "abiotic_penetrometer.RData"))
 load(paste0(location, "hobo_rq2.RData"))
 
-bg_green <- rgb(223, 241, 204, maxColorValue = 255)
 ```
 
 ## Research Question 2: Abiotic Indicators
@@ -201,11 +200,114 @@ ggplot(aes(x=site, y=compaction, col = site),
 
 # Bivariate Relationships
 ```{r}
-abiotic_quadrat.df
+## Abiotic variables
+abiotic_vars <- c("av_quad_compaction", "av_trans_decomposition", "min_temp", "max_temp", "range_temp", "av_trans_elevation", "av_quad_lai")
 
 
+abiotic_quadrat.df %>% 
+  select(av_trans_elevation, min_temp, max_temp, range_temp, 
+         av_trans_decomposition, av_quad_compaction, av_quad_lai) %>%
+  cor() %>%
+  round(digits=2)
+
+abiotic_quadrat.df %>% 
+  select(av_trans_elevation, min_temp, max_temp, range_temp, 
+         av_trans_decomposition, av_quad_compaction) %>%
+  pairs(upper.panel = NULL)
+title("Abiotic Indicator Correlations")
+
+# correlation results
+# elevation will account for decopmosition and min_temperature, however we will leave compaction in the model for now as it is at the quadrat level and may provide additional information
+# range_temp will account for max_temp
+# so model elevation, range_temp, compaction, lai
+
+abiotic_quadrat.df %>%
+  ggplot(aes(x=av_trans_elevation, y=av_quad_compaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_project()+
+  scale_colour_tableau() +
+  xlab("Elevation (m)") +
+  ylab("Compaction (pressure)") +
+  ggtitle("Compaction vs Elevation")
+
+abiotic_quadrat.df %>%
+  ggplot(aes(x=av_trans_elevation, y=av_trans_decomposition)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_project()+
+  scale_colour_tableau() +
+  xlab("Elevation (m)") +
+  ylab("Decomposition") +
+  ggtitle("Compaction vs Decomposition")
+
+abiotic_quadrat.df %>%
+  mutate(av_quad_lai = ifelse(av_quad_lai == disturbed_mean_lai, NA, av_quad_lai)) %>%
+  ggplot(aes(x=av_trans_elevation, y=av_quad_lai)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_project()+
+  scale_colour_tableau() +
+  xlab("Elevation (m)") +
+  ylab("Leaf Area Index") +
+  ggtitle("Elevation vs LAI (NA's)")
+
+abiotic_quadrat.df %>%
+  # mutate(av_quad_lai = ifelse(av_quad_lai == disturbed_mean_lai, NA, av_quad_lai)) %>%
+  ggplot(aes(x=av_trans_elevation, y=av_quad_lai)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_project()+
+  scale_colour_tableau() +
+  xlab("Elevation (m)") +
+  ylab("Leaf Area Index") +
+  ggtitle("Elevation vs LAI (Imputed)")
+
+abiotic_quadrat.df %>%
+  # mutate(av_quad_lai = ifelse(av_quad_lai == disturbed_mean_lai, NA, av_quad_lai)) %>%
+  ggplot(aes(x=max_temp, y=av_quad_lai)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  theme_project()+
+  scale_colour_tableau() +
+  xlab("Max Temperature") +
+  ylab("Leaf Area Index") +
+  ggtitle("Max Temperature vs LAI (Imputed)")
+```
+
+### Temperature Spline Fit
+```{r}
+# Filter the data between useable dates
+datarq2 <- hobo_rq2.df # Ten Hour Lag..
+
+datarq2 %<>%
+  mutate(time24 = as.numeric(substr(date_time, 12, 13)) + 
+                         as.numeric(substr(date_time, 15, 16))/60)
+
+# Plot the graphs
+ggplot() +
+  theme_project() +
+  scale_fill_tableau(name = "Day")+
+  geom_point(aes(x=time24, y=temp, col=site),
+             data = datarq2, size=1) +
+  scale_colour_manual(name = "Site",
+                      values = colours.site) +
+  ggtitle("Temperature over 24 Period") +
+  xlab("Hour") +
+  scale_x_continuous(breaks = seq(0, 24, 6)) +
+  ylab("Temperature (Degrees Celsius)") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green))
 
 
 ```
 
+```{r}
 
+fit <- lm(temp ~ site + time24,
+          data = datarq2)
+
+summary(fit)
+```
