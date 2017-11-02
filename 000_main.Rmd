@@ -79,11 +79,25 @@ colours.site = c("#d62121", "#30d621")
 # Abstract
 
 
-# Introduction
+# Background
 Is there a relationship between understory diversity and forest disturbance.
 
-## Research Question 1
-$H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
+## Research Questions
+  1. $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
+  2. $H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
+  3. $H_0$: Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
+
+
+The three research questions require an investigation of five research variables:
+
+  1. Temperature
+  2. Dominant Seedling Cover
+  3. Dominant Shannon's Index of Diversity
+  4. 
+
+
+
+
 
 
   * leaf economic spectrum (energy from the sun)
@@ -98,7 +112,6 @@ $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the thr
   * Seedling cover
   * Leaf Traits
     * 1. Why care about them?
-  * 'Couched' ina  topic
   * Explain what we don't know about the study
   * standardised major size correlation??
   * Plastic response: geno type -> triggered phenotype -> 
@@ -113,12 +126,6 @@ $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the thr
     * 
 
 
-## Research Question 2
-$H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
-
-## Research Question 3
-$H_0$: Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
-
 # Experimental Design
 ```{r, child = '001_experimental_design.Rmd'}
 ```
@@ -127,20 +134,81 @@ $H_0$: Can species richness be predicted based on other data which are much chea
 ```{r, child = '010_data_preparation.Rmd'}
 ```
 
-# Exploratory Analysis
-```{r, child = '020_exploratory_analysis.Rmd'}
+# Analysis
+The models used throughout this report are generalised linear mixed effects models, in a bayesian paradigm. Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
+  
+The fixed effects include all abiotic and biotic variables that are collected throughout the experiment. The final model will represent the most predictive subset of these variables. The random effects of each model include variation between transects, and variation between quadrats nested in transects. This structure is necessary due to the experimental design, and will remain constant for every model (i.e. not form part of the model selection).
+
+The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a canonical link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness based on predictor variables.
+
+The bayesian paradigm is utilised for it's simplicity in model fit evaluation and the ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
+
+$$ Insert the equation  $$
+The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
+
+This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationship between the predictors and response variables. 
+
+  * Model/variable selection is evaluated on the highest Marginal log-Likelihood. 
+  * Model fit is evaluated on residuals plots and whether the CPO PIT values are approximately uniformly/normally distributed.
+  * Model outcomes are presented with credible intervals of estimated parameters. Additional credible intervals are shown that demonstrate the real effect of parameters with interactions.
+
+The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
+
+## Temperature (RQ2)
+### Exploratory Analysis
+```{r, child = '020_exploratory_abiotic.Rmd'}
 ```
 
-# Model Development
-```{r, child = '030_model_development.Rmd'}
+### Model Development
+```{r, child = '021_model_abiotic.Rmd'}
 ```
 
-```{r, child = '031_model_rq1_sla.Rmd'}
+## Dominant Seedling Cover (RQ1)
+### Exploratory Analysis
+```{r, child = '030_exploratory_cover.Rmd'}
 ```
 
-# Results
-<!-- # ```{r, child = '040_model_results.Rmd'} -->
-<!-- # ``` -->
+### Model Development
+```{r, child = '031_model_cover.Rmd'}
+```
+
+
+## Dominant Shannon's Index of Diversity
+### Exploratory Analysis
+```{r, child = '040_exploratory_shannons.Rmd'}
+```
+
+### Model Development
+```{r, child = '041_model_shannons.Rmd'}
+```
+
+## Dominant Specific Leaf Area
+### Exploratory Analysis
+```{r, child = '050_exploratory_sla.Rmd'}
+```
+
+### Model Development
+```{r, child = '051_model_sla.Rmd'}
+```
+
+## Species Richness
+### Exploratory Analysis
+```{r, child = '060_exploratory_richness.Rmd'}
+```
+
+### Model Development
+```{r, child = '061_model_richness.Rmd'}
+```
+
+
+# Model Outcomes
+```{r, child = '070_allmodel_summary.Rmd'}
+```
+
+# Discussion
+
+
+
 
 # Conclusion
 
