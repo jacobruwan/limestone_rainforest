@@ -17,7 +17,6 @@ output:
     fig_width: 5
 ---
 
-## Experiment Design
 
 Design:
 

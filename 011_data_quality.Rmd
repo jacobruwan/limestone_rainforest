@@ -1,0 +1,87 @@
+---
+title: "model_development"
+output: html_document
+---
+
+## Unuseable data
+```{r}
+load(paste0(data_folder, "hobo_nofilter2.RData"))
+
+# Plot the graphs
+hobo_days_humid <- data.frame(startday = c(as.POSIXct(strftime("2017-09-25 22:00:01", "%Y-%m-%d %H:%M:%S")),
+                                     as.POSIXct(strftime("2017-09-26 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-27 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-28 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins")),
+                        endday =   c(as.POSIXct(strftime("2017-09-25 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-26 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-27 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
+                                     as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S")))) %>%
+                        mutate(day = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+                               day = factor(day,
+                                            levels = c("Monday", "Tuesday", "Wednesday", "Thursday"),
+                                            ordered = TRUE)) %>% 
+  tbl_df()
+
+ggplot() +
+  theme_project() +
+  scale_x_datetime(breaks = labels
+                   ,labels = time_labels
+                   ) +
+  theme(axis.text.x = element_text(angle = 45, 
+                                   vjust = 1,
+                                   hjust = 1)) +
+  geom_rect(aes(xmin=startday, xmax=endday, ymin = 65, ymax = 100, fill = day),
+            data = hobo_days_humid, alpha = 0.4)   +
+  scale_fill_tableau(name = "Day")+
+  geom_point(aes(x=date_time, y=rel_humid, col=av_trans_elevation),
+             data = hobo_nofilter2.df, size=1.5) +
+  scale_colour_continuous(low = colours.site[1], high = colours.site[2], name = "Elevation")  +
+  ggtitle("Humidity over Time") +
+  xlab("Time of Day") +
+  ylab("Relative Humidity (%)") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green)) +
+  geom_line(aes(x=xdatetime, y=ytemp),
+            data = latehobos) +
+  scale_y_continuous(lim = c(65, 100))
+
+```
+
+### Univariate Relationship
+```{r}
+# Decopmosition
+ggplot() + 
+  geom_point(aes(x=site, y=decomposition, col = site),
+       data = abiotic_filterpaper.df) +
+  # geom_boxplot(aes(x=site, y=decomposition, col = site),
+       # data = abiotic_filterpaper.df)+
+  ggtitle("Decomposition") +
+  xlab("Site") +
+  ylab("Decomposition Rate (grams/days)") +
+  theme_project() +
+  scale_colour_manual(values = colours.site) +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green)) +
+  geom_abline(slope = 0, intercept = 0)
+
+# LAI
+ggplot(aes(x=paste0(site, ":", transect), y=lai, col = site),
+       data = abiotic_canopycover.df) + 
+  geom_point() +
+  geom_boxplot() +
+  ggtitle("Leaf Area Index") +
+  theme_project()+
+  scale_colour_manual(values = colours.site) +
+  xlab("Site") +
+  ylab("Leaf Area Index") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green))
+
+```
+
