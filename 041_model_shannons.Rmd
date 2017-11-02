@@ -1,0 +1,23 @@
+---
+title: "model_development"
+output: html_document
+---
+
+```{r}
+datafolder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+
+load(paste0(datafolder, "domseedlingcover_rq1.RData"))
+```
+
+#### Correlation
+
+#### Final Model: Minimum Marginal log-Likelihood
+
+#### Model Fit
+
+#### Fixed Effect Credible Intervals
+
+#### Real Fixed Effect Credible Intervals
+
+#### Variation Breakdown
+
