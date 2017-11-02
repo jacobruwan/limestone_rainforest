@@ -19,6 +19,7 @@ load(paste0(location, "abiotic_quadrat.RData"))
 load(paste0(location, "abiotic_filterpaper.RData"))
 load(paste0(location, "abiotic_canopycover.RData"))
 load(paste0(location, "abiotic_penetrometer.RData"))
+load(paste0(location, "abiotic_elevation.RData"))
 load(paste0(location, "hobo_rq2.RData"))
 
 ```
@@ -281,7 +282,7 @@ ts.df <- datarq2 %>%
   select(hobo_id, date_time, temp, site, av_trans_elevation, av_trans_decomposition, av_trans_compaction) %>%
   ts()
 
-cycle(ts.df)
+# cycle(ts.df)
 
 
 ```
@@ -316,12 +317,55 @@ ggplot() +
 ```
 
 ```{r}
+k1 <- 14
+k2 <- 14
+k3 <- 17
 
-splinefit <- lm(temp ~ site + bs(time24, knots=NULL) + av_trans_elevation,
+splinefit <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + site:bs(time24, knots = c(k1, k2, k3)),
           data = datarq2)
 
-summary(splinefit)
+# summary(splinefit)
 
+splinefit_el <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + av_trans_elevation:bs(time24, knots = c(k1, k2, k3)) + av_trans_elevation,
+          data = datarq2)
+
+# summary(splinefit_el)
+```
+
+```{r}
+
+# Add the spline line onto the scatterplot
+pred_p <- data.frame(time24 = seq(0, 24, 0.5), site = "P", metric = " Spline - Pristine", av_trans_elevation = 60)
+pred_d <- data.frame(time24 = seq(0, 24, 0.5), site = "D", metric = " Spline - Disturbed", av_trans_elevation = 60)
+
+pred_p %<>% mutate(pred_temp = predict(splinefit, pred_p))
+pred_d %<>% mutate(pred_temp = predict(splinefit, pred_d))
+
+pred_fits <- rbind(pred_p, pred_d)
+
+
+
+ 
+ggplot() +
+  geom_point(aes(x=time24, y=temp, col = site),
+             size = 0.2,
+             data = datarq2) +
+  geom_line(aes(x = time24, y = pred_temp, col = metric),
+            size = 1.2,
+            data =  pred_fits) +
+  theme_project() +
+  scale_colour_manual(values = colours.splinefit,
+                      name = "Metric") +
+  scale_x_continuous(breaks = seq(0, 24, 3)) +
+  ylab("Temperature") +
+  xlab("24 Hour Time") +
+  ggtitle("Temperature vs Time")
+
+
+```
+
+
+```{r}
 
 pred = splinefit$fitted.values
 
