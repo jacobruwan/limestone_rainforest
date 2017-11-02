@@ -4,27 +4,19 @@ output: html_document
 ---
 
 ```{r}
-# Use the choose files function to get the location of the datasets on your computer
-# choose.files()
-
-# Should get an output like:
-# "C:\\Users\\Jacob\Project\\Data\\biotic_leaftraits.RData"
-
-# Copy the folder spot below, and copy the """".RData file into the load function below
-
-location <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 # Load the datasets
-load(paste0(location, "abiotic_quadrat.RData"))
-load(paste0(location, "abiotic_filterpaper.RData"))
-load(paste0(location, "abiotic_canopycover.RData"))
-load(paste0(location, "abiotic_penetrometer.RData"))
-load(paste0(location, "abiotic_elevation.RData"))
-load(paste0(location, "hobo_rq2.RData"))
+load(paste0(data_folder, "abiotic_quadrat.RData"))
+load(paste0(data_folder, "abiotic_filterpaper.RData"))
+load(paste0(data_folder, "abiotic_canopycover.RData"))
+load(paste0(data_folder, "abiotic_penetrometer.RData"))
+load(paste0(data_folder, "abiotic_elevation.RData"))
+load(paste0(data_folder, "hobo_rq2.RData"))
 
 ```
 
-## Research Question 2: Abiotic Indicators
+
+
 ### Univariate Relationships
 ```{r}
 # Create 6 hour intervals for time series graphs
@@ -120,21 +112,23 @@ ggplot() +
   # geom_line(aes(x=date_time, y=temp, col=hobo_id),
              # data = datarq2, size=1) +
   # scale_colour_pander(name = "Hobo ID")+
-  geom_line(aes(x=date_time, y=temp, col=paste0(site, ":", transect)),
+  geom_point(aes(x=date_time, y=temp, col=(av_trans_elevation)),
              data = datarq2, size=1) +
-  scale_color_pander(name = "Transect") +
-                      # values = colours.site) +
-  ggtitle("Temperature over Time (D1, D2, P1, P3)") +
+  scale_colour_continuous(low = colours.site[1], high = colours.site[2], name = "Elevation") +
   xlab("Time of Day") +
   ylab("Temperature (Degrees Celsius)") +
   theme(legend.background = element_rect(bg_green),
         legend.box.background = element_rect(fill=bg_green, color=bg_green),
         legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green))
+        plot.background = element_rect(bg_green, color=bg_green)) +
+  ggtitle("Temperature over Time, for Elevation")
 
 ```
 
 ### Univariate Relationship
+
+
+
 ```{r}
 abiotic_elevation.df %>%
   select(elevation, site, transect) %>%
@@ -155,9 +149,11 @@ abiotic_elevation.df %>%
   
 
 # Decopmosition
-ggplot(aes(x=site, y=decomposition, col = site),
-       data = abiotic_filterpaper.df) + 
-  geom_boxplot() +
+ggplot() + 
+  geom_point(aes(x=site, y=decomposition, col = site),
+       data = abiotic_filterpaper.df) +
+  geom_boxplot(aes(x=site, y=decomposition, col = site),
+       data = abiotic_filterpaper.df)+
   ggtitle("Decomposition") +
   xlab("Site") +
   ylab("Decomposition Rate (grams/days)") +
@@ -166,11 +162,13 @@ ggplot(aes(x=site, y=decomposition, col = site),
   theme(legend.background = element_rect(bg_green),
         legend.box.background = element_rect(fill=bg_green, color=bg_green),
         legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green))
+        plot.background = element_rect(bg_green, color=bg_green)) +
+  geom_abline(slope = 0, intercept = 0)
 
 # LAI
 ggplot(aes(x=site, y=lai, col = site),
        data = abiotic_canopycover.df) + 
+  geom_point() +
   geom_boxplot() +
   ggtitle("Leaf Area Index") +
   theme_project()+
