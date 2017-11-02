@@ -3,14 +3,11 @@ title: "data_preparation"
 output: html_document
 ---
 
-# Modelling Data Preparation
+## Modelling Data Preparation
+Need five different datasets to appropriately model the data.
+
+
 ```{r importing_data}
-data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-
-# load(paste0(dropbox, "quadrat_modelling.RData"))
-# load(paste0(dropbox, "species_modelling.RData"))
-# load(paste0(dropbox, "hobo_modelling.RData"))
-
 location <- paste0(data_folder, "Malaysia_Capstone_Raw_Data.xlsx")
 
 sheets <- c("Transect", 
@@ -49,8 +46,6 @@ penetrometer <- read_excel(paste0(location), sheet = "Penetrometer")
 # transect dataframe contains elevation information
 # get average elevation of each 
 # Is this a modelling variable?
-
-
 transect2 <- transect %>%
   group_by(Site, Transect) %>%
   summarise(av_trans_elevation = mean(Elevation))
@@ -260,7 +255,7 @@ transect_filter_paper2 <- filter_paper2 %>%
 # So the cloudy days at ~10am have a higher LAI than Sunny days at 1pm... interesting
 
 # Anyways, group to quadrat level the average LAI. No lai data is available for Disturbed Transect 2 or 3
-# LAI will need to be removed from thorough analysis of all transects
+# LAI will need to be imputed for total analysis, ut results are skeptical
 canopy_cover2 <- canopy_cover %>%
   rename(lai = `Leaf Area Index`, gft = `Gap Fraction Threshold`) %>%
   select(Site, Transect, Quadrat, lai, gft)
@@ -299,11 +294,8 @@ min_new_time <- as.POSIXct(strftime("2017-09-28 03:00:00", "%Y-%m-%d %H:%M:%S"))
 max_time <- as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S"))
 
 
-
-
-
 # Group this to a transect level
-hobo2 <- hobo %>%
+hobo_nofilter <- hobo %>%
   left_join(hobo_index_time, by="Index") %>%
   left_join(hobo_id, by=c("Hobo ID")) %>%
   filter(Time > `Hobo Start Time`, Time < `Hobo End Time`) %>%
@@ -315,7 +307,10 @@ hobo2 <- hobo %>%
   mutate(filter_minhobo = ifelse(!(hobo_id %in% c("3", "8", "13", "6")),
                                  min_new_time,
                                  min_time), 
-         filter_maxhobo = max_time) %>%
+         filter_maxhobo = max_time)
+
+
+hobo2 <- hobo_nofilter %>%
   filter(date_time >= filter_minhobo, date_time <= filter_maxhobo)
 
 
@@ -559,13 +554,30 @@ save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
 ```
 
 ```{r rq2_hobo_timeseries}
+hobo_nofilter2.df <- hobo_nofilter%>%
+  left_join(max_min_hobo2, by=c("Site", "Transect", "hobo_id", 
+                                "start_hobo", "end_hobo")) %>%
+  mutate(hobo_id = factor(hobo_id))  %>%
+  left_join(transect2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_penetrometer2,
+            by = c("Site", "Transect")) %>%
+  left_join(transect_canopy_cover2,
+  by = c("Site", "Transect")) %>%
+  left_join(transect_filter_paper2,
+            by = c("Site", "Transect")) %>%
+  rename(site = Site, transect= Transect)  %>%
+  mutate(transect = factor(transect)) %>%
+  arrange(desc(hobo_id), date_time)
+
+
 hobo_rq2.df <- hobo3 %>%
   left_join(transect2,
             by = c("Site", "Transect")) %>%
   left_join(transect_penetrometer2,
             by = c("Site", "Transect")) %>%
-  # left_join(quadrat_canopy_cover2,
-            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(transect_canopy_cover2,
+  by = c("Site", "Transect"))
   left_join(transect_filter_paper2,
             by = c("Site", "Transect")) %>%
   rename(site = Site, transect= Transect)  %>%
@@ -579,6 +591,7 @@ hobo_rq2.df <- hobo3 %>%
 
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
+save(hobo_nofilter2.df, file = paste0(data_folder, "hobo_rq2.RData"))
 ```
 
 ```{r rq3_species_richness}
