@@ -56,7 +56,7 @@ instant_pkgs <- function(pkgs) {
 # Define packages to load run instant_pkgs
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
                       "ggplot2", "ggthemes", "lubridate",
-                      "lme4", "INLA", "stringr", "scales", "nnet")
+                      "lme4", "INLA", "stringr", "scales", "splines")
 
 instant_pkgs(packages_to_load)
 
@@ -74,6 +74,7 @@ theme_project <- function() {
 }
 
 colours.site = c("#d62121", "#30d621")
+colours.splinefit = c("#b21515", "#21b623", colours.site[1], colours.site[2], "#d92121", "#33d621")
 ```
 
 # Abstract
@@ -202,8 +203,7 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 # Model Outcomes
-```{r, child = '070_allmodel_summary.Rmd'}
-```
+
 
 # Discussion
 
