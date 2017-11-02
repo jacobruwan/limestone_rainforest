@@ -275,6 +275,17 @@ abiotic_quadrat.df %>%
   ggtitle("Max Temperature vs LAI (Imputed)")
 ```
 
+### Temperature Time Series Fit
+```{r}
+ts.df <- datarq2 %>%
+  select(hobo_id, date_time, temp, site, av_trans_elevation, av_trans_decomposition, av_trans_compaction) %>%
+  ts()
+
+cycle(ts.df)
+
+
+```
+
 ### Temperature Spline Fit
 ```{r}
 # Filter the data between useable dates
@@ -306,8 +317,36 @@ ggplot() +
 
 ```{r}
 
-fit <- lm(temp ~ site + time24,
+splinefit <- lm(temp ~ site + bs(time24, knots=NULL) + av_trans_elevation,
           data = datarq2)
 
-summary(fit)
+summary(splinefit)
+
+
+pred = splinefit$fitted.values
+
+datarq2 %<>%
+  mutate(temp_pred = pred,
+         residuals = temp - temp_pred,
+         stdresiduals = (residuals-mean(residuals))/sqrt(var(residuals))) 
+
+datarq2 %>%
+  ggplot(aes(x=temp, y=temp_pred, col=site)) +
+  geom_point() +
+  theme_project() +
+  geom_abline(slope=1, intercept=0)+
+  coord_equal() +
+  scale_colour_manual(values = colours.site)
+
+datarq2 %>%
+  ggplot(aes(x=temp_pred, y=stdresiduals, col=site)) +
+  geom_point() +
+  theme_project()+
+  scale_colour_manual(values = colours.site)
+
+
+datarq2 %>%
+  ggplot(aes(x = date_time, y = temp)) +
+  geom_point() +
+  geom_abline(splinefit)
 ```
