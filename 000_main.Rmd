@@ -59,11 +59,14 @@ packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr",
                       "lme4", "INLA", "stringr", "scales", "splines")
 
 instant_pkgs(packages_to_load)
+```
 
-
+```{r}
+# Qesthetics for GGplot
 bg_green <- rgb(223, 241, 204, maxColorValue = 255)
+colours.site = c("#d62121", "#30d621")
+colours.splinefit = c("#b21515", "#21b623", colours.site[1], colours.site[2], "#d92121", "#33d621")
 
-## Setup ggplot theme
 theme_project <- function() {
   theme_bw() +
   theme(legend.position = "top") +
@@ -73,8 +76,8 @@ theme_project <- function() {
         plot.background = element_rect(bg_green, color=bg_green)) 
 }
 
-colours.site = c("#d62121", "#30d621")
-colours.splinefit = c("#b21515", "#21b623", colours.site[1], colours.site[2], "#d92121", "#33d621")
+# Define the datafolder that contains all RDatasets. This will be an empty string when submitted
+data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 ```
 
 # Abstract
@@ -131,8 +134,13 @@ The three research questions require an investigation of five research variables
 ```{r, child = '001_experimental_design.Rmd'}
 ```
 
-# Data Build
+# Data
+## Data Build
 ```{r, child = '010_data_preparation.Rmd'}
+```
+
+## Data Quality
+```{r, child = '011_data_quality.Rmd'}
 ```
 
 # Analysis
