@@ -7,7 +7,29 @@ output: html_document
 ```{r}
 load(paste0(data_folder, "hobo_nofilter2.RData"))
 
+
+
+
 # Plot the graphs
+# Create 6 hour intervals for time series graphs
+start <- as.POSIXct(strptime("2017-09-25 04:00:00", "%Y-%m-%d %H:%M:%S"))
+interval <- 60*6
+end <- start + as.difftime(4, units="days")
+labels = seq(from=start, by=interval*60, to=end)
+
+# Create just the time intervals instead, since shading is used for days
+start2 <- as.POSIXct(strptime("2017-09-25 18:00:00", "%Y-%m-%d %H:%M:%S"))
+end2 <- start + as.difftime(5, units="days")
+labels2 = seq(from=start2, by=interval*60, to=end2)
+time_labels = format(labels2, format = "%H:%M:%S")
+
+labels = labels[2:17]
+time_labels <- substr(time_labels[2:17], 1, 5)
+
+latehobos <- data.frame(ytemp = c(25.5, 28),
+                        xdatetime = c(min_new_time, min_new_time)) %>%
+  tbl_df
+
 hobo_days_humid <- data.frame(startday = c(as.POSIXct(strftime("2017-09-25 22:00:01", "%Y-%m-%d %H:%M:%S")),
                                      as.POSIXct(strftime("2017-09-26 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
                                      as.POSIXct(strftime("2017-09-27 00:00:00", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
@@ -15,7 +37,7 @@ hobo_days_humid <- data.frame(startday = c(as.POSIXct(strftime("2017-09-25 22:00
                         endday =   c(as.POSIXct(strftime("2017-09-25 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
                                      as.POSIXct(strftime("2017-09-26 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
                                      as.POSIXct(strftime("2017-09-27 23:59:59", "%Y-%m-%d %H:%M:%S"))+as.difftime(60*10, units="mins"),
-                                     as.POSIXct(strftime("2017-09-28 22:00:00", "%Y-%m-%d %H:%M:%S")))) %>%
+                                     as.POSIXct(strftime("2017-09-29 01:00:00", "%Y-%m-%d %H:%M:%S")))) %>%
                         mutate(day = c("Monday", "Tuesday", "Wednesday", "Thursday"),
                                day = factor(day,
                                             levels = c("Monday", "Tuesday", "Wednesday", "Thursday"),
