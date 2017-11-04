@@ -204,13 +204,32 @@ specieslvl_dom_leaf_area3 <- dom_leaf_area3 %>%
             av_dom_sla_from_ind = mean(dom_sla)) %>%
   mutate(av_dom_sla_from_total = total_dom_leaf_area/total_dom_leaf_dry_weight)
 
+# Get the quadrat level dataset
+quadrat_individ_dom_sla <- specieslvl_dom_leaf_area3 %>%
+  mutate(species_sla = paste0("av_dom_", `Dom Species ID`, "_sla")) %>%
+  ungroup() %>%
+  select(Site, Transect, Quadrat, species_sla, av_dom_sla_from_ind) %>%
+  spread(species_sla, av_dom_sla_from_ind) %>%
+  group_by(Site, Transect) %>%
+  mutate(av_dom_1_sla = ifelse(is.na(av_dom_1_sla),
+                            mean(av_dom_1_sla, na.rm = TRUE),
+                            av_dom_1_sla)) %>%
+  mutate(av_dom_2_sla = ifelse(is.na(av_dom_2_sla),
+                            mean(av_dom_2_sla, na.rm = TRUE),
+                            av_dom_2_sla)) %>%
+  mutate(av_dom_3_sla = ifelse(is.na(av_dom_3_sla),
+                            mean(av_dom_3_sla, na.rm = TRUE),
+                            av_dom_3_sla))
+
+
 # Now get a dataset at quadrat level
 quadrat_dom_leaf_area3 <- dom_leaf_area3 %>%
   group_by(Site, Transect, Quadrat) %>%
   summarise(total_dom_leaf_area = sum(leaf_area),
             total_dom_leaf_dry_weight = sum(total_dom_leaf_dry_weight),
-            av_dom_sla_from_ind = mean(dom_sla)) %>%
-  mutate(av_dom_sla_from_total = total_dom_leaf_area/total_dom_leaf_dry_weight)
+            av_totaldom_sla = mean(dom_sla)) %>%
+  left_join(quadrat_individ_dom_sla,
+            by = c("Site", "Transect", "Quadrat"))
 
 # There is one stupid sla value.. investigae why
 # dom_leaf_area %>% 
@@ -260,13 +279,44 @@ canopy_cover2 <- canopy_cover %>%
   rename(lai = `Leaf Area Index`, gft = `Gap Fraction Threshold`) %>%
   select(Site, Transect, Quadrat, lai, gft)
 
-quadrat_canopy_cover2 <- canopy_cover2  %>%
+quadrat_canopy_cover <- canopy_cover2  %>%
   group_by(Site, Transect, Quadrat) %>%
-  summarise(av_quad_lai = mean(lai), av_quad_gft = mean(gft)) 
+  summarise(av_quad_lai = mean(lai), av_quad_gft = mean(gft)) %>%
+  ungroup()
 
 transect_canopy_cover2 <- canopy_cover2  %>%
   group_by(Site, Transect) %>%
   summarise(av_trans_lai = mean(lai), av_trans_gft = mean(gft)) 
+
+
+# impute LAI: Get average of disturbed LAI
+disturbed_mean_lai <- canopy_cover2 %>% 
+  select(Site, lai) %>%
+  filter(Site == "D") %>% 
+  distinct() %>%
+  summarise(mean = mean(lai, na.rm = TRUE)) %>%
+  unlist(use.names = FALSE)
+
+disturbed_mean_gft <- canopy_cover2 %>% 
+  select(Site, gft) %>%
+  filter(Site == "D") %>% 
+  distinct() %>%
+  summarise(mean = mean(gft, na.rm = TRUE)) %>%
+  unlist(use.names = FALSE)
+
+imputed_cc <- data.frame(Site = rep("D", 10),
+                         Transect = c(rep(2, 5), rep(3, 5)),
+                         Quadrat = rep(1:5, 2)) %>%
+  data.frame() %>%
+  tbl_df() %>%
+  mutate(av_quad_lai = disturbed_mean_lai,
+         av_quad_gft = disturbed_mean_gft,
+         Site = as.character(Site),
+         Quadrat = as.numeric(Quadrat))
+
+quadrat_canopy_cover2 <- rbind(quadrat_canopy_cover,
+                               imputed_cc) %>% 
+  tbl_df()
 
 # penetrometer dataframe contains the soil compaction measurements. 
 # The extra 8 measurements throughout the transect should be investigated separately,
@@ -368,7 +418,7 @@ biotic_leaftraits.df <- species_id2 %>%
   left_join(transect2,
             by = c("Site", "Transect")) %>%
   left_join(quadrat_penetrometer2,
-            by = c("Site", "Transect", "Quadrat"))%>%
+            by = c("Site", "Transect", "Quadrat")) %>%
   left_join(transect_filter_paper2,
             by = c("Site", "Transect")) %>%
   left_join(transect_hobo2,
@@ -428,17 +478,17 @@ abiotic_quadrat.df <- quadrat %>%
             by = c("Site", "Transect", "Quadrat")) %>%
   rename(site = Site, transect = Transect, quadrat = Quadrat)
 
-# Imputing LAI
-disturbed_mean_lai <- abiotic_quadrat.df %>% 
-  select(site, av_quad_lai) %>%
-  filter(site == "D") %>% 
-  distinct() %>%
-  summarise(mean = mean(av_quad_lai, na.rm = TRUE)) %>%
-  unlist(use.names = FALSE)
-
-abiotic_quadrat.df %<>%
-  mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
-  select(-av_quad_gft)
+# # Imputing LAI
+# disturbed_mean_lai <- abiotic_quadrat.df %>% 
+#   select(site, av_quad_lai) %>%
+#   filter(site == "D") %>% 
+#   distinct() %>%
+#   summarise(mean = mean(av_quad_lai, na.rm = TRUE)) %>%
+#   unlist(use.names = FALSE)
+# 
+# abiotic_quadrat.df %<>%
+#   mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
+#   select(-av_quad_gft)
 
 
 save(abiotic_quadrat.df, 
@@ -453,8 +503,8 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
             by = c("Site", "Transect", "Quadrat", "Dom Species ID")) %>%
   left_join(quadrat_penetrometer2,
             by = c("Site", "Transect", "Quadrat")) %>%
-  # left_join(quadrat_canopy_cover2,
-            # by = c("Site", "Transect", "Quadrat")) %>% # Excluded since the data is extremely inbalanced
+  left_join(quadrat_canopy_cover2,
+            by = c("Site", "Transect", "Quadrat")) %>% 
   left_join(transect2,
             by = c("Site", "Transect")) %>%
   left_join(transect_filter_paper2,
@@ -471,10 +521,13 @@ save(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.R
 ```
 
 ```{r rq1_shannons}
+
 domshannons_rq1.df <- quadrat_dom_seedling_count2 %>%
   left_join(quadrat_dom_leaf_area3,
             by = c("Site", "Transect", "Quadrat")) %>%
   left_join(quadrat_penetrometer2,
+            by = c("Site", "Transect", "Quadrat")) %>%
+  left_join(quadrat_canopy_cover2,
             by = c("Site", "Transect", "Quadrat")) %>%
   left_join(transect2,
             by = c("Site", "Transect")) %>%
@@ -527,17 +580,10 @@ domsla_rq1.df %<>%
          -total_dom_leaf_area, -av_dom_sla_from_ind, -av_dom_sla_from_total,
          -species_richness) 
 
-# impute LAI
-disturbed_mean_lai = domsla_rq1.df %>% 
-  select(site, av_quad_lai) %>%
-  filter(site == "D") %>% 
-  distinct() %>%
-  summarise(mean = mean(av_quad_lai, na.rm = TRUE)) %>%
-  unlist(use.names = FALSE)
 
-domsla_rq1.df %<>%
-  mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
-  select(-av_quad_gft)
+# domsla_rq1.df %<>%
+#   mutate(av_quad_lai = ifelse(is.na(av_quad_lai), disturbed_mean_lai, av_quad_lai)) %>%
+#   select(-av_quad_gft)
 
 # Calculate Functional Richness, Functional Evenness and Functional Divergence
 domsla_rq1.df %<>%
@@ -577,7 +623,7 @@ hobo_rq2.df <- hobo3 %>%
   left_join(transect_penetrometer2,
             by = c("Site", "Transect")) %>%
   left_join(transect_canopy_cover2,
-  by = c("Site", "Transect"))
+  by = c("Site", "Transect")) %>%
   left_join(transect_filter_paper2,
             by = c("Site", "Transect")) %>%
   rename(site = Site, transect= Transect)  %>%
@@ -591,7 +637,7 @@ hobo_rq2.df <- hobo3 %>%
 
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
-save(hobo_nofilter2.df, file = paste0(data_folder, "hobo_rq2.RData"))
+save(hobo_nofilter2.df, file = paste0(data_folder, "hobo_nofilter2.RData"))
 ```
 
 ```{r rq3_species_richness}
