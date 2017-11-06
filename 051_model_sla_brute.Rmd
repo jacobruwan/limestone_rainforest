@@ -1,0 +1,461 @@
+---
+title: "model_development"
+output: html_document
+---
+
+```{r load_datasets}
+dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+
+# load(paste0(dropbox, "domseedlingcover_rq1.RData"))
+# load(paste0(dropbox, "domshannons_rq1.RData"))
+load(paste0(dropbox, "domsla_rq1.RData"))
+# load(paste0(dropbox, "species_richness_rq3.RData"))
+# load(paste0(dropbox, "hobo_rq2.RData"))
+
+# Go through the variables and unselect predictor variable that don't make sense
+# domsla_rq1.df %>% str()
+
+sla.df <- domsla_rq1.df %>%
+  select(-dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
+
+
+# Look at structure of modelling df
+# sla.df %>% str()
+```
+
+```{r}
+# define the vector of possible predictors, exclude random effects
+response <- "dom_sla_weighted_abundance"
+temp_predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
+                                                         "min_temp", "range_temp",
+                                                         "secondary_venetion", "tertiary_venetion", "other",
+                                                         "sla_character_range", "sla_species_niche_space", "sla_functional_richness")))]
+
+# Remove all leaf data
+interactions <- c("site:dom_species_id", "site:av_quad_gft", "site:av_quad_compaction",
+         "dom_species_id:scaled_av_trans_elevation", "dom_species_id:av_quad_gft", "dom_species_id:av_quad_compaction")
+
+predictors <- c(temp_predictors, paste0(temp_predictors, ":dom_species_id"), paste0(temp_predictors, ":site"))
+# predictors <- c(temp_predictors, interactions)
+
+# Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
+possible_predictor_combinations <- list()
+index <- 1
+
+for (i in 1:length(predictors)) {
+  for (j in i:length(predictors)) {
+  possible_predictor_combinations[[index]] <- i:j
+  index <- index + 1
+  }
+}
+
+# Create formula's
+formula_string_combinations <- list()
+
+for (i in 1:length(possible_predictor_combinations)) {
+
+  formula_string_combinations[[i]] <- predictors[possible_predictor_combinations[[i]][1]]
+
+  if (length(possible_predictor_combinations[[i]]) > 1) {
+    for (j in 2:length(possible_predictor_combinations[[i]])) {
+      formula_string_combinations[[i]] <- paste(formula_string_combinations[[i]],
+                                                predictors[possible_predictor_combinations[[i]][j]],
+                                                sep = " + ")
+    }
+  }
+
+}
+
+# Find the full formula of predictors for INLA step
+length_formulastring <- data.frame(Index=NA, Length=NA)
+
+for (i in 1:length(formula_string_combinations)) {
+  length_formulastring[i,1] <- i
+  length_formulastring[i,2] <- nchar(formula_string_combinations[[i]])
+}
+
+full_formula <- length_formulastring %>% 
+  arrange(desc(Length)) %>%
+  head(1) %>%
+  select(Length) %>%
+  unlist(use.names = FALSE)
+```
+
+
+#### INLA Step
+```{r}
+# install.packages("INLAutils")
+library(INLAutils)
+n <- length(names(domsla_rq1.df))
+
+inlsastep.df <- domsla_rq1.df %>% 
+                 select(-dom_sla, -dom_abundance) %>%
+                 mutate(Intercept = 1)
+
+stack <- inla.stack(data = list(y = domsla_rq1.df$dom_sla_weighted_abundance),
+                    A = list(1),
+                    effects = list(data.frame(Intercept = 1,
+                                              domsla_rq1.df[1:n])))
+
+fitstep <- INLAstep(fam1 = "gaussian",
+                    dataf = data.frame(domsla_rq1.df),
+                    in_stack = stack,
+                    invariant = "0 + Intercept",
+                    direction = c("forwards", "backwards"),
+                    include = c(1,2,3,4),
+                    y = 'dom_sla_weighted_abundance',
+                    y2 = 'dom_sla_weighted_abundance')
+
+```
+
+
+
+#### Ruwans Stepwise
+```{r}
+# Run all possible INLA models
+linear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sla.df)
+
+linear_stepwise_summary <- linear_stepwise_summary %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(linear_stepwise_summary, file = paste0(data_folder, "linear_stepwise_summary.RData"))
+
+# load(paste0(dropbox, "inla_mlik_rank.RData"))
+# 
+# top10 <- linear_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+```{r}
+# Run all possible INLA models
+gamma_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gamma",
+            data = sla.df)
+
+gamma_stepwise_summary <- gamma_stepwise_summary %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(gamma_stepwise_summary, file = paste0(data_folder, "gamma_stepwise_summary.RData"))
+
+# load(paste0(dropbox, "gamma_stepwise_summary.RData"))
+# 
+# top10 <- gamma_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+```{r}
+# Run all possible INLA models
+loglinear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("log(dom_sla_weighted_abundance) ~ ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sla.df)
+
+loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
+
+# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
+# 
+# top10 <- loglinear_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+```{r}
+# Run all possible INLA models
+lognormal_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("log(dom_sla_weighted_abundance) ~ ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sla.df)
+
+lognormal_stepwise_summary <- lognormal_stepwise_summary %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(lognormal_stepwise_summary, file = paste0(data_folder, "lognormal_stepwise_summary.RData"))
+
+# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
+# 
+# top10 <- loglinear_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+
+#### Model Fit
+```{r}
+# fit <- 
+
+```
+
+```{r}
+# summary(fit)
+predictions <- fit$summary.fitted.values$mean
+
+
+pred.df <- domsla_rq1.df %>% 
+      mutate(pred_dom_sla_weighted_abundance = predictions,
+             residuals = dom_sla_weighted_abundance - pred_dom_sla_weighted_abundance,
+             std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)))
+
+## Fitted vs Predicted
+pred.df %>%
+  ggplot(aes(x = dom_sla_weighted_abundance, y = pred_dom_sla_weighted_abundance)) +
+  geom_point() +
+  xlab("Observed Abundance Weighted SLA") +
+  ylab("Fitted Values") +
+  theme_project() +
+  coord_equal() +
+  geom_abline() +
+  ggtitle("Observed vs Fitted SLA")
+
+## Fitted vs Standardised Residuals
+pred.df %>%
+  ggplot(aes(x = pred_dom_sla_weighted_abundance, y = std_residuals)) +
+  geom_point() +
+  xlab("Fitted Values") +
+  ylab("Standardised Residuals") +
+  theme_project() +
+  geom_abline(slope = 0)+
+  geom_abline(slope = 0, intercept = 1.5)+
+  geom_abline(slope = 0, intercept = -1.5)
+
+# QQ-Plot
+qqnorm(fit$cpo$pit)
+qqline(fit$cpo$pit)
+
+# Histogram of predictions
+pred.df %>%
+  ggplot(aes(x = pred_dom_sla_weighted_abundance)) +
+  geom_histogram(bins=15) +
+  theme_project() +
+  ggtitle("Histograms of Fitted Values")
+  
+
+
+```
+
+#### Fixed Effect Credible Intervals
+```{r }
+## How to look at predictions and compare to original???
+fixed <- summary(fit)$fixed
+vec <- fixed[1:length(fixed)]
+# random <- summary(fit)$random
+n <- length(summary(fit)$fixed)
+n1 <- n/7
+
+# Collect and plot the intercals
+# How to standardise the intervals?
+# Standardise the response variable?
+fixed.df <- data.frame(Estimate = row.names(fixed),
+           Mean = vec[1:n1],
+           SD = vec[(n1+1):(2*n1)],
+           quant0.025 = vec[(2*n1+1):(3*n1)],
+           quant0.5 = vec[(3*n1+1):(4*n1)],
+           quant0.975 = vec[(4*n1+1):(5*n1)],
+           mode = vec[(5*n1+1):(6*n1)]) %>%
+  mutate(Estimate = factor(Estimate, levels = row.names(fixed)[n1:1], ordered = TRUE)) %>%
+  tbl_df() %>%
+  mutate(beta = 0:(n1-1)) %>%
+  mutate(Est2 = paste0(Estimate, " - b", beta),
+         Est2 = reorder(Est2, rev(beta)))
+
+fixed.df %>%
+  ggplot(aes(y = Est2, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Standardised Predictors") +
+  xlab("Credible Intervals") +
+  ylab("Parameter") +
+  geom_vline(xintercept = 0)
+```
+
+
+#### Real Fixed Effect Credible Intervals
+```{r}
+mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.5[c(1)]),
+                   sum(fixed.df$quant0.5[c(2)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.5[c(1, 3)]),
+                   sum(fixed.df$quant0.5[c(2, 7)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.5[c(1, 4)]),
+                   sum(fixed.df$quant0.5[c(2, 8)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 6)]),
+                   sum(fixed.df$quant0.5[c(2)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.5[c(2, 7)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.5[c(2, 8)]),
+                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  gather(Scenario, Median, -Parameter)
+
+lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.025[c(1)]),
+                   sum(fixed.df$quant0.025[c(2)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.025[c(1, 3)]),
+                   sum(fixed.df$quant0.025[c(2, 7)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.025[c(1, 4)]),
+                   sum(fixed.df$quant0.025[c(2, 8)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 6)]),
+                   sum(fixed.df$quant0.025[c(2)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.025[c(2, 7)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.025[c(2, 8)]),
+                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  gather(Scenario, LB, -Parameter)
+
+ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+  mutate(ID1_D = round(c(sum(fixed.df$quant0.975[c(1)]),
+                   sum(fixed.df$quant0.975[c(2)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID2_D = round(c(sum(fixed.df$quant0.975[c(1, 3)]),
+                   sum(fixed.df$quant0.975[c(2, 7)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID3_D = round(c(sum(fixed.df$quant0.975[c(1, 4)]),
+                   sum(fixed.df$quant0.975[c(2, 8)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 6)]),
+                   sum(fixed.df$quant0.975[c(2)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 3, 6)]),
+                   sum(fixed.df$quant0.975[c(2, 7)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 4, 6)]),
+                   sum(fixed.df$quant0.975[c(2, 8)]),
+                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  gather(Scenario, UB, -Parameter)
+
+
+realeffect.df <- lb_fixedeffect.df %>%
+  left_join(ub_fixedeffect.df,
+            by = c("Parameter", "Scenario")) %>%
+  left_join(mean_fixedeffect.df,
+            by = c("Parameter", "Scenario"))
+
+
+realeffect.df %>%
+  mutate(speciesid = substr(Scenario, 1, 3)) %>%
+  filter(Parameter == "Scaled_Elevation") %>%
+  select(speciesid, Median, UB, LB, Parameter) %>%
+  distinct() %>%
+  ggplot(aes(y = speciesid, x = Median, xmin = UB, xmax = LB)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Scaled Elevation") +
+  xlab("Real Elevation Effect - Credible Intervals") +
+  ylab("Dominant Species ID") +
+  geom_vline(xintercept = 0)
+
+realeffect.df %>%
+  filter(Parameter == "Intercept") %>%
+  ggplot(aes(y = Scenario, x = Median, xmin = UB, xmax = LB)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Site and Dominant Species ID") +
+  xlab("Real Intercept Effect - Credible Intervals") +
+  ylab("Intercept Scenarios") +
+  geom_vline(xintercept = 0)
+```
+
+#### Variation Breakdown
+```{r}
+## How to look at predictions and compare to original???
+random <- summary(fit)$hyperpar
+# random
+
+randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:Transect"),
+           precision = random[[1]],
+           lb = random[[3]],
+           ub = random[[5]]) %>%
+  mutate(variance = 1/precision,
+         varlb = 1/lb,
+         varub = 1/ub) %>%
+  mutate(totalvar = sum(variance),
+         totallb = sum(varlb),
+         totalub = sum(varub)) %>%
+  mutate(explained = variance/totalvar,
+         explainedlb = varlb/totallb,
+         explainedub = varub/totalub) %>%
+  arrange(desc(explained))
+
+# 
+randomeffects %>%
+  ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Hyperparameters") +
+  xlab("Credible Interval") +
+  ylab("Hyperparameter")
+
+randomeffects %>%
+  mutate(`Variation Explained` = percent(explained)) %>%
+  select(hyperparameter, `Variation Explained`)
+
+```
+
+
