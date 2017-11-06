@@ -16,13 +16,58 @@ load(paste0(dropbox, "domshannons_rq1.RData"))
 domshannons_rq1.df %>% str()
 ```
 
+# Site
 ```{r}
 domshannons_rq1.df %>%
-  ggplot(aes(x = paste0(site,transect), y = dom_shannon)) +
+  ggplot(aes(x = paste0(site), y = dom_shannon)) +
   geom_point() +
   theme_project() +
   scale_colour_tableau() +
-  ggtitle("Dominant Shannons Index vs Site")
+  ggtitle("Dominant Shannons Index vs Site") +
+  xlab("Site") +
+  ylab("Shannon's")
 
 
 ```
+
+# Overall Seedling Cover
+```{r}
+domshannons_rq1.df %>%
+  ggplot(aes(x = overall_seedling_cover, y = dom_shannon, col = site)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_project() +
+  ggtitle("Shannon's Index vs Overall Seedling Cover") +
+  ylab("Shannon's") + 
+  xlab("Overall Seedling Cover")
+```
+
+# SLA
+```{r}
+domshannons_rq1.df %>%
+  ggplot(aes(x = av_totaldom_sla, y = dom_shannon, col = site)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_project() +
+  ggtitle("Shannon's Index vs Total SLA") +
+  ylab("Shannon's") + 
+  xlab("SLA")
+```
+
+## Dominant Species 1 SLA
+```{r}
+domshannons_rq1.df %>%
+  ggplot(aes(x = av_dom_1_sla, y = dom_shannon, col = site)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_project() +
+  ggtitle("Shannon's Index vs Dominant Species 1 SLA") +
+  ylab("Shannon's") + 
+  xlab("Dom 1 SLA")
+```
+
+
+
+
+
+
