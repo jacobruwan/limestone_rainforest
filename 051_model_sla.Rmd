@@ -3,100 +3,6 @@ title: "model_development"
 output: html_document
 ---
 
-```{r}
-# define the vector of possible predictors, exclude random effects
-response <- "dom_sla_weighted_abundance"
-predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
-                                                         "min_temp", "range_temp", "av_trans_decomposition",
-                                                         "secondary_venetion", "tertiary_venetion", "other")))]
-
-# Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
-possible_predictor_combinations <- list()
-index <- 1
-
-for (i in 1:length(predictors)) {
-  for (j in 1:length(predictors)) {
-  possible_predictor_combinations[[index]] <- i:j 
-  index <- index + 1
-  }
-}
-
-# Create formula's
-formula_string_combinations <- list()
-
-for (i in 1:length(possible_predictor_combinations)) {
-  
-  formula_string_combinations[[i]] <- predictors[possible_predictor_combinations[[i]][1]]
-  
-  if (length(possible_predictor_combinations[[i]]) > 1) {
-    for (j in 2:length(possible_predictor_combinations[[i]])) {
-      formula_string_combinations[[i]] <- paste(formula_string_combinations[[i]], 
-                                                predictors[possible_predictor_combinations[[i]][j]],
-                                                sep = " + ")
-    }
-  }
-    
-}
-```
-
-```{r all_inla_model_combinations}
-# Run all possible INLA models
-# Log_Likelihood_Summary <- data.frame(Formula = "-", Log_Likelihood = NA)
-# 
-# # In for loop, run the model and combine the log likelihood estimate into a data.frame
-# for (i in 1:length(formula_string_combinations)) {
-# inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
-#                           formula_string_combinations[[i]],
-#                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
-# 
-# fit <- inla(inla_formula,
-#             family = "gaussian",
-#             data = sla.df)
-# 
-# Log_Likelihood_Summary <- Log_Likelihood_Summary %>%
-#   rbind(data.frame(Formula = formula_string_combinations[[i]],
-#                    Log_Likelihood = summary(fit)[["mlik"]][2]))
-# 
-# }
-# 
-# save(Log_Likelihood_Summary, file = paste0(data_folder, "inla_mlik_rank.RData"))
-#
-# load(paste0(dropbox, "inla_mlik_rank.RData"))
-# 
-# top10 <- Log_Likelihood_Summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
-
-
-
-
-
-
-In this analysis, SLA is investigated to quantify the difference between dominant species and between disturbed and pristine forest conditions.
-
-```{r load_datasets}
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-
-# load(paste0(dropbox, "domseedlingcover_rq1.RData"))
-# load(paste0(dropbox, "domshannons_rq1.RData"))
-load(paste0(dropbox, "domsla_rq1.RData"))
-# load(paste0(dropbox, "species_richness_rq3.RData"))
-# load(paste0(dropbox, "hobo_rq2.RData"))
-
-# Go through the variables and unselect predictor variable that don't make sense
-# domsla_rq1.df %>% str()
-
-sla.df <- domsla_rq1.df %>%
-  select(-dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
-
-
-# Look at structure of modelling df
-# sla.df %>% str()
-```
-
 #### Correlation
 ```{r correlation_analysis}
 # Look at correlations between variables
@@ -104,7 +10,7 @@ names(domsla_rq1.df)
 
 
 
-biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id", "dom_abundance")
+biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
 
 domsla_rq1.df %>%
   select(one_of(biotic_vars)) %>%
@@ -118,7 +24,6 @@ domsla_rq1.df %>%
 # correlation results
 # overall seedling cover is not needed. 
 ```
-
 
 #### Final Model: Minimum Marginal log-Likelihood
 ```{r}
@@ -139,7 +44,7 @@ fit <- inla(inla_formula,
             control.inla = list(strategy = "laplace"))
 
 # analyse the output of the model
-# summary(fit)
+summary(fit)
 ```
 
 $$
