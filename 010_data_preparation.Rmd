@@ -566,8 +566,8 @@ domsla_rq1.df <- dom_leaf_area3 %>%
 # Mutate variables for modelling with
 domsla_rq1.df %<>%
   mutate(dom_sla_weighted_abundance = dom_sla/dom_abundance)   %>%
-  left_join(leaf_traits2 %>% mutate(species_id = as.numeric(`Species ID`)) %>% select(-`Species ID`),
-            by = c("species_id")) %>%
+  # left_join(leaf_traits2 %>% mutate(species_id = as.numeric(`Species ID`)) %>% select(-`Species ID`),
+            # by = c("species_id")) %>%
   mutate(dom_seedling_cover = dom_seedling_cover/100,
          overall_seedling_cover = overall_seedling_cover/100,
          scaled_dom_seedling_cover = (dom_seedling_cover - mean(dom_seedling_cover))/sqrt(var(dom_seedling_cover)),
