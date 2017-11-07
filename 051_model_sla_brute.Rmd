@@ -3,7 +3,7 @@ title: "model_development"
 output: html_document
 ---
 
-```{r load_datasets}
+```{r}
 dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 # load(paste0(dropbox, "domseedlingcover_rq1.RData"))
@@ -131,7 +131,7 @@ linear_stepwise_summary <- linear_stepwise_summary %>%
 print(i)
 }
 
-save(linear_stepwise_summary, file = paste0(data_folder, "linear_stepwise_summary.RData"))
+# save(linear_stepwise_summary, file = paste0(data_folder, "linear_stepwise_summary.RData"))
 
 # load(paste0(dropbox, "inla_mlik_rank.RData"))
 # 
@@ -162,7 +162,7 @@ gamma_stepwise_summary <- gamma_stepwise_summary %>%
 print(i)
 }
 
-save(gamma_stepwise_summary, file = paste0(data_folder, "gamma_stepwise_summary.RData"))
+# save(gamma_stepwise_summary, file = paste0(data_folder, "gamma_stepwise_summary.RData"))
 
 # load(paste0(dropbox, "gamma_stepwise_summary.RData"))
 # 
@@ -193,7 +193,7 @@ loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
 print(i)
 }
 
-save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
+# save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
 
 # load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
 # 
@@ -238,8 +238,38 @@ save(lognormal_stepwise_summary, file = paste0(data_folder, "lognormal_stepwise_
 
 #### Model Fit
 ```{r}
+
+load(paste0(data_folder, "linear_stepwise_summary.RData"))
+
+load(paste0(data_folder, "gamma_stepwise_summary.RData"))
+
+load(paste0(data_folder, "loglinear_stepwise_summary.RData"))
+
+linear_stepwise_summary %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(3)
+
+gamma_stepwise_summary %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(3)
+
+top5_log <- loglinear_stepwise_summary %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(5)
 # fit <- 
 
+```
+
+```{r}
+inla_formula <- as.formula(paste0("log(dom_sla_weighted_abundance) ~ site + dom_species_id + dom_species_id:scaled_overall_seedling_cover +",
+                          # top5_log[1,1],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = domsla_rq1.df)
+
+summary(fit)
 ```
 
 ```{r}
