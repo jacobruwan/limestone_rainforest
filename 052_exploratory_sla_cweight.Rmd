@@ -5,11 +5,11 @@ output: html_document
 
 ```{r}
 # This code should be removed when entire process is productionised
-load(paste0(data_folder, "sla_com.RData"))
+load(paste0(data_folder, "sla_ind.RData"))
 
-sladata <- sla_com.df
+sladata <- sla_ind.df
 
-response_variables <- c("sla_cw_mean", "sla_cw_sd")
+response_variables <- c("sla_cw", "sla_cw_sd")
 ```
 
   * leaf area - photosynthetic aparatus of the plant
@@ -22,35 +22,37 @@ The following subsections investigate key relationships that explain the mean an
     
 ### SLA vs Site
 ```{r}
-var <- "site"
+var <- "domspecies"
 # ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
 # ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
 
 # Mean sla plot
 sladata %>%
-  ggplot(aes(x = site, y = sla_cw_mean, col = site)) +
+  ggplot(aes(x = site, y = sla_cw, col = site)) +
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean SLA vs Site") +
+  ggtitle("SLA vs Site") +
   xlab("Site") +
-  ylab("Mean SLA (CA)") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+  ylab("SLA (CW)") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw))) +
+  facet_wrap("dom_species_id", scale = "free_y")
 
-ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 3.5, height = 3.5, dpi = 900)
+ggsave(paste0(data_folder, "scale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
 
-# variance sla plot
 sladata %>%
-  ggplot(aes(x=site, y = sla_cw_sd^2, col = site)) +
+  ggplot(aes(x = site, y = sla_cw, col = site)) +
   geom_boxplot() +
   theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site")  +
-  ggtitle("Variance of SLA vs Site")+
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("(Unscaled) SLA vs Site") +
   xlab("Site") +
-  ylab("Variance of SLA (CA)")  +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+  ylab("SLA (CW)") +
+  # scale_y_continuous(lim = c(0, max(sladata$sla_cw))) +
+  facet_wrap("dom_species_id", scale = "free_y")
 
-ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 3.5, height = 3.5, dpi = 900)
+ggsave(paste0(data_folder, "unscale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
+
 ```
 
 ### Overall Seedling Cover

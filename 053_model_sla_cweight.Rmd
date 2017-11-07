@@ -5,41 +5,31 @@ output: html_document
 
 #### Correlation
 ```{r}
-# Look at correlations between variables
-names(domsla_rq1.df)
+sladata <- sla_ind.df
 
-
-
-biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
-
-domsla_rq1.df %>%
-  select(one_of(biotic_vars)) %>%
-  pairs(lower.panel = NULL)
-
-domsla_rq1.df %>%
-  mutate(dom_species_id = as.numeric(dom_species_id)) %>%
-  select(one_of(biotic_vars)) %>%
-  cor()
+# biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
+# 
+# sladata %>%
+#   select(one_of(biotic_vars)) %>%
+#   pairs(lower.panel = NULL)
+# 
+# sladata %>%
+#   mutate(dom_species_id = as.numeric(dom_species_id)) %>%
+#   select(one_of(biotic_vars)) %>%
+#   cor()
 
 # correlation results
-# overall seedling cover is not needed. 
+# overall seedling cover is not needed.  
 ```
 
 #### Final Model: Minimum Marginal log-Likelihood
 ```{r}
-# Try logged elevation
-domsla_rq1.df %<>%
-  mutate(log_av_trans_elevation = log(av_trans_elevation),
-         scaled_log_av_trans_elevation = (log_av_trans_elevation-mean(log_av_trans_elevation))/sqrt(var(log_av_trans_elevation))) %>%
-  mutate(scaled_av_quad_lai = (av_quad_lai - mean(av_quad_lai))/sqrt(var(av_quad_lai)))
-# Did not work
-
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("dom_sla_weighted_abundance ~  scaled_av_trans_elevation  + dom_species_id +  dom_species_id:scaled_av_trans_elevation + scaled_dom_seedling_cover + site + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = domsla_rq1.df,
+            data = sladata,
             control.compute = list(cpo=TRUE),
             control.inla = list(strategy = "laplace"))
 
@@ -47,26 +37,25 @@ fit <- inla(inla_formula,
 summary(fit)
 ```
 
-$$
-y_{SLA_{CW}} = \beta_0 + \beta_1x_e + \beta_2x_{id2} + \beta_3x_{id3} + \beta_4x_{cover} + \beta_5x_{siteP} + \beta_6x_{e:id2} + \beta_7x_{e:id3} + u_{transect} + v_{quadrat/transect} + \varepsilon_{residual}
 
-$$
 #### Model Fit
 ```{r}
 # summary(fit)
 predictions <- fit$summary.fitted.values$mean
-dataset <- domsla_rq1.df
+dataset <- sladata
 
 pred.df <- dataset %>% 
-      mutate(pred_dom_sla_weighted_abundance = predictions,
-             residuals = dom_sla_weighted_abundance - pred_dom_sla_weighted_abundance,
-             std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)))
+      mutate(fitted = predictions,
+             observed = log(sla_cw),
+             residuals = observed - fitted,
+             std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)),
+             cpo = fit$cpo$pit)
 
 ## Fitted vs Predicted
 pred.df %>%
-  ggplot(aes(x = dom_sla_weighted_abundance, y = pred_dom_sla_weighted_abundance)) +
+  ggplot(aes(x = observed, y = fitted)) +
   geom_point() +
-  xlab("Observed Abundance Weighted SLA") +
+  xlab("Observed Mean SLA (CA)") +
   ylab("Fitted Values") +
   theme_project() +
   coord_equal() +
@@ -75,7 +64,7 @@ pred.df %>%
 
 ## Fitted vs Standardised Residuals
 pred.df %>%
-  ggplot(aes(x = pred_dom_sla_weighted_abundance, y = std_residuals)) +
+  ggplot(aes(x = fitted, y = std_residuals)) +
   geom_point() +
   xlab("Fitted Values") +
   ylab("Standardised Residuals") +
@@ -84,18 +73,29 @@ pred.df %>%
   geom_abline(slope = 0, intercept = 1.5)+
   geom_abline(slope = 0, intercept = -1.5)
 
-# QQ-Plot
-qqnorm(fit$cpo$pit)
-qqline(fit$cpo$pit)
+# Residuals QQ plot
+qqnorm(pred.df$residuals)
+qqline(pred.df$residuals)
+title("Residuals                                                 ")
 
-# Histogram of predictions
+ # Histogram of predictions
 pred.df %>%
-  ggplot(aes(x = pred_dom_sla_weighted_abundance)) +
-  geom_histogram(bins=15) +
+  ggplot(aes(x = fitted)) +
+  geom_histogram(bins=7) +
   theme_project() +
   ggtitle("Histograms of Fitted Values")
   
 
+# CPO Values: QQ plot and Histogram
+pred.df %>%
+  ggplot(aes(x = cpo)) +
+  geom_histogram(bins=7) +
+  theme_project() +
+  ggtitle("Histograms of CPO")
+
+qqnorm(fit$cpo$pit)
+qqline(fit$cpo$pit)
+title("CPO                                       ")
 
 ```
 

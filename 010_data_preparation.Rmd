@@ -662,7 +662,8 @@ ind_vars <- c("site", "transect", "quadrat", "dom_species_id",
 
 sla_ind.df <- community.df %>%
   select(one_of(ind_vars)) %>%
-  distinct()
+  distinct() %>%
+  rename(sla_cw = sla_cover)
 
 sla_com.df <- community.df %>%
   select(one_of(communityagg_vars)) %>%
