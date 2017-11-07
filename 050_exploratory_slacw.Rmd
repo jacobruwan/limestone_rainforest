@@ -5,9 +5,7 @@ output: html_document
 
 ```{r}
 # This code should be removed when entire process is productionised
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-
-load(paste0(dropbox, "sla_com.RData"))
+load(paste0(data_folder, "sla_com.RData"))
 
 sladata <- sla_com.df
 
@@ -24,16 +22,22 @@ The following subsections investigate key relationships that explain the mean an
     
 ### SLA vs Site
 ```{r}
+var <- "site"
+# ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
+# ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
+
 # Mean sla plot
 sladata %>%
   ggplot(aes(x = site, y = sla_cw_mean, col = site)) +
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Site")+
+  ggtitle("Mean Community Aggregated SLA vs Site") +
   xlab("Site") +
   ylab("Mean SLA (CW)") +
   scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
 
 # variance sla plot
 sladata %>%
@@ -46,16 +50,19 @@ sladata %>%
   ylab("Variance of SLA (CW)")  +
   scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
 
+ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
 ```
 
 ### Overall Seedling Cover
 ```{r}
+
+
 # Mean sla plot
 sladata %>%
-  ggplot(aes(x = overall_seedling_cover, y = sla_cw_mean)) +
+  ggplot(aes(x = overall_seedling_cover, y = sla_cw_mean, col = site)) +
   geom_point() +
   theme_project() +
-  # scale_colour_manual(values = colours.site, name = "Site") +
+  scale_colour_manual(values = colours.site, name = "Site") +
   ggtitle("Mean Community Aggregated SLA vs Cover")+
   xlab("Overall Seedling Cover") +
   ylab("Mean SLA (CW)") +
@@ -64,10 +71,10 @@ sladata %>%
 
 # variance sla plot
 sladata %>%
-  ggplot(aes(x = overall_seedling_cover, y = sla_cw_sd^2)) +
+  ggplot(aes(x = overall_seedling_cover, y = sla_cw_sd^2, col = site)) +
   geom_point() +
   theme_project() +
-  # scale_colour_manual(values = colours.site, name = "Site")  +
+  scale_colour_manual(values = colours.site, name = "Site")  +
   ggtitle("Variance of Community Aggregated SLA vs Cover")+
   xlab("Overall Seedling Cover") +
   ylab("Variance of SLA (CW)") +
