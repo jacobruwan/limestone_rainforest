@@ -597,6 +597,39 @@ domsla_rq1.df %<>%
 
 
 save(domsla_rq1.df, file = paste0(data_folder, "domsla_rq1.RData"))
+
+# Create community aggregated SLA
+community.df <- domsla_rq1.df %>%
+  # select(site, transect, quadrat, dom_species_id, dom_sla, dom_seedling_cover) %>%
+  group_by(site, transect, quadrat, dom_species_id) %>%
+  mutate(sla_mean = mean(dom_sla), sla_sd = sqrt(var(dom_sla)))  %>%
+  mutate(sla_cover = dom_sla*dom_seedling_cover,
+         sla_cover_mean = mean(sla_cover), 
+         sla_cover_sd = sqrt(var(sla_cover))) %>%
+  group_by(site, transect, quadrat) %>%
+  mutate(sla_cw_mean = mean(sla_cover_mean), sla_cw_sd = sqrt(var(sla_cover_sd))) %>%
+  ungroup()
+
+communityagg_vars <- c("site", "transect", "quadrat", 
+          "sla_cw_mean", "sla_cw_sd",
+          "overall_seedling_cover", "scaled_overall_seedling_cover",
+          "av_trans_decomposition", "max_temp", "av_quad_compaction", "av_quad_lai", "av_quad_gft")
+
+coefficient_variance_vars <- c("site", "transect", "quadrat", "dom_species_id",
+                               "sla_mean", "sla_sd", "sla_cover_mean", "sla_cover_sd",
+                               "dom_seedling_cover", "overall_seedling_cover", "scaled_dom_seedling_cover", "scaled_overall_seedling_cover",
+                               "av_trans_decomposition", "max_temp", "av_quad_compaction", "av_quad_lai", "av_quad_gft")
+
+sla_com.df <- community.df %>%
+  select(one_of(communityagg_vars)) %>%
+  distinct()
+
+sla_var.df <- community.df %>%
+  select(one_of(coefficient_variance_vars)) %>%
+  distinct()
+
+save(sla_com.df, file = paste0(data_folder, "sla_com.RData"))
+save(sla_var.df, file = paste0(data_folder, "sla_var.RData"))
 ```
 
 ```{r rq2_hobo_timeseries}
