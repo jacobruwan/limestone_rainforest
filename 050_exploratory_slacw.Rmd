@@ -32,12 +32,12 @@ sladata %>%
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Site") +
+  ggtitle("Mean SLA vs Site") +
   xlab("Site") +
-  ylab("Mean SLA (CW)") +
+  ylab("Mean SLA (CA)") +
   scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
 
-ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
+ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 3.5, height = 3.5, dpi = 900)
 
 # variance sla plot
 sladata %>%
@@ -45,12 +45,12 @@ sladata %>%
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site")  +
-  ggtitle("Variance of Community Aggregated SLA vs Site")+
+  ggtitle("Variance of SLA vs Site")+
   xlab("Site") +
-  ylab("Variance of SLA (CW)")  +
+  ylab("Variance of SLA (CA)")  +
   scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
 
-ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
+ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 3.5, height = 3.5, dpi = 900)
 ```
 
 ### Overall Seedling Cover
