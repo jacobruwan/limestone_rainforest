@@ -14,6 +14,19 @@ load(paste0(dropbox, "domseedlingcover_rq1.RData"))
 This section provides an insight to the trends in the collected data. This analysis will be focused on individual research questions. This will provide interpretability when developing the statistical model.
 
 
+
+All about light
+
+  * Competitive domiance
+  * High cover, low frquency -> big leaves when young
+  * life history strategy -> not just maximise 
+  
+  * Ecophyisiology
+  * plant plasticity: intra specific variability -> more variability = better adaptation to more environment. More adaptation to different -> Measure of variation
+  * Incorporate adaptation: CV = mean/variance
+    * High variaation in leaf traits -> Use grime paper : 
+
+
 ```{r}
 domseedlingcover_rq1.df
 
@@ -32,7 +45,7 @@ domseedlingcover_rq1.df %>%
   select(dom_species_id, site, dom_seedling_cover, transect, quadrat) %>%
   distinct() %>%
   filter(!is.na(dom_species_id)) %>%
-  ggplot(aes(x = factor(dom_species_id), y = dom_seedling_cover, col = site)) +
+  ggplot(aes(x = factor(dom_species_id), y = dom_seedling_cover)) +
   geom_boxplot() +
   theme_project() +
   scale_colour_tableau() +
