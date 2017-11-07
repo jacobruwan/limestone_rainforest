@@ -616,33 +616,53 @@ cover_agg <- domsla_rq1.df %>%
   group_by(site, transect, quadrat, dom_species_id) %>%
   mutate(sla_mean = mean(dom_sla), sla_sd = sqrt(var(dom_sla)))  %>%
   mutate(sla_cover = dom_sla*dom_seedling_cover,
-         sla_cover_mean = mean(sla_cover), 
-         sla_cover_sd = sqrt(var(sla_cover))) %>%
+         sla_cw_mean = mean(sla_cover),
+         sla_cw_sd = sqrt(var(sla_cover))) %>%
   group_by(site, transect, quadrat) %>%
-  mutate(sla_cw_mean = mean(sla_cover_mean), sla_cw_sd = sqrt(var(sla_cover_sd))) %>%
+  mutate(sla_cover_total_sd = sqrt(var(sla_cover))) %>%
+  ungroup()
+
+cover_agg_sum <- cover_agg %>%
+  select(site, transect, quadrat, dom_species_id, sla_cw_mean, sla_cover_total_sd) %>%
+  distinct()  %>%
+  group_by(site, transect, quadrat) %>%
+  mutate(sla_ca_mean = sum(sla_cw_mean), sla_ca_sd = sla_cover_total_sd) %>%
+  select(-sla_cw_mean, -sla_cover_total_sd, -dom_species_id) %>%
   ungroup() %>%
+  distinct()
+
+
+cover_agg2 <- cover_agg %>%
+  left_join(cover_agg_sum,
+            by = c("site", "transect", "quadrat")) %>%
   left_join(total_dom_abundance,
             by = c("site", "transect", "quadrat", "dom_species_id"))
 
-
-
-
-
-
 # Choose which community aggregated to use: cover or abundance
-community.df <- cover_agg
+community.df <- cover_agg2
 
 communityagg_vars <- c("site", "transect", "quadrat", 
-          "sla_cw_mean", "sla_cw_sd",
+          "sla_ca_mean", "sla_ca_sd",
           "overall_seedling_cover", "scaled_overall_seedling_cover", 
           "total_dom_abundance", "scaled_total_dom_abundance",
           "av_trans_decomposition", "max_temp", "av_quad_compaction", "av_quad_lai", "av_quad_gft")
 
 coefficient_variance_vars <- c("site", "transect", "quadrat", "dom_species_id",
-                               "sla_mean", "sla_sd", "sla_cover_mean", "sla_cover_sd",
+                               "dom_sla", "sla_cover",
+                               "sla_mean", "sla_sd", "sla_cw_mean", "sla_cw_sd",
                                "dom_seedling_cover", "overall_seedling_cover", "dom_abundance",
                                "scaled_dom_seedling_cover", "scaled_overall_seedling_cover", "scaled_dom_abundance",
                                "av_trans_decomposition", "max_temp", "av_quad_compaction", "av_quad_lai", "av_quad_gft")
+
+ind_vars <- c("site", "transect", "quadrat", "dom_species_id",
+             "sla_cover", "dom_sla",
+             "dom_seedling_cover", "overall_seedling_cover", "dom_abundance",
+             "scaled_dom_seedling_cover", "scaled_overall_seedling_cover", "scaled_dom_abundance",
+             "av_trans_decomposition", "max_temp", "av_quad_compaction", "av_quad_lai", "av_quad_gft")
+
+sla_ind.df <- community.df %>%
+  select(one_of(ind_vars)) %>%
+  distinct()
 
 sla_com.df <- community.df %>%
   select(one_of(communityagg_vars)) %>%
@@ -652,6 +672,7 @@ sla_var.df <- community.df %>%
   select(one_of(coefficient_variance_vars)) %>%
   distinct()
 
+save(sla_ind.df, file = paste0(data_folder, "sla_ind.RData"))
 save(sla_com.df, file = paste0(data_folder, "sla_com.RData"))
 save(sla_var.df, file = paste0(data_folder, "sla_var.RData"))
 ```
