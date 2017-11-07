@@ -1,0 +1,267 @@
+---
+title: "model_development"
+output: html_document
+---
+
+```{r}
+# This code should be removed when entire process is productionised
+load(paste0(data_folder, "sla_com.RData"))
+
+sladata <- sla_com.df
+
+response_variables <- c("sla_cw_mean", "sla_cw_sd")
+```
+
+  * leaf area - photosynthetic aparatus of the plant
+  * amount of investment of dry matter (plant investment into growth defence trade off) -> Most dominant species most compettitive, higher specific leaf area
+  * community aggregated sla provides insight to how plants function as a quadrat
+    * high community aggregated sla -> infer plants in that plot growing faster
+    * low sla -> plasticity to disturbance
+
+The following subsections investigate key relationships that explain the mean and variance of community aggregated SLA.
+    
+### SLA vs Site
+```{r}
+var <- "site"
+# ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
+# ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
+
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = site, y = sla_cw_mean, col = site)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean SLA vs Site") +
+  xlab("Site") +
+  ylab("Mean SLA (CA)") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 3.5, height = 3.5, dpi = 900)
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x=site, y = sla_cw_sd^2, col = site)) +
+  geom_boxplot() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of SLA vs Site")+
+  xlab("Site") +
+  ylab("Variance of SLA (CA)")  +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+
+ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 3.5, height = 3.5, dpi = 900)
+```
+
+### Overall Seedling Cover
+```{r}
+
+
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = overall_seedling_cover, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Cover")+
+  xlab("Overall Seedling Cover") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = overall_seedling_cover, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Cover")+
+  xlab("Overall Seedling Cover") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm")  +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+
+```
+
+### Total Dominant Species Abundance
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = total_dom_abundance, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Abundance")+
+  xlab("Total Dominant Species Abundance") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = total_dom_abundance, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Abundance")+
+  xlab("Total Dominant Species Abundance") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
+### Compaction
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_compaction, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  xlab("Compaction (pressure)") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_compaction, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  xlab("Compaction (pressure)") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
+### Leaf Area Index
+```{r}
+sladata %>%
+  ggplot(aes(x=av_quad_lai, y=av_quad_gft)) +
+  geom_point()
+
+sladata %>%
+  select(av_quad_lai, av_quad_gft) %>%
+  cor()
+```
+
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_lai, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  xlab("Leaf Area Index") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_lai, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  xlab("Leaf Area Index") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
+### Gap Fraction Threshold
+```{r}
+sladata %>%
+  ggplot(aes(x=av_quad_lai, y=av_quad_gft)) +
+  geom_point()
+
+sladata %>%
+  select(av_quad_lai, av_quad_gft) %>%
+  cor()
+```
+
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_gft, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  xlab("Gap Fraction Threshold") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = av_quad_gft, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  xlab("Gap Fraction Threshold") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
+### Decomposition
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = av_trans_decomposition, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  xlab("Decomposition (grams/days)") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = av_trans_decomposition, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  xlab("Decomposition (grams/days)") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
+### Maximum Temperature
+```{r}
+# Mean sla plot
+sladata %>%
+  ggplot(aes(x = max_temp, y = sla_cw_mean, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  xlab("Maximum Temperature (celsius)") +
+  ylab("Mean SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+
+# variance sla plot
+sladata %>%
+  ggplot(aes(x = max_temp, y = sla_cw_sd^2, col = site)) +
+  geom_point() +
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site")  +
+  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  xlab("Maximum Temperature (celsius)") +
+  ylab("Variance of SLA (CW)") +
+  geom_smooth(method = "lm") +
+  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+```
+
