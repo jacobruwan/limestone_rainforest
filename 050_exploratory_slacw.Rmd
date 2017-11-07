@@ -3,11 +3,51 @@ title: "model_development"
 output: html_document
 ---
 
-```{r load_datasets_exploratory_analysis}
+```{r}
 # This code should be removed when entire process is productionised
 dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 load(paste0(dropbox, "domsla_rq1.RData"))
+```
+
+plants function in each plot
+
+high sla for overall plot -> infer plants in that plot growing faster
+
+low sla -> plasticity that species  to the disturbance
+
+```{r}
+domsla_rq1.df %>%
+  ggplot(aes(x = dom_species_id, y = dom_abundance, col=site)) +
+  geom_boxplot()
+
+domsla_rq1.df %>%
+  ggplot(aes(x = dom_species_id, y = dom_sla, col=site)) +
+  geom_boxplot()
+```
+
+
+```{r}
+# Look at community aggregated SLA
+df <- domsla_rq1.df
+
+newsla.df <- df %>%
+  mutate(sla_cw = dom_sla*dom_seedling_cover) %>%
+  group_by(site, transect, quadrat) %>%
+  mutate(sla_cw_agg = mean(sla_cw)) %>%
+  select(site, transect, quadrat, dom_sla, dom_seedling_cover, 
+         sla_cw, sla_cw_agg)%>%
+  ungroup() %>%
+  distinct() 
+
+newsla.df
+
+newsla.df %>%
+  select(site, sla_cw_agg) %>%
+  distinct() %>%
+  ggplot(aes(x = site, y = sla_cw_agg, col = site)) +
+  geom_boxplot() +
+  theme_project()
 
 ```
 
@@ -31,9 +71,9 @@ domsla_rq1.df %>%
   geom_boxplot() +
   theme_project() +
   scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Site")+
+  ggtitle("SLA_CW vs Site")+
   xlab("Site") +
-  ylab("Abundance-Weighted SLA")
+  ylab("Community-Weighted SLA")
 
 ```
 
@@ -43,7 +83,7 @@ domsla_rq1.df %>%
   ggplot(aes(x=dom_species_id, y = dom_sla, col=site)) +
   geom_boxplot() +
   theme_project() +
-  ggtitle("SLA vs Site")+
+  ggtitle("SLA vs Dominant Species")+
   xlab("Dominant Species ID") +
   ylab("SLA") +
   scale_colour_manual(values = colours.site, name = "Site")
@@ -52,9 +92,9 @@ domsla_rq1.df %>%
   ggplot(aes(x=dom_species_id, y = dom_sla_weighted_abundance, col=site)) +
   geom_boxplot() +
   theme_project() +
-  ggtitle("SLA vs Site")+
+  ggtitle("SLA_CW vs Dominant Species")+
   xlab("Dominant Species ID") +
-  ylab("Abundance-Weighted SLA") +
+  ylab("Community-Weighted SLA") +
   scale_colour_manual(values = colours.site, name = "Site")
 
 ```
@@ -72,71 +112,91 @@ domsla_rq1.df %>%
   geom_smooth(method = "lm") +
   facet_wrap("dom_species_id")
 
-domsla_rq1.df %>%
-  ggplot(aes(x=dom_abundance, y = dom_sla, col=dom_species_id)) +
-  geom_point() +
+
+ggplot() +
+  geom_density(aes(x=dom_sla, col=site),
+               stat = "density",
+               position = "identity",
+               data = domsla_rq1.df) +
   theme_project() +
   ggtitle("SLA vs Dominant Species ID")+
   xlab("Abundance") +
   ylab("SLA") +
-  scale_colour_tableau(name = "Dominant Species ID") +
-  geom_smooth(method = "lm")
+  # scale_colour_tableau(name = "Dominant Species ID") +
+  scale_colour_manual(values = colours.site) +
+  facet_wrap("dom_species_id")
 
-```
-
-
-### Abundance-Weighted SLA vs Elevation
-```{r}
-# domsla_rq1.df %>%
-#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
-#   geom_point() +
-#   theme_project() +
-#   ggtitle("Weighted SLA vs Elevation")+
-#   xlab("Transect Elevation") +
-#   ylab("Abundance-Weighted SLA") +
-#   scale_colour_manual(name = "Site",
-#                       values = colours.site)
-
-domsla_rq1.df %>%
-  ggplot(aes(x=paste0(site, ":", 
-                      round(av_trans_elevation), "m"), 
-             y = dom_sla_weighted_abundance,
-             col=dom_species_id)) +
-  geom_boxplot()  +
-  # scale_y_continuous(lim = c(0, 80))+
+ggplot() +
+  geom_density(aes(x=dom_sla_weighted_abundance, col=site),
+               stat = "density",
+               position = "identity",
+               data = domsla_rq1.df) +
   theme_project() +
-  scale_colour_tableau(name = "Dominant Species ID") +
-  ggtitle("SLA vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Abundance-Weighted SLA")
+  ggtitle("SLA_CW vs Dominant Species ID")+
+  xlab("Abundance") +
+  ylab("Community-Weighted SLA") +
+  # scale_colour_tableau(name = "Dominant Species ID") +
+  scale_colour_manual(values = colours.site) +
+  facet_wrap("dom_species_id")
+
 ```
 
-### Abundance-Weighted SLA vs Compaction
+
+### SLA vs Elevation
 ```{r}
 # domsla_rq1.df %>%
-#   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
-#   geom_point() +
+#   ggplot(aes(x=av_trans_elevation, 
+#              y = dom_sla,
+#              col=dom_species_id)) +
+#   geom_point()  +
 #   theme_project() +
-#   ggtitle("Weighted SLA vs Elevation")+
+#   scale_colour_tableau(name = "Dominant Species ID") +
+#   ggtitle("SLA vs Elevation")+
 #   xlab("Transect Elevation") +
-#   ylab("Abundance-Weighted SLA") +
-#   scale_colour_manual(name = "Site",
-#                       values = colours.site)
+#   ylab("SLA") +
+#   geom_smooth(method = "lm")
+# 
+# domsla_rq1.df %>%
+#   ggplot(aes(x=av_trans_elevation, 
+#              y = dom_sla_weighted_abundance,
+#              col=dom_species_id)) +
+#   geom_point()  +
+#   theme_project() +
+#   scale_colour_tableau(name = "Dominant Species ID") +
+#   ggtitle("SLA vs Elevation")+
+#   xlab("Transect Elevation") +
+#   ylab("Community-Weighted SLA")+
+#   geom_smooth(method = "lm")
+```
 
+### Community-Weighted SLA vs Compaction
+```{r}
 domsla_rq1.df %>%
   ggplot(aes(x = av_quad_compaction, 
-             y = dom_sla_weighted_abundance,
-             col=dom_species_id)) +
+             y = dom_sla,
+             col = dom_species_id)) +
   geom_point() + 
   geom_smooth(method="lm",se=FALSE, span = 5) +
   theme_project() +
   scale_colour_tableau() +
-  ggtitle("Weighted SLA vs Compaction")+
+  ggtitle("SLA vs Compaction")+
   xlab("Quadrat Compaction") +
-  ylab("Abundance-Weighted SLA")
+  ylab("SLA")
+
+domsla_rq1.df %>%
+  ggplot(aes(x = av_quad_compaction, 
+             y = dom_sla_weighted_abundance,
+             col = dom_species_id)) +
+  geom_point() + 
+  geom_smooth(method="lm",se=FALSE, span = 5) +
+  theme_project() +
+  scale_colour_tableau() +
+  ggtitle("SLA_CW vs Compaction")+
+  xlab("Quadrat Compaction") +
+  ylab("Community-Weighted SLA")
 ```
 
-### Abundance-Weighted SLA vs LAI
+### Community-Weighted SLA vs LAI
 ```{r}
 # domsla_rq1.df %>%
 #   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
@@ -173,7 +233,7 @@ domsla_rq1.df %>%
   ylab("Abundance-Weighted SLA")
 ```
 
-### Abundance-Weighted SLA vs Temeprature Range
+### Community-Weighted SLA vs Temeprature Range
 ```{r}
 # domsla_rq1.df %>%
 #   ggplot(aes(x=(round(av_trans_elevation)), y = dom_sla_weighted_abundance, col=site)) +
@@ -210,7 +270,7 @@ domsla_rq1.df %>%
   ylab("Abundance-Weighted SLA")
 ```
 
-### Abundance-Weighted SLA vs Seedling Cover
+### Community-Weighted SLA vs Seedling Cover
 ```{r}
 domsla_rq1.df %>%
   ggplot(aes(x = dom_seedling_cover, 

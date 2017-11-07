@@ -4,7 +4,7 @@ output: html_document
 ---
 
 #### Correlation
-```{r correlation_analysis}
+```{r}
 # Look at correlations between variables
 names(domsla_rq1.df)
 
@@ -55,9 +55,9 @@ $$
 ```{r}
 # summary(fit)
 predictions <- fit$summary.fitted.values$mean
+dataset <- domsla_rq1.df
 
-
-pred.df <- domsla_rq1.df %>% 
+pred.df <- dataset %>% 
       mutate(pred_dom_sla_weighted_abundance = predictions,
              residuals = dom_sla_weighted_abundance - pred_dom_sla_weighted_abundance,
              std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)))
@@ -268,55 +268,4 @@ randomeffects %>%
 
 ```
 
-
-#### Model Fit
-```{r}
-# cpo
-# pit
-#
-
-
-```
-
-
-
-
-
-<!-- ### Frequentist Approach -->
-
-```{r}
-# # Try the same model using glmer
-# # Run all possible glmer models
-# Log_Likelihood_Summary2 <- data.frame(Formula = "-", Log_Likelihood = NA)
-# 
-# # In for loop, run the model and combine the log likelihood estimate into a data.frame
-# for (i in 1:length(formula_string_combinations)) {
-# glmm_formula <- as.formula(paste0("dom_sla ~ ",
-#                           formula_string_combinations[[i]],
-#                           " + (1|transect/quadrat)"))
-# 
-# fit2 <- glmer(glmm_formula,
-#              data = sla.df,
-#              family = "gaussian")
-# 
-# Log_Likelihood_Summary2 <- Log_Likelihood_Summary2 %>%
-#   rbind(data.frame(Formula = formula_string_combinations[[i]],
-#                    Log_Likelihood = summary(fit2)[["logLik"]][1]))
-# 
-# }
-```
-
-```{r}
-# top5 <- Log_Likelihood_Summary2 %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(5)
-# top5
-
-# fit2 <- lmer(dom_sla_weighted_abundance ~ scaled_av_trans_elevation + dom_species_id + 
-#     dom_species_id:scaled_av_trans_elevation + scaled_dom_seedling_cover + 
-#     site + (1|transect/quadrat),
-#              data = domsla_rq1.df)
-# 
-# confint(fit2)
-```
 
