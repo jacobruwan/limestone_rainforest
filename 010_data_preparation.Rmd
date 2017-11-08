@@ -713,7 +713,7 @@ hobo_rq2.df <- hobo3 %>%
                                          "%Y-%m-%d %H:%M:%S")),
          date_time < as.POSIXct(strftime("2017-09-28 22:00:00", 
                                          "%Y-%m-%d %H:%M:%S"))) %>%
-  select(site, transect, hobo_id, temp, rel_humid, av_trans_elevation, av_trans_compaction, av_trans_lai, av_trans_gft, av_trans_decomposition)
+  select(site, transect, hobo_id, date_time, temp, rel_humid, av_trans_elevation, av_trans_compaction, av_trans_lai, av_trans_gft, av_trans_decomposition)
 
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))
