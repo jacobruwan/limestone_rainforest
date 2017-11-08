@@ -22,6 +22,111 @@ sladata <- sla_com.df
 # overall seedling cover is not needed. 
 ```
 
+
+```{r}
+# define the vector of possible predictors, exclude random effects
+response <- "sla_ca_mean"
+temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("sla_ca_mean", "site", "transect", "quadrat",
+                                                         "min_temp", "range_temp",
+                                                         "overall_seedling_cover", "scaled_overall_seedling_cover",
+                                                         "total_dom_abundance", "scaled_total_dom_abundance")))]
+
+# Remove all leaf data
+# interactions <- c("site:dom_species_id", "site:av_quad_gft", "site:av_quad_compaction",
+#          "dom_species_id:scaled_av_trans_elevation", "dom_species_id:av_quad_gft", "dom_species_id:av_quad_compaction")
+
+predictors <- c(temp_predictors, paste0(temp_predictors, " + ", temp_predictors, ":site"))
+# predictors <- c(temp_predictors, interactions)
+
+# Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
+possible_predictor_combinations <- list()
+index <- 1
+
+for (i in 1:length(predictors)) {
+  for (j in i:length(predictors)) {
+  possible_predictor_combinations[[index]] <- i:j
+  index <- index + 1
+  }
+}
+
+# Create formula's
+formula_string_combinations <- list()
+
+for (i in 1:length(possible_predictor_combinations)) {
+
+  formula_string_combinations[[i]] <- predictors[possible_predictor_combinations[[i]][1]]
+
+  if (length(possible_predictor_combinations[[i]]) > 1) {
+    for (j in 2:length(possible_predictor_combinations[[i]])) {
+      formula_string_combinations[[i]] <- paste(formula_string_combinations[[i]],
+                                                predictors[possible_predictor_combinations[[i]][j]],
+                                                sep = " + ")
+    }
+  }
+
+}
+
+# Find the full formula of predictors for INLA step
+length_formulastring <- data.frame(Index=NA, Length=NA)
+
+for (i in 1:length(formula_string_combinations)) {
+  length_formulastring[i,1] <- i
+  length_formulastring[i,2] <- nchar(formula_string_combinations[[i]])
+}
+
+full_formula <- length_formulastring %>% 
+  arrange(desc(Length)) %>%
+  head(1) %>%
+  select(Length) %>%
+  unlist(use.names = FALSE)
+```
+
+
+
+
+#### Ruwans Stepwise for Aggregate
+```{r}
+# Run all possible INLA models
+loglinear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("log(sla_ca_mean) ~ site + ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sladata)
+
+loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
+
+# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
+# 
+# top10 <- loglinear_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+```{r}
+
+load(paste0(data_folder, "loglinear_stepwise_summary.RData"))
+
+loglinear_stepwise_summary %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(10)
+# fit <- 
+
+```
+
 #### Final Model: Minimum Marginal log-Likelihood
 ```{r}
 # RUn a model on the top 3 variables identified
@@ -128,10 +233,14 @@ fixed.df %>%
   ggplot(aes(y = Est2, x = exp(quant0.5), xmin = exp(quant0.025), xmax = exp(quant0.975))) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("Standardised Predictors") +
+  ggtitle("SLA Agg - Fixed") +
   xlab("Credible Intervals") +
   ylab("Parameter") +
-  geom_vline(xintercept = 0)
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(breaks = seq(0, 40, 5))
+
+
+ggsave(paste0(data_folder, "sla_", "agg","_estimates.png"), width = 3, height = 1.5, dpi = 900)
 ```
 
 
@@ -257,14 +366,16 @@ randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:
 randomeffects %>%
   ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
   geom_errorbarh() +
-  theme_project() +
-  ggtitle("Hyperparameters") +
+  theme_table_pastel() +
+  ggtitle("SLA Agg - Random") +
   xlab("Credible Interval") +
   ylab("Hyperparameter")
 
 randomeffects %>%
   mutate(`Variation Explained` = percent(explained)) %>%
   select(hyperparameter, `Variation Explained`)
+
+ggsave(paste0(data_folder, "sla_", "agg","_randomeff.png"), width = 3.5, height = 1.8, dpi = 900)
 
 ```
 

@@ -70,6 +70,7 @@ instant_pkgs(packages_to_load)
 ```{r}
 # Aesthetics for GGplot
 bg_green <- rgb(223, 241, 204, maxColorValue = 255)
+bg_table_pastel <- rgb(255, 242, 204, maxColorValue = 255)
 colours.site = c("#d62121", "#30d621")
 colours.splinefit = c("#b21515", "#21b623", colours.site[1], colours.site[2], "#d92121", "#33d621")
 
@@ -80,6 +81,15 @@ theme_project <- function() {
         legend.box.background = element_rect(fill=bg_green, color=bg_green),
         legend.key = element_rect(fill=bg_green),
         plot.background = element_rect(bg_green, color=bg_green)) 
+}
+
+theme_table_pastel <- function() {
+  theme_bw() +
+  theme(legend.position = "top") +
+  theme(legend.background = element_rect(bg_table_pastel),
+        legend.box.background = element_rect(fill=bg_table_pastel, color=bg_table_pastel),
+        legend.key = element_rect(fill=bg_table_pastel),
+        plot.background = element_rect(bg_table_pastel, color=bg_table_pastel)) 
 }
 
 # Define the datafolder that contains all RDatasets. This will be an empty string when submitted

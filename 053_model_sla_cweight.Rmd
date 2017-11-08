@@ -2,8 +2,6 @@
 title: "model_development"
 output: html_document
 ---
-
-#### Correlation
 ```{r}
 sladata <- sla_ind.df
 
@@ -22,10 +20,117 @@ sladata <- sla_ind.df
 # overall seedling cover is not needed.  
 ```
 
+```{r}
+# define the vector of possible predictors, exclude random effects
+response <- "sla_cw"
+temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("transect", "quadrat", "site", "dom_species_id", "sla_cw", "dom_seedling_cover", "overall_seedling_cover",
+"dom_abundance", "scaled_dom_seedling_cover", "scaled_overall_seedling_cover",
+"scaled_dom_abundance", "dom_sla", "min_temp", "range_temp")))]
+
+# Remove all leaf data
+# interactions <- c("site:dom_species_id", "site:av_quad_gft", "site:av_quad_compaction",
+#          "dom_species_id:scaled_av_trans_elevation", "dom_species_id:av_quad_gft", "dom_species_id:av_quad_compaction")
+
+predictors <- c(temp_predictors, paste0(temp_predictors, "+", temp_predictors, ":site"), paste0(temp_predictors, "+", temp_predictors, ":dom_species_id"))
+# predictors <- c(temp_predictors, interactions)
+
+# Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
+possible_predictor_combinations <- list()
+index <- 1
+
+for (i in 1:length(predictors)) {
+  for (j in i:length(predictors)) {
+  possible_predictor_combinations[[index]] <- i:j
+  index <- index + 1
+  }
+}
+
+# Create formula's
+formula_string_combinations <- list()
+
+for (i in 1:length(possible_predictor_combinations)) {
+
+  formula_string_combinations[[i]] <- predictors[possible_predictor_combinations[[i]][1]]
+
+  if (length(possible_predictor_combinations[[i]]) > 1) {
+    for (j in 2:length(possible_predictor_combinations[[i]])) {
+      formula_string_combinations[[i]] <- paste(formula_string_combinations[[i]],
+                                                predictors[possible_predictor_combinations[[i]][j]],
+                                                sep = " + ")
+    }
+  }
+
+}
+
+# Find the full formula of predictors for INLA step
+length_formulastring <- data.frame(Index=NA, Length=NA)
+
+for (i in 1:length(formula_string_combinations)) {
+  length_formulastring[i,1] <- i
+  length_formulastring[i,2] <- nchar(formula_string_combinations[[i]])
+}
+
+full_formula <- length_formulastring %>% 
+  arrange(desc(Length)) %>%
+  head(1) %>%
+  select(Length) %>%
+  unlist(use.names = FALSE)
+```
+
+
+
+
+####  Stepwise for Weighted
+```{r}
+# Run all possible INLA models
+loglinear_stepwise_summary_w <- data.frame(Formula = "-", Log_Likelihood = NA)
+
+# In for loop, run the model and combine the log likelihood estimate into a data.frame
+for (i in 1:length(formula_string_combinations)) {
+inla_formula <- as.formula(paste0("log(sla_cw) ~ site + dom_species_id + site:dom_species_id + ",
+                          formula_string_combinations[[i]],
+                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sladata)
+
+loglinear_stepwise_summary_w <- loglinear_stepwise_summary_w %>%
+  rbind(data.frame(Formula = formula_string_combinations[[i]],
+                   Log_Likelihood = summary(fit)[["mlik"]][2]))
+print(i)
+}
+
+save(loglinear_stepwise_summary_w, file = paste0(data_folder, "loglinear_stepwise_summary_w.RData"))
+
+# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
+# 
+# top10 <- loglinear_stepwise_summary %>%
+#   arrange(desc(Log_Likelihood)) %>%
+#   head(10)
+# 
+# top10
+```
+
+```{r}
+
+load(paste0(data_folder, "loglinear_stepwise_summary_w.RData"))
+
+loglinear_stepwise_summary_w %>%
+  arrange(desc(Log_Likelihood)) %>%
+  head(5)
+
+
+```
+
+
+
+
 #### Final Model: Minimum Marginal log-Likelihood
 ```{r}
+
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai + scaled_av_quad_lai^2 + scaled_av_quad_lai:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -37,6 +142,23 @@ fit <- inla(inla_formula,
 summary(fit)
 ```
 
+```{r}
+sladata %<>% 
+  mutate(sq_av_quad_lai = av_quad_lai^2) %>%
+  mutate(scaled_sq_av_quad_lai = (sq_av_quad_lai - mean(sq_av_quad_lai))/sqrt(var(sq_av_quad_lai)))
+
+# RUn a model on the top 3 variables identified
+inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+
+fit <- inla(inla_formula,
+            family = "gaussian",
+            data = sladata,
+            control.compute = list(cpo=TRUE),
+            control.inla = list(strategy = "laplace"))
+
+# analyse the output of the model
+summary(fit)
+```
 
 #### Model Fit
 ```{r}
@@ -128,76 +250,60 @@ fixed.df %>%
   ggplot(aes(y = Est2, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("Standardised Predictors") +
+  ggtitle("SLA Weight - Fixed") +
   xlab("Credible Intervals") +
   ylab("Parameter") +
   geom_vline(xintercept = 0)
+
+ggsave(paste0(data_folder, "scale_sla_cw_", "fixed",".png"), width = 5, height = 3.5, dpi = 900)
 ```
 
 
 #### Real Fixed Effect Credible Intervals
 ```{r}
-mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.5[c(1)]),
-                   sum(fixed.df$quant0.5[c(2)]),
                    sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.5[c(1, 3)]),
-                   sum(fixed.df$quant0.5[c(2, 7)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.5[c(5, 8)])), digits=1)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.5[c(1, 4)]),
-                   sum(fixed.df$quant0.5[c(2, 8)]),
+                   sum(fixed.df$quant0.5[c(5, 9)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 2)]),
                    sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 6)]),
-                   sum(fixed.df$quant0.5[c(2)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.5[c(2, 7)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.5[c(2, 8)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 3, 6)]),
+                   sum(fixed.df$quant0.5[c(5, 8)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 4, 7)]),
+                   sum(fixed.df$quant0.5[c(5, 9)])), digits=1)) %>%
   gather(Scenario, Median, -Parameter)
 
-lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.025[c(1)]),
-                   sum(fixed.df$quant0.025[c(2)]),
                    sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.025[c(1, 3)]),
-                   sum(fixed.df$quant0.025[c(2, 7)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.025[c(5, 8)])), digits=1)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.025[c(1, 4)]),
-                   sum(fixed.df$quant0.025[c(2, 8)]),
+                   sum(fixed.df$quant0.025[c(5, 9)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 2)]),
                    sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 6)]),
-                   sum(fixed.df$quant0.025[c(2)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.025[c(2, 7)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.025[c(2, 8)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 3, 6)]),
+                   sum(fixed.df$quant0.025[c(5, 8)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 4, 7)]),
+                   sum(fixed.df$quant0.025[c(5, 9)])), digits=1)) %>%
   gather(Scenario, LB, -Parameter)
 
-ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
+ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.975[c(1)]),
-                   sum(fixed.df$quant0.975[c(2)]),
                    sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.975[c(1, 3)]),
-                   sum(fixed.df$quant0.975[c(2, 7)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.975[c(5, 8)])), digits=1)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.975[c(1, 4)]),
-                   sum(fixed.df$quant0.975[c(2, 8)]),
+                   sum(fixed.df$quant0.975[c(5, 9)])), digits=1)) %>%
+  mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 2)]),
                    sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 6)]),
-                   sum(fixed.df$quant0.975[c(2)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.975[c(2, 7)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.975[c(2, 8)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 3, 6)]),
+                   sum(fixed.df$quant0.975[c(5, 8)])), digits=1)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 4, 7)]),
+                   sum(fixed.df$quant0.975[c(5, 9)])), digits=1)) %>%
   gather(Scenario, UB, -Parameter)
 
 
@@ -209,17 +315,20 @@ realeffect.df <- lb_fixedeffect.df %>%
 
 
 realeffect.df %>%
-  mutate(speciesid = substr(Scenario, 1, 3)) %>%
-  filter(Parameter == "Scaled_Elevation") %>%
+  mutate(speciesid = paste0("Dom Species ",substr(Scenario, 3, 3))) %>%
+  filter(Parameter == "Scaled LAI") %>%
   select(speciesid, Median, UB, LB, Parameter) %>%
   distinct() %>%
   ggplot(aes(y = speciesid, x = Median, xmin = UB, xmax = LB)) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("Scaled Elevation") +
-  xlab("Real Elevation Effect - Credible Intervals") +
+  ggtitle("Leaf Area Index") +
+  xlab("Real LAI Effect - Credible Intervals") +
   ylab("Dominant Species ID") +
   geom_vline(xintercept = 0)
+
+
+ggsave(paste0(data_folder, "scale_sla_cw_", "lai",".png"), width = 3.5, height = 1.8, dpi = 900)
 
 realeffect.df %>%
   filter(Parameter == "Intercept") %>%
@@ -230,6 +339,9 @@ realeffect.df %>%
   xlab("Real Intercept Effect - Credible Intervals") +
   ylab("Intercept Scenarios") +
   geom_vline(xintercept = 0)
+
+
+ggsave(paste0(data_folder, "scale_sla_cw_", "intercept",".png"), width = 3.5, height = 2.5, dpi = 900)
 ```
 
 #### Variation Breakdown
@@ -266,6 +378,7 @@ randomeffects %>%
   mutate(`Variation Explained` = percent(explained)) %>%
   select(hyperparameter, `Variation Explained`)
 
+ggsave(paste0(data_folder, "scale_sla_cw_", "random",".png"), width = 3.5, height = 1.8, dpi = 900)
 ```
 
 

@@ -32,7 +32,7 @@ sladata %>%
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("SLA vs Site") +
+  ggtitle("SLA vs Dominant Species ID") +
   xlab("Site") +
   ylab("SLA (CW)") +
   scale_y_continuous(lim = c(0, max(sladata$sla_cw))) +
@@ -153,27 +153,21 @@ sladata %>%
 ```{r}
 # Mean sla plot
 sladata %>%
-  ggplot(aes(x = av_quad_lai, y = sla_cw_mean, col = site)) +
-  geom_point() +
+  filter(av_quad_lai != disturbed_mean_lai) %>%
+  ggplot(aes(x = (av_quad_lai), y = log(sla_cw), col = dom_species_id)) +
+  geom_point(size = 0.9) +
   theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  # scale_colour_manual(values = colours.site, name = "Site") +
+  scale_colour_tableau(name = "Dom Species ID") +
+  ggtitle("SLA vs LAI (No Impute)")+
   xlab("Leaf Area Index") +
-  ylab("Mean SLA (CW)") +
+  ylab("SLA (CW)") +
   geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw_mean)))
+  scale_y_continuous(lim = c(0, max(log(sladata$sla_cw))))
 
-# variance sla plot
-sladata %>%
-  ggplot(aes(x = av_quad_lai, y = sla_cw_sd^2, col = site)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site")  +
-  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
-  xlab("Leaf Area Index") +
-  ylab("Variance of SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw_sd)^2))
+
+ggsave(paste0(data_folder, "scale_sla_cw_", "LAI","_mean.png"), width = 4, height = 3.5, dpi = 900)
+
 ```
 
 ### Gap Fraction Threshold

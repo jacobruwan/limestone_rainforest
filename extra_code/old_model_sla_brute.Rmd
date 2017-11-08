@@ -8,34 +8,26 @@ dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 
 # load(paste0(dropbox, "domseedlingcover_rq1.RData"))
 # load(paste0(dropbox, "domshannons_rq1.RData"))
-load(paste0(dropbox, "domsla_rq1.RData"))
+load(paste0(dropbox, "sla_com.RData"))
 # load(paste0(dropbox, "species_richness_rq3.RData"))
 # load(paste0(dropbox, "hobo_rq2.RData"))
 
-# Go through the variables and unselect predictor variable that don't make sense
-# domsla_rq1.df %>% str()
-
-sla.df <- domsla_rq1.df %>%
-  select(-dom_sla, -dom_abundance, -dom_seedling_cover, -overall_seedling_cover, -av_trans_elevation) 
-
-
-# Look at structure of modelling df
-# sla.df %>% str()
+sladata <- sla_com.df
 ```
 
 ```{r}
 # define the vector of possible predictors, exclude random effects
-response <- "dom_sla_weighted_abundance"
-temp_predictors <- names(sla.df)[-(which(names(sla.df) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
+response <- "sla_ca_mean"
+temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("dom_sla_weighted_abundance", "transect", "quadrat",
                                                          "min_temp", "range_temp",
                                                          "secondary_venetion", "tertiary_venetion", "other",
                                                          "sla_character_range", "sla_species_niche_space", "sla_functional_richness")))]
 
 # Remove all leaf data
-interactions <- c("site:dom_species_id", "site:av_quad_gft", "site:av_quad_compaction",
-         "dom_species_id:scaled_av_trans_elevation", "dom_species_id:av_quad_gft", "dom_species_id:av_quad_compaction")
+# interactions <- c("site:dom_species_id", "site:av_quad_gft", "site:av_quad_compaction",
+#          "dom_species_id:scaled_av_trans_elevation", "dom_species_id:av_quad_gft", "dom_species_id:av_quad_compaction")
 
-predictors <- c(temp_predictors, paste0(temp_predictors, ":dom_species_id"), paste0(temp_predictors, ":site"))
+predictors <- c(temp_predictors, paste0(temp_predictors, ":site"))
 # predictors <- c(temp_predictors, interactions)
 
 # Iterate through code that creates all possible combinations of predictors: 7 predictors means 7^2 combinations
@@ -82,110 +74,22 @@ full_formula <- length_formulastring %>%
 ```
 
 
-#### INLA Step
-```{r}
-# install.packages("INLAutils")
-library(INLAutils)
-n <- length(names(domsla_rq1.df))
-
-inlsastep.df <- domsla_rq1.df %>% 
-                 select(-dom_sla, -dom_abundance) %>%
-                 mutate(Intercept = 1)
-
-stack <- inla.stack(data = list(y = domsla_rq1.df$dom_sla_weighted_abundance),
-                    A = list(1),
-                    effects = list(data.frame(Intercept = 1,
-                                              domsla_rq1.df[1:n])))
-
-fitstep <- INLAstep(fam1 = "gaussian",
-                    dataf = data.frame(domsla_rq1.df),
-                    in_stack = stack,
-                    invariant = "0 + Intercept",
-                    direction = c("forwards", "backwards"),
-                    include = c(1,2,3,4),
-                    y = 'dom_sla_weighted_abundance',
-                    y2 = 'dom_sla_weighted_abundance')
-
-```
 
 
-
-#### Ruwans Stepwise
-```{r}
-# Run all possible INLA models
-linear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
-
-# In for loop, run the model and combine the log likelihood estimate into a data.frame
-for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
-                          formula_string_combinations[[i]],
-                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
-
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sla.df)
-
-linear_stepwise_summary <- linear_stepwise_summary %>%
-  rbind(data.frame(Formula = formula_string_combinations[[i]],
-                   Log_Likelihood = summary(fit)[["mlik"]][2]))
-print(i)
-}
-
-# save(linear_stepwise_summary, file = paste0(data_folder, "linear_stepwise_summary.RData"))
-
-# load(paste0(dropbox, "inla_mlik_rank.RData"))
-# 
-# top10 <- linear_stepwise_summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
-
-```{r}
-# Run all possible INLA models
-gamma_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
-
-# In for loop, run the model and combine the log likelihood estimate into a data.frame
-for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("dom_sla_weighted_abundance ~ ",
-                          formula_string_combinations[[i]],
-                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
-
-fit <- inla(inla_formula,
-            family = "gamma",
-            data = sla.df)
-
-gamma_stepwise_summary <- gamma_stepwise_summary %>%
-  rbind(data.frame(Formula = formula_string_combinations[[i]],
-                   Log_Likelihood = summary(fit)[["mlik"]][2]))
-print(i)
-}
-
-# save(gamma_stepwise_summary, file = paste0(data_folder, "gamma_stepwise_summary.RData"))
-
-# load(paste0(dropbox, "gamma_stepwise_summary.RData"))
-# 
-# top10 <- gamma_stepwise_summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
-
+#### Ruwans Stepwise for Aggregate
 ```{r}
 # Run all possible INLA models
 loglinear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
 
 # In for loop, run the model and combine the log likelihood estimate into a data.frame
 for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("log(dom_sla_weighted_abundance) ~ ",
+inla_formula <- as.formula(paste0("log(sla_ca_mean) ~ ",
                           formula_string_combinations[[i]],
                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = sla.df)
+            data = sladata)
 
 loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
   rbind(data.frame(Formula = formula_string_combinations[[i]],
@@ -193,7 +97,7 @@ loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
 print(i)
 }
 
-# save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
+save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
 
 # load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
 # 
@@ -203,38 +107,6 @@ print(i)
 # 
 # top10
 ```
-
-```{r}
-# Run all possible INLA models
-lognormal_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
-
-# In for loop, run the model and combine the log likelihood estimate into a data.frame
-for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("log(dom_sla_weighted_abundance) ~ ",
-                          formula_string_combinations[[i]],
-                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
-
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sla.df)
-
-lognormal_stepwise_summary <- lognormal_stepwise_summary %>%
-  rbind(data.frame(Formula = formula_string_combinations[[i]],
-                   Log_Likelihood = summary(fit)[["mlik"]][2]))
-print(i)
-}
-
-save(lognormal_stepwise_summary, file = paste0(data_folder, "lognormal_stepwise_summary.RData"))
-
-# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
-# 
-# top10 <- loglinear_stepwise_summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
-
 
 #### Model Fit
 ```{r}

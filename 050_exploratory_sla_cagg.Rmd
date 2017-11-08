@@ -219,11 +219,13 @@ sladata %>%
   geom_point() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
+  ggtitle("Mean SLA vs Decomposition")+
   xlab("Decomposition (grams/days)") +
   ylab("Mean SLA (CW)") +
   geom_smooth(method = "lm") +
   scale_y_continuous(lim = c(0, max(sladata$sla_ca_mean)))
+
+
 
 # variance sla plot
 sladata %>%
@@ -231,11 +233,12 @@ sladata %>%
   geom_point() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site")  +
-  ggtitle("Variance of Community Aggregated SLA vs Compaction")+
+  ggtitle("Variance SLA vs Decomposition")+
   xlab("Decomposition (grams/days)") +
   ylab("Variance of SLA (CW)") +
   geom_smooth(method = "lm") +
   scale_y_continuous(lim = c(0, max(sladata$sla_ca_sd)^2))
+
 ```
 
 ### Maximum Temperature
