@@ -80,7 +80,7 @@ ggplot() +
   # geom_line(aes(x=date_time, y=temp, col=hobo_id),
              # data = datarq2, size=1) +
   # scale_colour_pander(name = "Hobo ID")+
-  geom_line(aes(x=date_time, y=temp, col=site),
+  geom_point(aes(x=date_time, y=temp, col=site),
              data = datarq2, size=1) +
   scale_colour_manual(name = "Site",
                       values = colours.site) +
@@ -94,34 +94,8 @@ ggplot() +
   geom_line(aes(x=xdatetime, y=ytemp),
             data = latehobos)
 
-ggplot() +
-  theme_project() +
-  scale_x_datetime(breaks = labels
-                   ,labels = time_labels
-                   # limits = c(as.POSIXct(strptime("2017-09-25 18:00:00",
-                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"),
-                              # as.POSIXct(strptime("2017-09-28 12:00:00",
-                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"))
-                   ) +
-  theme(axis.text.x = element_text(angle = 45, 
-                                   vjust = 1,
-                                   hjust = 1)) +
-  geom_rect(aes(xmin=startday, xmax=endday, ymin = 25.5, ymax = 28, fill = day),
-            data = hobo_days, alpha = 0.4)   +
-  scale_fill_tableau(name = "Day")+
-  # geom_line(aes(x=date_time, y=temp, col=hobo_id),
-             # data = datarq2, size=1) +
-  # scale_colour_pander(name = "Hobo ID")+
-  geom_point(aes(x=date_time, y=temp, col=(av_trans_elevation)),
-             data = datarq2, size=1) +
-  scale_colour_continuous(low = colours.site[1], high = colours.site[2], name = "Elevation") +
-  xlab("Time of Day") +
-  ylab("Temperature (Degrees Celsius)") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) +
-  ggtitle("Temperature over Time, for Elevation")
+ggsave(paste0(data_folder, "temp_timeseries.png"), width = 6, height = 3.5, dpi = 900)
+
 
 ```
 
@@ -200,20 +174,20 @@ ggplot(aes(x=site, y=compaction, col = site),
 # Bivariate Relationships
 ```{r}
 ## Abiotic variables
-abiotic_vars <- c("av_quad_compaction", "av_trans_decomposition", "min_temp", "max_temp", "range_temp", "av_trans_elevation", "av_quad_lai")
+abiotic_vars <- c("av_quad_compaction", "av_trans_decomposition", "min_temp", "max_temp", "range_temp", "av_quad_lai", "av_quad_gft")
 
 
 abiotic_quadrat.df %>% 
-  select(av_trans_elevation, min_temp, max_temp, range_temp, 
-         av_trans_decomposition, av_quad_compaction, av_quad_lai) %>%
+  select(one_of(abiotic_vars)) %>%
   cor() %>%
   round(digits=2)
 
+abiotic_vars2 <- c("av_quad_compaction", "av_trans_decomposition", "max_temp", "av_quad_lai")
+
 abiotic_quadrat.df %>% 
-  select(av_trans_elevation, min_temp, max_temp, range_temp, 
-         av_trans_decomposition, av_quad_compaction) %>%
-  pairs(upper.panel = NULL)
-title("Abiotic Indicator Correlations")
+  select(one_of(abiotic_vars2)) %>%
+  cor() %>%
+  round(digits=2)
 
 # correlation results
 # elevation will account for decopmosition and min_temperature, however we will leave compaction in the model for now as it is at the quadrat level and may provide additional information
@@ -274,16 +248,6 @@ abiotic_quadrat.df %>%
   ggtitle("Max Temperature vs LAI (Imputed)")
 ```
 
-### Temperature Time Series Fit
-```{r}
-ts.df <- datarq2 %>%
-  select(hobo_id, date_time, temp, site, av_trans_elevation, av_trans_decomposition, av_trans_compaction) %>%
-  ts()
-
-# cycle(ts.df)
-
-
-```
 
 ### Temperature Spline Fit
 ```{r}
@@ -322,12 +286,13 @@ k3 <- 17
 splinefit <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + site:bs(time24, knots = c(k1, k2, k3)),
           data = datarq2)
 
-# summary(splinefit)
 
-splinefit_el <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + av_trans_elevation:bs(time24, knots = c(k1, k2, k3)) + av_trans_elevation,
-          data = datarq2)
+# inla_spline <- inla(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + site:bs(time24, knots = c(k1, k2, k3)),
+#                     family = "gaussian",
+#                     data = datarq2)
 
-# summary(splinefit_el)
+summary(splinefit)
+
 ```
 
 ```{r}
@@ -362,10 +327,11 @@ ggplot() +
 
 ```
 
+### Model Fit
 
 ```{r}
 
-pred = splinefit$fitted.values
+pred <- splinefit$fitted.values
 
 datarq2 %<>%
   mutate(temp_pred = pred,
@@ -386,9 +352,4 @@ datarq2 %>%
   theme_project()+
   scale_colour_manual(values = colours.site)
 
-
-datarq2 %>%
-  ggplot(aes(x = date_time, y = temp)) +
-  geom_point() +
-  geom_abline(splinefit)
 ```
