@@ -3,7 +3,10 @@ title: "model_development"
 output: html_document
 ---
 ```{r}
-sladata <- sla_ind.df
+load(paste0(data_folder, "sla_ind.RData"))
+sladata <- sla_ind.df 
+
+
 
 # biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
 # 
@@ -80,67 +83,53 @@ full_formula <- length_formulastring %>%
 
 
 
-####  Stepwise for Weighted
-```{r}
-# Run all possible INLA models
-loglinear_stepwise_summary_w <- data.frame(Formula = "-", Log_Likelihood = NA)
+<!-- ####  Stepwise for Weighted -->
+<!-- ```{r} -->
+<!-- # Run all possible INLA models -->
+<!-- loglinear_stepwise_summary_w <- data.frame(Formula = "-", Log_Likelihood = NA) -->
 
-# In for loop, run the model and combine the log likelihood estimate into a data.frame
-for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("log(sla_cw) ~ site + dom_species_id + site:dom_species_id + ",
-                          formula_string_combinations[[i]],
-                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+<!-- # In for loop, run the model and combine the log likelihood estimate into a data.frame -->
+<!-- for (i in 1:length(formula_string_combinations)) { -->
+<!-- inla_formula <- as.formula(paste0("log(sla_cw) ~ site + dom_species_id + site:dom_species_id + ", -->
+<!--                           formula_string_combinations[[i]], -->
+<!--                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")) -->
 
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sladata)
+<!-- fit <- inla(inla_formula, -->
+<!--             family = "gaussian", -->
+<!--             data = sladata) -->
 
-loglinear_stepwise_summary_w <- loglinear_stepwise_summary_w %>%
-  rbind(data.frame(Formula = formula_string_combinations[[i]],
-                   Log_Likelihood = summary(fit)[["mlik"]][2]))
-print(i)
-}
+<!-- loglinear_stepwise_summary_w <- loglinear_stepwise_summary_w %>% -->
+<!--   rbind(data.frame(Formula = formula_string_combinations[[i]], -->
+<!--                    Log_Likelihood = summary(fit)[["mlik"]][2])) -->
+<!-- print(i) -->
+<!-- } -->
 
-save(loglinear_stepwise_summary_w, file = paste0(data_folder, "loglinear_stepwise_summary_w.RData"))
+<!-- save(loglinear_stepwise_summary_w, file = paste0(data_folder, "loglinear_stepwise_summary_w.RData")) -->
 
-# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
-# 
-# top10 <- loglinear_stepwise_summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
+<!-- # load(paste0(dropbox, "loglinear_stepwise_summary.RData")) -->
+<!-- #  -->
+<!-- # top10 <- loglinear_stepwise_summary %>% -->
+<!-- #   arrange(desc(Log_Likelihood)) %>% -->
+<!-- #   head(10) -->
+<!-- #  -->
+<!-- # top10 -->
+<!-- ``` -->
 
-```{r}
+<!-- ```{r} -->
 
-load(paste0(data_folder, "loglinear_stepwise_summary_w.RData"))
+<!-- load(paste0(data_folder, "loglinear_stepwise_summary_w.RData")) -->
 
-loglinear_stepwise_summary_w %>%
-  arrange(desc(Log_Likelihood)) %>%
-  head(5)
+<!-- loglinear_stepwise_summary_w %>% -->
+<!--   arrange(desc(Log_Likelihood)) %>% -->
+<!--   head(5) -->
 
 
-```
+<!-- ``` -->
 
 
 
 
 #### Final Model: Minimum Marginal log-Likelihood
-```{r}
-
-# RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai + scaled_av_quad_lai^2 + scaled_av_quad_lai:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
-
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sladata,
-            control.compute = list(cpo=TRUE),
-            control.inla = list(strategy = "laplace"))
-
-# analyse the output of the model
-summary(fit)
-```
 
 ```{r}
 sladata %<>% 
@@ -148,7 +137,10 @@ sladata %<>%
   mutate(scaled_sq_av_quad_lai = (sq_av_quad_lai - mean(sq_av_quad_lai))/sqrt(var(sq_av_quad_lai)))
 
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + f(site_trans, model="iid") + f(quadrat:site_trans, model = "iid")
+
+
+# inla_formula <- 
 
 fit <- inla(inla_formula,
             family = "gaussian",

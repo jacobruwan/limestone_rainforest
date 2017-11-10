@@ -84,48 +84,48 @@ full_formula <- length_formulastring %>%
 
 
 
-#### Ruwans Stepwise for Aggregate
-```{r}
-# Run all possible INLA models
-loglinear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA)
+<!-- #### Ruwans Stepwise for Aggregate -->
+<!-- ```{r} -->
+<!-- # Run all possible INLA models -->
+<!-- loglinear_stepwise_summary <- data.frame(Formula = "-", Log_Likelihood = NA) -->
 
-# In for loop, run the model and combine the log likelihood estimate into a data.frame
-for (i in 1:length(formula_string_combinations)) {
-inla_formula <- as.formula(paste0("log(sla_ca_mean) ~ site + ",
-                          formula_string_combinations[[i]],
-                          " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')"))
+<!-- # In for loop, run the model and combine the log likelihood estimate into a data.frame -->
+<!-- for (i in 1:length(formula_string_combinations)) { -->
+<!-- inla_formula <- as.formula(paste0("log(sla_ca_mean) ~ site + ", -->
+<!--                           formula_string_combinations[[i]], -->
+<!--                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")) -->
 
-fit <- inla(inla_formula,
-            family = "gaussian",
-            data = sladata)
+<!-- fit <- inla(inla_formula, -->
+<!--             family = "gaussian", -->
+<!--             data = sladata) -->
 
-loglinear_stepwise_summary <- loglinear_stepwise_summary %>%
-  rbind(data.frame(Formula = formula_string_combinations[[i]],
-                   Log_Likelihood = summary(fit)[["mlik"]][2]))
-print(i)
-}
+<!-- loglinear_stepwise_summary <- loglinear_stepwise_summary %>% -->
+<!--   rbind(data.frame(Formula = formula_string_combinations[[i]], -->
+<!--                    Log_Likelihood = summary(fit)[["mlik"]][2])) -->
+<!-- print(i) -->
+<!-- } -->
 
-save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData"))
+<!-- save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData")) -->
 
-# load(paste0(dropbox, "loglinear_stepwise_summary.RData"))
-# 
-# top10 <- loglinear_stepwise_summary %>%
-#   arrange(desc(Log_Likelihood)) %>%
-#   head(10)
-# 
-# top10
-```
+<!-- # load(paste0(dropbox, "loglinear_stepwise_summary.RData")) -->
+<!-- #  -->
+<!-- # top10 <- loglinear_stepwise_summary %>% -->
+<!-- #   arrange(desc(Log_Likelihood)) %>% -->
+<!-- #   head(10) -->
+<!-- #  -->
+<!-- # top10 -->
+<!-- ``` -->
 
-```{r}
+<!-- ```{r} -->
 
-load(paste0(data_folder, "loglinear_stepwise_summary.RData"))
+<!-- load(paste0(data_folder, "loglinear_stepwise_summary.RData")) -->
 
-loglinear_stepwise_summary %>%
-  arrange(desc(Log_Likelihood)) %>%
-  head(10)
-# fit <- 
+<!-- loglinear_stepwise_summary %>% -->
+<!--   arrange(desc(Log_Likelihood)) %>% -->
+<!--   head(10) -->
+<!-- # fit <-  -->
 
-```
+<!-- ``` -->
 
 #### Final Model: Minimum Marginal log-Likelihood
 ```{r}

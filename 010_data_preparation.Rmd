@@ -665,7 +665,8 @@ sla_ind.df <- community.df %>%
   distinct() %>%
   rename(sla_cw = sla_cover) %>%
   ungroup() %>%
-  mutate(scaled_av_quad_lai = (av_quad_lai - mean(av_quad_lai))/sqrt(var(av_quad_lai)))
+  mutate(scaled_av_quad_lai = (av_quad_lai - mean(av_quad_lai))/sqrt(var(av_quad_lai)))%>%
+  mutate(site_trans = factor(paste0(site, transect)))
 
 sla_com.df <- community.df %>%
   select(one_of(communityagg_vars)) %>%

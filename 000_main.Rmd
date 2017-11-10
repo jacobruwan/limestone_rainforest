@@ -3,12 +3,6 @@ title: "Langkawi Island Limestone Rainforest Project"
 author: 'MXB344 Students: Jacob, Nick and Ricky'
 date: 'Brainstorm: 24 August 2017. Analysis: 3rd October'
 output:
-  word_document:
-    toc: yes
-    toc_depth: '3'
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     code_folding: hide
     df_print: paged
@@ -21,6 +15,12 @@ output:
     toc: yes
     toc_depth: 3
     toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  word_document:
+    toc: yes
+    toc_depth: '3'
 ---
 
 ```{r setup, include=FALSE}
@@ -179,61 +179,61 @@ This section demonstrates the model development process. The data is explored th
 
 The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
 
-<!-- ## Temperature (RQ2) -->
-<!-- ### Exploratory Analysis -->
-<!-- ```{r, child = '020_exploratory_abiotic.Rmd'} -->
-<!-- ``` -->
+## Temperature (RQ2)
+### Exploratory Analysis
+```{r, child = '020_exploratory_abiotic.Rmd'}
+```
 
-<!-- ### Model Development -->
-<!-- ```{r, child = '021_model_abiotic.Rmd'} -->
-<!-- ``` -->
+## Dominant Seedling Cover (RQ1)
+### Exploratory Analysis
+```{r, child = '030_exploratory_cover.Rmd'}
+```
 
-<!-- ## Dominant Seedling Cover (RQ1) -->
-<!-- ### Exploratory Analysis -->
-<!-- ```{r, child = '030_exploratory_cover.Rmd'} -->
-<!-- ``` -->
-
-<!-- ### Model Development -->
-<!-- ```{r, child = '031_model_cover.Rmd'} -->
-<!-- ``` -->
+### Model Development
+```{r, child = '031_model_cover.Rmd'}
+```
 
 
-<!-- ## Dominant Shannon's Index of Diversity -->
-<!-- ### Exploratory Analysis -->
-<!-- ```{r, child = '040_exploratory_shannons.Rmd'} -->
-<!-- ``` -->
+## Dominant Shannon's Index of Diversity
+### Exploratory Analysis
+```{r, child = '040_exploratory_shannons.Rmd'}
+```
 
-<!-- ### Model Development -->
-<!-- ```{r, child = '041_model_shannons.Rmd'} -->
-<!-- ``` -->
+### Model Development
+```{r, child = '041_model_shannons.Rmd'}
+```
 
 ## Dominant Specific Leaf Area
-### Exploratory Analysis
-```{r, child = '050_exploratory_sla.Rmd'}
+### Aggregated
+#### Exploratory Analysis
+```{r, child = '050_exploratory_sla_cagg.Rmd'}
 
 ```
 
 ### Model Development
-```{r, child = '051_model_sla.Rmd'}
+```{r, child = '051_model_sla_cagg.Rmd'}
 
 ```
 
-```{r, child = '051_model_sla_gamma.Rmd'}
+### Individual Species
+#### Exploratory Analysis
+```{r, child = '052_exploratory_sla_cweight.Rmd'}
 
 ```
 
-```{r, child = '051_model_sla_loglinear.Rmd'}
+### Model Development
+```{r, child = '053_model_sla_cweight.Rmd'}
 
 ```
 
-<!-- ## Species Richness -->
-<!-- ### Exploratory Analysis -->
-<!-- ```{r, child = '060_exploratory_richness.Rmd'} -->
-<!-- ``` -->
+## Species Richness
+### Exploratory Analysis
+```{r, child = '060_exploratory_richness.Rmd'}
+```
 
-<!-- ### Model Development -->
-<!-- ```{r, child = '061_model_richness.Rmd'} -->
-<!-- ``` -->
+### Model Development
+```{r, child = '061_model_richness.Rmd'}
+```
 
 
 # Model Outcomes
