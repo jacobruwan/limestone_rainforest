@@ -3,7 +3,8 @@ title: "model_development"
 output: html_document
 ---
 
-### Exclusions
+Before building the modelling datasets, quality of the collected data is assessed.
+
 ```{r}
 load(paste0(data_folder, "hobo_nofilter2.RData"))
 
@@ -50,6 +51,8 @@ hobo_days_humid <- data.frame(startday = c(as.POSIXct(strftime("2017-09-25 22:00
 
 _Relative Humidity_
 
+The data collected from the HOBO devices produced humidity data that reaches a constant 100%. As such, the research question involving relative humidity is not investigated further, as the collected data presents no difference between disturbed and undisturbed areas of the rainforest. This is observed from the figure below.
+
 ```{r}
 ggplot() +
   theme_project() +
@@ -79,6 +82,8 @@ ggplot() +
 ```
 
 _Temperature_
+
+In the temperature data, distinct outliers are observed at the initial and final readings. These correspond to operator handling errors during the experiment set up. These are removed to ensure a reliable comparison between temperature readings. The outliers are observed in the figure below.
 
 ```{r}
 yaxis_min <- min(hobo_nofilter2.df$temp)
@@ -112,41 +117,65 @@ ggplot() +
 
 ```
 
-### Imputing
 
-_Leaf Area Index_
+_Canopy Analyser: LAI and GFT_
+The canopy analyser was not able to collect data on the remaining two disturbed transects. To account for this imbalance, the imputing method was used with the average value from the first disturbed transect. The imbalance for these variables can be visually observed in the figure below. Three transect replicates of Pristine rainforest areas are recorded, compared to only one replicate of the Disturbed rainforest area.
+
 ```{r}
-# Decopmosition
-ggplot() + 
-  geom_point(aes(x=site, y=decomposition, col = site),
-       data = abiotic_filterpaper.df) +
-  # geom_boxplot(aes(x=site, y=decomposition, col = site),
-       # data = abiotic_filterpaper.df)+
-  ggtitle("Decomposition") +
+# LAI
+lai1 <- ggplot(aes(x=paste0(site, ":", transect), y=lai, col = site),
+       data = abiotic_canopycover.df) + 
+  # geom_point() +
+  geom_boxplot() +
+  ggtitle("Leaf Area Index") +
+  theme_project()+
+  scale_colour_manual(values = colours.site) +
+  xlab("Site:Transect") +
+  ylab("Imbalance of LAI") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green))
+
+gft1 <- ggplot(aes(x=paste0(site, ":", transect), y=gft, col = site),
+       data = abiotic_canopycover.df) + 
+  # geom_point() +
+  geom_boxplot() +
+  ggtitle("Imbalance of GFT") +
+  theme_project()+
+  scale_colour_manual(values = colours.site) +
+  xlab("Site:Transet") +
+  ylab("Gap Fraction Threshold") +
+  theme(legend.background = element_rect(bg_green),
+        legend.box.background = element_rect(fill=bg_green, color=bg_green),
+        legend.key = element_rect(fill=bg_green),
+        plot.background = element_rect(bg_green, color=bg_green))
+
+multiplot(lai1, gft1,
+          layout = matrix(c(1,2), nrow=1))
+```
+
+_Elevation_
+
+Elevation was a confounding variable as the experimental design placed all disturbed transects at a lower elevation to pristine transects. As the main interest of this research was a comparison between disturbed and pristine areas, the elevation variable is excluded from further analysis. This confounding is observed in the figure below.
+
+```{r}
+load(paste0(data_folder, "abiotic_elevation.RData"))
+
+abiotic_elevation.df %>%
+  select(elevation, site, transect) %>%
+  distinct() %>%
+  ggplot(aes(x=paste0(site, ":", transect), y=elevation, col = site)) +
+  geom_point(size=2.27) +
+  geom_boxplot() +
   xlab("Site") +
-  ylab("Decomposition Rate (grams/days)") +
+  ylab("Elevation (m)") +
   theme_project() +
   scale_colour_manual(values = colours.site) +
   theme(legend.background = element_rect(bg_green),
         legend.box.background = element_rect(fill=bg_green, color=bg_green),
         legend.key = element_rect(fill=bg_green),
         plot.background = element_rect(bg_green, color=bg_green)) +
-  geom_abline(slope = 0, intercept = 0)
-
-# LAI
-ggplot(aes(x=paste0(site, ":", transect), y=lai, col = site),
-       data = abiotic_canopycover.df) + 
-  geom_point() +
-  geom_boxplot() +
-  ggtitle("Leaf Area Index") +
-  theme_project()+
-  scale_colour_manual(values = colours.site) +
-  xlab("Site") +
-  ylab("Leaf Area Index") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green))
+  ggtitle("Elevation vs Sites and Transects")
 
 ```
-

@@ -15,16 +15,13 @@ output:
     toc: yes
     toc_depth: 3
     toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   word_document:
     toc: yes
     toc_depth: '3'
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, fig.height = 3, fig.width)
 
 # Function to automatically install missing libraries and load all.
 # Sourced from internet: 
@@ -74,13 +71,16 @@ bg_table_pastel <- rgb(255, 242, 204, maxColorValue = 255)
 colours.site = c("#d62121", "#30d621")
 colours.splinefit = c("#b21515", "#21b623", colours.site[1], colours.site[2], "#d92121", "#33d621")
 
+# Define backgroun_colour as bg_green for presentation
+colours.background <- "white"
+
 theme_project <- function() {
   theme_bw() +
   theme(legend.position = "top") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) 
+  theme(legend.background = element_rect(colours.background),
+        legend.box.background = element_rect(fill=colours.background, color=colours.background),
+        legend.key = element_rect(fill=colours.background),
+        plot.background = element_rect(colours.background, color=colours.background)) 
 }
 
 theme_table_pastel <- function() {
@@ -92,6 +92,39 @@ theme_table_pastel <- function() {
         plot.background = element_rect(bg_table_pastel, color=bg_table_pastel)) 
 }
 
+## Introduce multiplot function by Peter Haschke http://www.peterhaschke.com/r/2013/04/24/MultiPlot.html 
+## This function is sourced from the internet. It is used to compare two plots of different datasets on a similar grid
+multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
+  require(grid)
+
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+  if (numPlots == 1) {
+    print(plots[[1]])
+
+  } else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+# Change Data Folder
+```{r}
 # Define the datafolder that contains all RDatasets. This will be an empty string when submitted
 data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
 ```
@@ -185,29 +218,43 @@ _Design and Method_
 ```
 
 # Data
+All raw data collected throughout the experiment was compiled into a single excel workbook. This data was cleaned and manipulated into five modelling datasets, for each research question. All numeric predictor variables are scaled to the standard normal distribution, to prevent numerical errors in the model development and enable a fair comparison between estimates.
+
+```{r, child = '010_data_preparation.Rmd'}
+```
 
 ## Data Quality
 ```{r, child = '011_data_quality.Rmd'}
 ```
 
 
-All raw data collected throughout the experiment was compiled into a single excel workbook. This data was cleaned and manipulated into five modelling datasets, for each research question.
 
-```{r, child = '010_data_preparation.Rmd'}
-```
+
 
 
 # Analysis
-The models used throughout this report are generalised linear mixed effects models. Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
+The models used throughout this report are generalised linear mixed effects models. This section will outline how and why these models are required, and will provide an overview of the model development process.
+
+_Mixed Effects_
+
+Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
   
 The fixed effects include all abiotic and biotic variables that are collected throughout the experiment. The final model will represent the most predictive subset of these variables. The random effects of each model include variation between transects, and variation between quadrats nested in transects. This structure is necessary due to the experimental design, and will remain constant for every model (i.e. not form part of the model selection).
 
+_Generalised Linear Mixed Effects_
+
 The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness.
+
+_Bayesian Model_
 
 The bayesian paradigm is utilised for it's ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
 
 $$ Insert the equation  $$
 The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
+
+The bayesian model estimates a distribution for each parameter in the model. These distributions are 
+
+_Process Overview_
 
 This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationships between the predictor and response variable. 
 
@@ -217,12 +264,16 @@ This section demonstrates the model development process. The data is explored th
 
 The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
 
-## Temperature (RQ2)
+## Temperature
 ### Exploratory Analysis
 ```{r, child = '020_exploratory_abiotic.Rmd'}
 ```
 
-## Dominant Seedling Cover (RQ1)
+### Model Outcomes
+*RUWAN* write stuff: Risk Ratio (RR) of credible intervals
+
+
+## Dominant Seedling Cover
 ### Exploratory Analysis
 ```{r, child = '030_exploratory_cover.Rmd'}
 ```
@@ -231,6 +282,8 @@ The following subsections are segmented into an exploratory analysis and model d
 ```{r, child = '031_model_cover.Rmd'}
 ```
 
+### Model Outcomes
+*RICKY* write stuff: Risk Ratio (RR) of credible intervals
 
 ## Dominant Shannon's Index of Diversity
 ### Exploratory Analysis
@@ -241,6 +294,11 @@ The following subsections are segmented into an exploratory analysis and model d
 ```{r, child = '041_model_shannons.Rmd'}
 ```
 
+
+### Model Outcomes
+*Nick* write stuff: Risk Ratio (RR) of credible intervals
+
+
 ## Dominant Specific Leaf Area
 ### Aggregated
 #### Exploratory Analysis
@@ -248,10 +306,15 @@ The following subsections are segmented into an exploratory analysis and model d
 
 ```
 
-### Model Development
+#### Model Development
 ```{r, child = '051_model_sla_cagg.Rmd'}
 
 ```
+
+
+#### Model Outcomes
+*Ruwan* write stuff: Risk Ratio (RR) of credible intervals
+
 
 ### Individual Species
 #### Exploratory Analysis
@@ -259,10 +322,15 @@ The following subsections are segmented into an exploratory analysis and model d
 
 ```
 
-### Model Development
+#### Model Development
 ```{r, child = '053_model_sla_cweight.Rmd'}
 
 ```
+
+
+#### Model Outcomes
+*Ruwan* write stuff: Risk Ratio (RR) of credible intervals
+
 
 ## Species Richness
 ### Exploratory Analysis
@@ -274,18 +342,41 @@ The following subsections are segmented into an exploratory analysis and model d
 ```
 
 
-# Model Outcomes
+### Model Outcomes
+*Ricky* write stuff: Risk Ratio (RR) of credible intervals
+
 
 
 # Discussion
+## Ecological Meaning of Model Outcomes
+
+_Temperature_
 
 
+_Seedling Cover_
+
+
+_Shannons Index of Diversity_
+
+
+_Specific leaf Area_
+
+
+_Species Richness_
+
+
+# Limitations
+The first limitation occurred for the leaf sample measurements, due the low sensitivity of the weighing scales. This was overcome by measuring the total weight of all leaf samples, per species per quadrat, and calculating the mean. This provides misleading results for the small or large leaves of the sample, which deviate significantly from the mean weight.
+
+The main limitation was due to the equipment available for the experiment overseas. No oven was available for drying leaves or filter paper, which resulted in the moisture content being an uncontrolled variable. This affects the dry leaf mass and filter paper weight measurements.
+
+Another limitation was a result of the limited time available to collect data such as temperature readings and soil decomposition. This prevented a throrough analysis of the variation in temperature at the rainforest. This also prevented the filter paper to adequately capture any difference in decomposition rates from the rainforest.
 
 
 # Conclusion and Recommendations
 
 
-
+# Appendix
 
 
 

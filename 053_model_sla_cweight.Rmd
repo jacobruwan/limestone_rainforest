@@ -258,8 +258,8 @@ pred.df %>%
   theme_project() +
   ggtitle("Histograms of CPO")
 
-qqnorm(fit$cpo$pit)
-qqline(fit$cpo$pit)
+qqnorm(pred.df$cpo)
+qqline(pred.df$cpo)
 title("CPO                                       ")
 
 ```

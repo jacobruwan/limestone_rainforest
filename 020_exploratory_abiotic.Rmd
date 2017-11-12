@@ -4,20 +4,15 @@ output: html_document
 ---
 
 ```{r}
-
 # Load the datasets
 load(paste0(data_folder, "abiotic_quadrat.RData"))
 load(paste0(data_folder, "abiotic_filterpaper.RData"))
 load(paste0(data_folder, "abiotic_canopycover.RData"))
 load(paste0(data_folder, "abiotic_penetrometer.RData"))
-load(paste0(data_folder, "abiotic_elevation.RData"))
 load(paste0(data_folder, "hobo_rq2.RData"))
 
 ```
 
-
-
-### Univariate Relationships
 ```{r}
 # Create 6 hour intervals for time series graphs
 start <- as.POSIXct(strptime("2017-09-25 04:00:00", "%Y-%m-%d %H:%M:%S"))
@@ -59,17 +54,15 @@ min_new_time <- as.POSIXct(strftime("2017-09-28 03:00:00", "%Y-%m-%d %H:%M:%S"))
 latehobos <- data.frame(ytemp = c(25.5, 28),
                         xdatetime = c(min_new_time, min_new_time)) %>%
   tbl_df
+```
 
-
+### Site
+```{r}
 # Plot the graphs
 ggplot() +
   theme_project() +
   scale_x_datetime(breaks = labels
                    ,labels = time_labels
-                   # limits = c(as.POSIXct(strptime("2017-09-25 18:00:00",
-                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"),
-                              # as.POSIXct(strptime("2017-09-28 12:00:00",
-                   # "%Y-%m-%d %H:%M:%S")) + as.difftime(10, units="hours"))
                    ) +
   theme(axis.text.x = element_text(angle = 45, 
                                    vjust = 1,
@@ -95,30 +88,11 @@ ggplot() +
             data = latehobos)
 
 ggsave(paste0(data_folder, "temp_timeseries.png"), width = 6, height = 3.5, dpi = 900)
-
-
 ```
 
 ### Univariate Relationship
-
-
-
 ```{r}
-abiotic_elevation.df %>%
-  select(elevation, site, transect) %>%
-  distinct() %>%
-  ggplot(aes(x=paste0(site, ":", transect), y=elevation, col = site)) +
-  geom_point(size=2.27) +
-  geom_boxplot() +
-  xlab("Site") +
-  ylab("Elevation (m)") +
-  theme_project() +
-  scale_colour_manual(values = colours.site) +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) +
-  ggtitle("Elevation vs Sites and Transects")
+
   
   
 
