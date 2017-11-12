@@ -100,82 +100,120 @@ data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Dat
 
 
 # Background
-Is there a relationship between understory diversity and forest disturbance.
+
+_Lankgawi Island's Limestone Rainforests_
+
+
+
+_Understorey Seedling Species_
+
+
+
+_Dominant Species_
+
+
+
+_Target Resolutions_
+
 
 ## Research Questions
+The three main research questions are:
+
   1. $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
   2. $H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
   3. $H_0$: Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
 
+At a high level, abiotic indicators are investigated to quantify the disturbance conditions of the rainforest. Where as biotic variables are investigated to evaluate the impact of this disturbance on the ecosystem. Each question will be explain in further detail to identify the ecological meaning.
 
-The three research questions require an investigation of six research variables:
-
-  1. Temperature
-  2. Dominant Seedling Cover
-  3. Dominant Shannon's Index of Diversity
-  4. 
+### Dominant Species Seedling Cover
 
 
 
 
+### Dominant Species Shannon's Index of Diversity
 
 
-  * leaf economic spectrum (energy from the sun)
-    * most important: its an important investment
-    * SLA weighted by species abundance
-      * Garnier paper
-    * Resource conservation and resource acquisition
-      * Defence invests in tissue (retaining water)
-      * Acquisition (high sla)
-  * Shannons diversity index
-    * Can use a different measure?
-  * Seedling cover
-  * Leaf Traits
-    * 1. Why care about them?
-  * Explain what we don't know about the study
-  * standardised major size correlation??
-  * Plastic response: geno type -> triggered phenotype -> 
-  * Structural equation model
-  * ASK JENN FOR HER POWERPOINT
-  * Catharsis.. Need to focus on the bigger picture
-  
-  
-  
-  * Function consequences
-    * Use cover for shannons and simpsons, rather than abundance
-    * 
+
+
+### Dominant Species Specific Leaf Area
+
+_Specific Leaf Area_
+The purpose of investigating specific leaf area, referred to as SLA in this report, is the insight is provides into a plants strategy in the ecosystem. Plants are in constant competition for resources within their community. One core resource required is light. This presents one of the most competitive strategies employed by a plant: how they invest growth into their leaves, the apparatus used to capture light. A larger leaf will capture more light, and enable faster growth. However, with a limited amount of energy available, the plant must sacrifice the thickness of their leaves. This makes the plant more susceptible to damage from herbivores.
+
+This presents a trade-off between the growth and defence mechanisms of the plant. SLA is a measure of this trade-off, calculated as the one-sided leaf area divided by the dry mass. SLA is used to relatively compare different species within the same community, categorising plants as resource acquisition or resource conservation. A relatively high SLA can suggest the plant has a need to compete more aggressively for light that other species within the same community.
+
+_Investigation of Weighted and Aggregated SLA_
+To provide a thorough comparison of the SLA between species and between disturbance, the SLA is weighted by each plants contribution to the community. This is calculated as the SLA of each leaf, weighted by the amount of area coverage the plant has in its community. This weighting takes into account how established a plant is in the community, and provides an insight to how this dominance affects a plant's investment strategy. This weighted measure is used to quantify the difference between species. To measure the difference due to disturbance, each species is aggregated to the community level. From Grime 2004, we know that dominant species have a large influence on the ecosystem, so this aggregation determines the growth strategy of the community.
+
+
+_*REFERENCES*_
+Quested, H., Eriksson, O., Fortunel, C., & Garnier, E. (2007). Plant Traits Relate to Whole-Community Litter Quality and Decomposition following Land Use Change. Functional Ecology,21(6), 1016-1026. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20142742 
+
+Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . Vile, D. (2008). Impact of Abundance Weighting on the Response of Seed Traits to Climate and Land Use. Journal of Ecology, 96(2), 355-366. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20143472 
+
+
+### Temperature
+
+
+
+
+# REFERENCES NEEDED
+
+
+### Species Richness
+
+
+
+
+
+
+
 
 
 # Experimental Design
+
+_Disturbance_
+
+
+_Design and Method_
+
+
+
+
+
 ```{r, child = '001_experimental_design.Rmd'}
 ```
 
 # Data
-## Data Build
-```{r, child = '010_data_preparation.Rmd'}
-```
 
 ## Data Quality
 ```{r, child = '011_data_quality.Rmd'}
 ```
 
+
+All raw data collected throughout the experiment was compiled into a single excel workbook. This data was cleaned and manipulated into five modelling datasets, for each research question.
+
+```{r, child = '010_data_preparation.Rmd'}
+```
+
+
 # Analysis
-The models used throughout this report are generalised linear mixed effects models, in a bayesian paradigm. Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
+The models used throughout this report are generalised linear mixed effects models. Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
   
 The fixed effects include all abiotic and biotic variables that are collected throughout the experiment. The final model will represent the most predictive subset of these variables. The random effects of each model include variation between transects, and variation between quadrats nested in transects. This structure is necessary due to the experimental design, and will remain constant for every model (i.e. not form part of the model selection).
 
-The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a canonical link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness based on predictor variables.
+The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness.
 
-The bayesian paradigm is utilised for it's simplicity in model fit evaluation and the ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
+The bayesian paradigm is utilised for it's ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
 
 $$ Insert the equation  $$
 The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
 
-This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationship between the predictors and response variables. 
+This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationships between the predictor and response variable. 
 
-  * Model/variable selection is evaluated on the highest Marginal log-Likelihood. 
-  * Model fit is evaluated on residuals plots and whether the CPO PIT values are approximately uniformly/normally distributed.
-  * Model outcomes are presented with credible intervals of estimated parameters. Additional credible intervals are shown that demonstrate the real effect of parameters with interactions.
+  * Model/variable selection is evaluated on the maximum Marginal log-Likelihood and Credible Intervals that do not contain zero. 
+    * Additional credible intervals are shown that demonstrate the real effect of parameters with interactions.
+  * Model fit is evaluated on residual plots and whether the CPO PIT values are approximately uniformly/normally distributed.
 
 The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
 
@@ -244,7 +282,7 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 
-# Conclusion
+# Conclusion and Recommendations
 
 
 
