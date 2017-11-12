@@ -3,30 +3,10 @@ title: "model_development"
 output: html_document
 ---
 
-#### Correlation
-```{r}
-sladata <- sla_com.df
-
-# biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
-# 
-# sladata %>%
-#   select(one_of(biotic_vars)) %>%
-#   pairs(lower.panel = NULL)
-# 
-# sladata %>%
-#   mutate(dom_species_id = as.numeric(dom_species_id)) %>%
-#   select(one_of(biotic_vars)) %>%
-#   cor()
-
-# correlation results
-# overall seedling cover is not needed. 
-```
-
-
 ```{r}
 # define the vector of possible predictors, exclude random effects
 response <- "sla_ca_mean"
-temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("sla_ca_mean", "sla_ca_sd","site", "site_trans","transect", "quadrat",
+temp_predictors <- names(sla_com.df)[-(which(names(sla_com.df) %in% c("sla_ca_mean", "sla_ca_sd","site", "site_trans","transect", "quadrat",
                                                          "min_temp", "range_temp",
                                                          "overall_seedling_cover", "scaled_overall_seedling_cover",
                                                          "total_dom_abundance", "scaled_total_dom_abundance")))]
@@ -97,7 +77,7 @@ full_formula <- length_formulastring %>%
 
 <!-- fit <- inla(inla_formula, -->
 <!--             family = "gaussian", -->
-<!--             data = sladata) -->
+<!--             data = sla_com.df) -->
 
 <!-- loglinear_stepwise_summary <- loglinear_stepwise_summary %>% -->
 <!--   rbind(data.frame(Formula = formula_string_combinations[[i]], -->
@@ -128,36 +108,49 @@ full_formula <- length_formulastring %>%
 <!-- ``` -->
 
 #### Final Model
-##### Bayesian
 ```{r}
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_ca_mean) ~  site + f(site_trans, model='iid') + f(quadrat:site_trans, model = 'iid')")
+inla_formula <- as.formula("log(sla_ca_mean) ~  site + overall_seedling_cover + f(site_trans, model='iid')")
+
+ # 
 
 fit <- inla(inla_formula,
             family = "gaussian",
-            data = sladata,
-            control.compute = list(cpo=TRUE),
-            control.inla = list(strategy = "laplace"))
+            data = sla_com.df,
+            control.compute =list(dic=TRUE, waic= TRUE, cpo = TRUE, 
+                                  mlik = TRUE,config=TRUE),
+            control.predictor=list(compute=T))
 
 # analyse the output of the model
 summary(fit)
 ```
 
-##### Frequentist
-```{r}
-fit2 <- lmer(log(sla_ca_mean) ~ site + (1|site_trans),
-             data = sladata)
+The final model models the log of community aggregated SLA by site and overall seedling cover. This results is determined by the maximum marginal log-Likelihood and by observing the credible intervals. As this model only has 30 observations and there are 30 unique quadrats, the only random effect variable included is the variation between transects.
 
-summary(fit2)
-```
+$$
+log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Site} + Overall Seedling Cover + \epsilon_{transect} +\epsilon_{residual}
+
+$$
+
+
+<!-- ##### Frequentist -->
+<!-- ```{r} -->
+<!-- fit2 <- lmer(log(sla_ca_mean) ~ site + overall_seedling_cover + (1|site_trans), -->
+<!--              data = sla_com.df) -->
+
+<!-- summary(fit2) -->
+<!-- ``` -->
 
 
 
 #### Model Fit
-```{r}
+
+The figure below highlights the fitted predictions of the model against the observed values, the standardised residuals are shown on the right. These residual plot shows that there ihe residuals are more likely to be positive in the middle range of fitted values, which is not ideal. However, there are no large concerns for the model fit, as the sample size is low.
+
+```{r, fig.width = 2.25}
 # summary(fit)
 predictions <- fit$summary.fitted.values$mean
-dataset <- sladata
+dataset <- sla_com.df
 
 pred.df <- dataset %>% 
       mutate(fitted = predictions,
@@ -167,7 +160,7 @@ pred.df <- dataset %>%
              cpo = fit$cpo$pit)
 
 ## Fitted vs Predicted
-pred.df %>%
+fit_vs_pred <- pred.df %>%
   ggplot(aes(x = observed, y = fitted)) +
   geom_point() +
   xlab("Observed Mean SLA (CA)") +
@@ -178,7 +171,7 @@ pred.df %>%
   ggtitle("Observed vs Fitted SLA")
 
 ## Fitted vs Standardised Residuals
-pred.df %>%
+fit_vs_res <- pred.df %>%
   ggplot(aes(x = fitted, y = std_residuals)) +
   geom_point() +
   xlab("Fitted Values") +
@@ -186,15 +179,15 @@ pred.df %>%
   theme_project() +
   geom_abline(slope = 0)+
   geom_abline(slope = 0, intercept = 1.5)+
-  geom_abline(slope = 0, intercept = -1.5)
+  geom_abline(slope = 0, intercept = -1.5) +
+  ggtitle("Standardised Residuals")
 
-# Residuals QQ plot
-qqnorm(pred.df$residuals)
-qqline(pred.df$residuals)
-title("Residuals                                                 ")
+multiplot(fit_vs_pred, fit_vs_res,
+          layout = matrix(c(1,2), nrow = 1))
+
 
  # Histogram of predictions
-pred.df %>%
+hist_res <- pred.df %>%
   ggplot(aes(x = fitted)) +
   geom_histogram(bins=7) +
   theme_project() +
@@ -202,19 +195,39 @@ pred.df %>%
   
 
 # CPO Values: QQ plot and Histogram
-pred.df %>%
+hist_cpo <- pred.df %>%
   ggplot(aes(x = cpo)) +
   geom_histogram(bins=7) +
   theme_project() +
   ggtitle("Histograms of CPO")
+```
 
-qqnorm(fit$cpo$pit)
-qqline(fit$cpo$pit)
-title("CPO                                       ")
+The model fit is further investigated in the code below, QQ plots and histograms of residual and CPO values. The CPO QQ plot demonstrate a good fit for the middles values of the QQ line, with deviations at the tail end. This is supported by the histogram, suggesting there are no major concerns for model fit. The residual qq plots and histogram support the trend shown in the figure above, where there isn't an even distribution around the zero line. However, there are no dramatic deviations, thus the model is considered appropriate.
 
+```{r, fig.width = 3}
+par(mfrow = c(2,2))
+# CPI QQ plot
+qqnorm(pred.df$cpo)
+qqline(pred.df$cpo)
+title("CPO                                         ")
+
+CPO <- pred.df$cpo
+hist(CPO)
+
+# Residuals QQ plot
+qqnorm(pred.df$residuals)
+qqline(pred.df$residuals)
+title("Residuals                                                   ")
+
+Residuals <- pred.df$residuals
+hist(Residuals)
+
+par(mfrow = c(1,1))
 ```
 
 #### Fixed Effect Credible Intervals
+In the figure below, the credible intervals of each estimated paramater is shown, transformed from the log scale to the original SLA domain. This graph demonstrates that a unit increase in overall seedling cover can increase community agrgegated SLA from a value between 8.5 up to 84, keeping all else constant. This represents a large amount on uncertainty around this relationship, however it is clear that overall seedling cover has a positive relationship as the credible interval does not include zero. Similarly, given the same overall seedling cover, a pristine forest areas is expected to have a positive increase on community aggregated sla value. This increase can range between 1.1 and 2.5 based on the credible intervals estimated.
+
 ```{r }
 ## How to look at predictions and compare to original???
 fixed <- summary(fit)$fixed
@@ -237,127 +250,32 @@ fixed.df <- data.frame(Estimate = row.names(fixed),
   tbl_df() %>%
   mutate(beta = 0:(n1-1)) %>%
   mutate(Est2 = paste0(Estimate, " - b", beta),
-         Est2 = reorder(Est2, rev(beta)))
+         Est2 = reorder(Est2, rev(beta))) %>%
+  mutate(RR_lower = exp(quant0.025), RR_upper = exp(quant0.975))
 
 fixed.df %>%
   ggplot(aes(y = Est2, x = exp(quant0.5), xmin = exp(quant0.025), xmax = exp(quant0.975))) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("SLA Agg - Fixed") +
+  ggtitle("SLA Agg - Fixed Effects") +
   xlab("Credible Intervals") +
   ylab("Parameter") +
   geom_vline(xintercept = 0) +
-  scale_x_continuous(breaks = seq(0, 40, 5))
+  scale_x_continuous(breaks = seq(0, 90, 5))
 
 
-ggsave(paste0(data_folder, "sla_", "agg","_estimates.png"), width = 3, height = 1.5, dpi = 900)
+# ggsave(paste0(data_folder, "sla_", "agg","_estimates.png"), width = 3, height = 1.5, dpi = 900)
 ```
 
+#### Random Effect Credible Intervals
+Based on the INLA model, no variation was attributed to between transects. This is a surprising result, as the exploratory analysis demonstrate distinct differences in log SLA between transects.
 
-#### Real Fixed Effect Credible Intervals
-```{r}
-mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
-  mutate(ID1_D = round(c(sum(fixed.df$quant0.5[c(1)]),
-                   sum(fixed.df$quant0.5[c(2)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID2_D = round(c(sum(fixed.df$quant0.5[c(1, 3)]),
-                   sum(fixed.df$quant0.5[c(2, 7)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID3_D = round(c(sum(fixed.df$quant0.5[c(1, 4)]),
-                   sum(fixed.df$quant0.5[c(2, 8)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 6)]),
-                   sum(fixed.df$quant0.5[c(2)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.5[c(2, 7)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.5[c(2, 8)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  gather(Scenario, Median, -Parameter)
-
-lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
-  mutate(ID1_D = round(c(sum(fixed.df$quant0.025[c(1)]),
-                   sum(fixed.df$quant0.025[c(2)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID2_D = round(c(sum(fixed.df$quant0.025[c(1, 3)]),
-                   sum(fixed.df$quant0.025[c(2, 7)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID3_D = round(c(sum(fixed.df$quant0.025[c(1, 4)]),
-                   sum(fixed.df$quant0.025[c(2, 8)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 6)]),
-                   sum(fixed.df$quant0.025[c(2)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.025[c(2, 7)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.025[c(2, 8)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  gather(Scenario, LB, -Parameter)
-
-ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled_Elevation", "Scaled_Cover")) %>%
-  mutate(ID1_D = round(c(sum(fixed.df$quant0.975[c(1)]),
-                   sum(fixed.df$quant0.975[c(2)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID2_D = round(c(sum(fixed.df$quant0.975[c(1, 3)]),
-                   sum(fixed.df$quant0.975[c(2, 7)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID3_D = round(c(sum(fixed.df$quant0.975[c(1, 4)]),
-                   sum(fixed.df$quant0.975[c(2, 8)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 6)]),
-                   sum(fixed.df$quant0.975[c(2)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 3, 6)]),
-                   sum(fixed.df$quant0.975[c(2, 7)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 4, 6)]),
-                   sum(fixed.df$quant0.975[c(2, 8)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  gather(Scenario, UB, -Parameter)
-
-
-realeffect.df <- lb_fixedeffect.df %>%
-  left_join(ub_fixedeffect.df,
-            by = c("Parameter", "Scenario")) %>%
-  left_join(mean_fixedeffect.df,
-            by = c("Parameter", "Scenario"))
-
-
-realeffect.df %>%
-  mutate(speciesid = substr(Scenario, 1, 3)) %>%
-  filter(Parameter == "Scaled_Elevation") %>%
-  select(speciesid, Median, UB, LB, Parameter) %>%
-  distinct() %>%
-  ggplot(aes(y = speciesid, x = Median, xmin = UB, xmax = LB)) +
-  geom_errorbarh() +
-  theme_project() +
-  ggtitle("Scaled Elevation") +
-  xlab("Real Elevation Effect - Credible Intervals") +
-  ylab("Dominant Species ID") +
-  geom_vline(xintercept = 0)
-
-realeffect.df %>%
-  filter(Parameter == "Intercept") %>%
-  ggplot(aes(y = Scenario, x = Median, xmin = UB, xmax = LB)) +
-  geom_errorbarh() +
-  theme_project() +
-  ggtitle("Site and Dominant Species ID") +
-  xlab("Real Intercept Effect - Credible Intervals") +
-  ylab("Intercept Scenarios") +
-  geom_vline(xintercept = 0)
-```
-
-#### Variation Breakdown
 ```{r}
 ## How to look at predictions and compare to original???
 random <- summary(fit)$hyperpar
 # random
 
-randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:Transect"),
+randomeffects <- data.frame(hyperparameter = c("Residual", "Transect"),# "Quadrat:Transect"),
            precision = random[[1]],
            lb = random[[3]],
            ub = random[[5]]) %>%
@@ -376,8 +294,8 @@ randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:
 randomeffects %>%
   ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
   geom_errorbarh() +
-  theme_table_pastel() +
-  ggtitle("SLA Agg - Random") +
+  theme_project() +
+  ggtitle("SLA Agg - Random Effects") +
   xlab("Credible Interval") +
   ylab("Hyperparameter")
 
@@ -385,7 +303,7 @@ randomeffects %>%
   mutate(`Variation Explained` = percent(explained)) %>%
   select(hyperparameter, `Variation Explained`)
 
-ggsave(paste0(data_folder, "sla_", "agg","_randomeff.png"), width = 3.5, height = 1.8, dpi = 900)
+# ggsave(paste0(data_folder, "sla_", "agg","_randomeff.png"), width = 3.5, height = 1.8, dpi = 900)
 
 ```
 

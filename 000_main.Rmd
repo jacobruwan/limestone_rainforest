@@ -21,7 +21,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning=FALSE, fig.height = 3, fig.width)
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, fig.height = 3, fig.width = 5)
 
 # Function to automatically install missing libraries and load all.
 # Sourced from internet: 
@@ -57,7 +57,7 @@ instant_pkgs <- function(pkgs) {
 } 
 
 # Define packages to load run instant_pkgs
-packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", 
+packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", "knitr",
                       "ggplot2", "ggthemes", "lubridate",
                       "lme4", "INLA", "stringr", "scales", "splines")
 
@@ -252,7 +252,7 @@ The bayesian paradigm is utilised for it's ability to handle a mixed effects str
 $$ Insert the equation  $$
 The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
 
-The bayesian model estimates a distribution for each parameter in the model. These distributions are 
+The bayesian model estimates a distribution for each parameter in the model. These distributions are interpreted using 95% Credible Intervals, which evaluates the 2.5% and 97.5% quantiles of the distribution. If this interval does not include zero, then the collected data provides evidence that the parameter has a positive or negative effect. The uncertainty around this parameter is evaluated as range between these quantile estimates. As such, the predictor variable's effect on the response variable will be reported with a lower and upper bound estimate.
 
 _Process Overview_
 
@@ -266,7 +266,11 @@ The following subsections are segmented into an exploratory analysis and model d
 
 ## Temperature
 ### Exploratory Analysis
-```{r, child = '020_exploratory_abiotic.Rmd'}
+```{r, child = '020_exploratory_temperature.Rmd'}
+```
+
+### Model Development
+```{r, child = '021_model_temperature.Rmd'}
 ```
 
 ### Model Outcomes
@@ -300,7 +304,11 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 ## Dominant Specific Leaf Area
+As SLA can only equal values between zero and infinity, the log of SLA will be modelled. 
+
 ### Aggregated
+The following subsections investigate key relationships that explain the community aggregated SLA., which includes 30 observations. 
+
 #### Exploratory Analysis
 ```{r, child = '050_exploratory_sla_cagg.Rmd'}
 
