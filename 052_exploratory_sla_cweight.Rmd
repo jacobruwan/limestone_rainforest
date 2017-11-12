@@ -7,113 +7,100 @@ output: html_document
 # This code should be removed when entire process is productionised
 load(paste0(data_folder, "sla_ind.RData"))
 
-sladata <- sla_ind.df
+sla_ind.df <- sla_ind.df
 
 response_variables <- c("sla_cw", "sla_cw_sd")
 ```
 
-### Random Effects
-```{r}
-sladata %>%
-  ggplot(aes(x = transect, y = log(sla_cw))) +
-  geom_boxplot() +
-  ggtitle("Transect Difference")+
-  theme_project()
-
-sladata %>%
-  ggplot(aes(x = paste0("T", transect, ":Q", quadrat), y = log(sla_cw))) +
-  geom_boxplot() +
-  ggtitle("Quadrat:Transect Difference")+
-  theme_project()
-      
-
-
-```
+##### Random Effects
+The figure below demonstrates the variation between transects and quadrats nested in transects. There is a slight difference between transect, and a large amount of variation observed between quadrats.
 
 ```{r}
-sladata %>%
-  group_by(site_trans) %>%
-  summarise(mean_log_sla_cw = mean(log(sla_cw))) %>%
-  mutate(variation = var(mean_log_sla_cw))
-  
-
-
-sladata %>%
+trans2 <- sla_ind.df %>%
   ggplot(aes(x = site_trans, y = log(sla_cw))) +
   geom_boxplot() +
-  ggtitle("Site:Transect Difference") +
-  theme_project()
+  theme_project() +
+  scale_colour_manual(values = colours.site, name = "Site") +
+  ggtitle("Log SLA Transect Variation") +
+  xlab("Transect") +
+  ylab("Log SLA (CW)")
 
-sladata %>%
-  ggplot(aes(x = paste0(site, transect, quadrat), y = log(sla_cw))) +
+quad2 <- sla_ind.df %>%
+  ggplot(aes(x = paste0(site_trans, ":Q", quadrat), y = log(sla_cw))) +
   geom_boxplot() +
-  ggtitle("Site:Transect:Qudrat Difference") +
-  theme_project()
+  ggtitle("Log SLA Nested Quadrat Variation")+
+  theme_project() +
+  xlab("Quadrat") +
+  ylab("Log SLA (CW)") +
+  scale_x_discrete(labels = NULL)
+      
+multiplot(trans2, quad2,
+          layout = matrix(c(1,2), nrow = 2))
 
 ```
 
-  * leaf area - photosynthetic aparatus of the plant
-  * amount of investment of dry matter (plant investment into growth defence trade off) -> Most dominant species most compettitive, higher specific leaf area
-  * community aggregated sla provides insight to how plants function as a quadrat
-    * high community aggregated sla -> infer plants in that plot growing faster
-    * low sla -> plasticity to disturbance
+##### Species and Site
+The figure below highlights the weighted SLA differences between species, and the interaction with disturbance. Dominant species 1 has a higher SLA in pristine areas of the rainforest. Where as dominant species 3 appears to decrease in SLA when in pristine forest areas, however there is a large overlap between sites. Dominant species 2 doesn't have any significant change between sites. This suggests an interaction term will be significant.
 
-The following subsections investigate key relationships that explain the mean and variance of community aggregated SLA.
-    
-### SLA vs Site
 ```{r}
 var <- "domspecies"
 # ggsave(paste0(data_folder, "sla_", var,"_mean.png"), width = 5, height = 6, dpi = 500)
 # ggsave(paste0(data_folder, "sla_", var,"_var.png"), width = 5, height = 6, dpi = 500)
 
 # Mean sla plot
-sladata %>%
-  ggplot(aes(x = site, y = sla_cw, col = site)) +
+scaled <- sla_ind.df %>%
+  ggplot(aes(x = site, y = log(sla_cw), col = site)) +
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("SLA vs Dominant Species ID") +
+  ggtitle("Log SLA (CW) vs Species") +
   xlab("Site") +
-  ylab("SLA (CW)") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw))) +
-  facet_wrap("dom_species_id", scale = "free_y")
+  ylab("Log SLA (CW)") +
+  # scale_y_continuous(lim = c(0, max(sla_ind.df$sla_cw))) +
+  facet_wrap("dom_species_id")
 
-ggsave(paste0(data_folder, "scale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
+# ggsave(paste0(data_folder, "scale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
 
-sladata %>%
-  ggplot(aes(x = site, y = sla_cw, col = site)) +
-  geom_boxplot() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("(Unscaled) SLA vs Site") +
-  xlab("Site") +
-  ylab("SLA (CW)") +
-  # scale_y_continuous(lim = c(0, max(sladata$sla_cw))) +
-  facet_wrap("dom_species_id", scale = "free_y")
+# unscaled <- sla_ind.df %>%
+#   ggplot(aes(x = site, y = log(sla_cw), col = site)) +
+#   geom_boxplot() +
+#   theme_project() +
+#   scale_colour_manual(values = colours.site, name = "Site") +
+#   ggtitle("(Unscaled) SLA vs Species") +
+#   xlab("Site") +
+#   ylab("SLA (CW)") +
+#   # scale_y_continuous(lim = c(0, max(sla_ind.df$sla_cw))) +
+#   facet_wrap("dom_species_id", scale = "free_y")
 
-ggsave(paste0(data_folder, "unscale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
+# ggsave(paste0(data_folder, "unscale_sla_cw_", var,"_mean.png"), width = 4, height = 3.5, dpi = 900)
 
+# multiplot(scaled, unscaled,
+#           layout = matrix(c(1,2), nrow = 1))
+
+scaled 
 ```
 
-### Overall Seedling Cover
+##### Overall Seedling Cover
+In the figure below, we observe the relationship between overall seedling cover and the log of weighted SLA. This variables appears to have a significant effect on species ID 1, however this is influenced by the low seedling cover of a single quadrat. An interaction term will be investigated to see if the overall model improves.
+
 ```{r}
 # Meansla plot
-sladata %>%
-  ggplot(aes(x = overall_seedling_cover, y = sla_cw, col = site)) +
+sla_ind.df %>%
+  ggplot(aes(x = overall_seedling_cover, y = log(sla_cw), col = dom_species_id)) +
   geom_point() +
   theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Cover")+
+  # scale_colour_manual(values = colours.site, name = "Site") +
+  scale_colour_tableau(name = "Dom Species ID")+
+  ggtitle("Log SLA (CW) vs Cover")+
   xlab("Overall Seedling Cover") +
-  ylab("Mean SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw)))
+  ylab("Log SLA (CW)") +
+  geom_smooth(method = "lm")
 ```
 
 <!-- ### Total Dominant Species Abundance -->
 <!-- ```{r} -->
 <!-- # Mean sla plot -->
-<!-- sladata %>% -->
+<!-- sla_ind.df %>% -->
 <!--   ggplot(aes(x = total_dom_abundance, y = sla_cw, col = site)) + -->
 <!--   geom_point() + -->
 <!--   theme_project() + -->
@@ -122,110 +109,56 @@ sladata %>%
 <!--   xlab("Total Dominant Species Abundance") + -->
 <!--   ylab("Mean SLA (CW)") + -->
 <!--   geom_smooth(method = "lm") + -->
-<!--   scale_y_continuous(lim = c(0, max(sladata$sla_cw))) -->
+<!--   scale_y_continuous(lim = c(0, max(sla_ind.df$sla_cw))) -->
 <!-- ``` -->
 
-### Compaction
-```{r}
-# Mean sla plot
-sladata %>%
-  ggplot(aes(x = av_quad_compaction, y = sla_cw, col = site)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
-  xlab("Compaction (pressure)") +
-  ylab("Mean SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw)))
-```
+<!-- ##### Compaction -->
+<!-- ```{r} -->
+<!-- # Mean sla plot -->
+<!-- sla_ind.df %>% -->
+<!--   ggplot(aes(x = av_quad_compaction, y = sla_cw, col = dom_species_id)) + -->
+<!--   geom_point() + -->
+<!--   theme_project() + -->
+<!--   # scale_colour_manual(values = colours.site, name = "Site") + -->
+<!--   scale_colour_tableau(name = "Dominant Species ID") + -->
+<!--   ggtitle("Mean Community Aggregated SLA vs Compaction")+ -->
+<!--   xlab("Compaction (pressure)") + -->
+<!--   ylab("Mean SLA (CW)") + -->
+<!--   geom_smooth(method = "lm") + -->
+<!--   scale_y_continuous(lim = c(0, max(sla_ind.df$sla_cw))) -->
+<!-- ``` -->
 
-### Leaf Area Index
-```{r}
-sladata %>%
-  ggplot(aes(x=av_quad_lai, y=av_quad_gft)) +
-  geom_point()
-
-sladata %>%
-  select(av_quad_lai, av_quad_gft) %>%
-  cor()
-```
+##### Leaf Area Index
+The figure below demonstrates the relationship between LAI and log weighted SLA. As observed, the increase in LAI has a different effect depending on the species. Dominant species 2 is the odd one out with a negative relationship with LAI. This will be investigated as an interaction relationship in the model.
 
 ```{r}
 # Mean sla plot
-sladata %>%
+sla_ind.df %>%
   filter(av_quad_lai != disturbed_mean_lai) %>%
   ggplot(aes(x = (av_quad_lai), y = log(sla_cw), col = dom_species_id)) +
-  geom_point(size = 0.9) +
+  geom_point() +
   theme_project() +
   # scale_colour_manual(values = colours.site, name = "Site") +
   scale_colour_tableau(name = "Dom Species ID") +
-  ggtitle("SLA vs LAI (No Impute)")+
+  ggtitle("Log SLA vs LAI (No Impute)")+
   xlab("Leaf Area Index") +
-  ylab("SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(log(sladata$sla_cw))))
+  ylab("Log SLA (CW)") +
+  geom_smooth(method = "lm")
 
 
-ggsave(paste0(data_folder, "scale_sla_cw_", "LAI","_mean.png"), width = 4, height = 3.5, dpi = 900)
-
-```
-
-### Gap Fraction Threshold
-```{r}
-sladata %>%
-  ggplot(aes(x=av_quad_lai, y=av_quad_gft)) +
-  geom_point()
-
-sladata %>%
-  select(av_quad_lai, av_quad_gft) %>%
-  cor()
-```
-
-```{r}
-# Mean sla plot
-sladata %>%
-  ggplot(aes(x = av_quad_gft, y = sla_cw, col = site)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
-  xlab("Gap Fraction Threshold") +
-  ylab("Mean SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw)))
+# ggsave(paste0(data_folder, "scale_sla_cw_", "LAI","_mean.png"), width = 4, height = 3.5, dpi = 900)
 
 ```
 
-### Decomposition
+
+##### Correlation
+All other exploratory graphs are not included in this report, due to no meaningful relationship observed or a high correlation (correlation between LAI and GFT ~ 0.8). The table below demonstrates the low correlation of the main predictors.
+
 ```{r}
-# Mean sla plot
-sladata %>%
-  ggplot(aes(x = av_trans_decomposition, y = sla_cw, col = site)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
-  xlab("Decomposition (grams/days)") +
-  ylab("Mean SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw)))
-
-```
-
-### Maximum Temperature
-```{r}
-# Mean sla plot
-sladata %>%
-  ggplot(aes(x = max_temp, y = sla_cw, col = site)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("Mean Community Aggregated SLA vs Compaction")+
-  xlab("Maximum Temperature (celsius)") +
-  ylab("Mean SLA (CW)") +
-  geom_smooth(method = "lm") +
-  scale_y_continuous(lim = c(0, max(sladata$sla_cw)))
-
+sla_ind.df %>%
+  select(av_quad_lai, overall_seedling_cover) %>%
+  cor() %>%
+  round(digits = 2) %>%
+  kable(caption = "SLA Weighted Model: Predictor Correlation")
 ```
 

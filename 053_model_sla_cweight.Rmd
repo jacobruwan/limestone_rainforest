@@ -3,63 +3,8 @@ title: "model_development"
 output: html_document
 ---
 
-
-The three research questions require an investigation of six research variables:
-
-  1. Temperature
-  2. Dominant Seedling Cover
-  3. Dominant Shannon's Index of Diversity
-  4. 
-
-
-
-
-
-
-  * leaf economic spectrum (energy from the sun)
-    * most important: its an important investment
-    * SLA weighted by species abundance
-      * Garnier paper
-    * Resource conservation and resource acquisition
-      * Defence invests in tissue (retaining water)
-      * Acquisition (high sla)
-  * Shannons diversity index
-    * Can use a different measure?
-  * Seedling cover
-  * Leaf Traits
-    * 1. Why care about them?
-  * Explain what we don't know about the study
-  * standardised major size correlation??
-  * Plastic response: geno type -> triggered phenotype -> 
-  * Structural equation model
-  * ASK JENN FOR HER POWERPOINT
-  * Catharsis.. Need to focus on the bigger picture
-  
-  
-  
-  * Function consequences
-    * Use cover for shannons and simpsons, rather than abundance
-    * 
-
-
-
-
 ```{r}
 load(paste0(data_folder, "sla_ind.RData"))
-
-# biotic_vars <- c("dom_seedling_cover", "overall_seedling_cover", "dom_species_id")
-# 
-# sla_ind.df %>%
-#   select(one_of(biotic_vars)) %>%
-#   pairs(lower.panel = NULL)
-# 
-# sla_ind.df %>%
-#   mutate(dom_species_id = as.numeric(dom_species_id)) %>%
-#   select(one_of(biotic_vars)) %>%
-#   cor()
-
-# correlation results
-# overall seedling cover is not needed.  
 ```
 
 ```{r}
@@ -169,7 +114,14 @@ full_formula <- length_formulastring %>%
 
 
 #### Final Model
-##### Bayesian
+The final model regressed the log of community weighted SLA by site, species ID and LAI, with interactions terms with the species ID. This model includes quadrats nested in transect as a random effect due to the large number of replicates. 
+
+\[
+log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Species ID 2} + \beta_{Species ID 3}  + \beta_{LAI} + \beta_{Overall Seedling Cover} + \beta_{Pristine:Species ID 2} + \beta_{Pristine:Species ID 3}  + \beta_{Species ID 2:LAI} + \beta_{Species ID 3:LAI}  + \varepsilon_{transect} + \varepsilon_{quadrat:transect} + \varepsilon_{residual}
+\]
+
+
+<!-- ##### Bayesian -->
 
 ```{r}
 sla_ind.df %<>% 
@@ -177,7 +129,7 @@ sla_ind.df %<>%
   mutate(scaled_sq_av_quad_lai = (sq_av_quad_lai - mean(sq_av_quad_lai))/sqrt(var(sq_av_quad_lai)))
 
 # RUn a model on the top 3 variables identified
-inla_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + f(site_trans, model="iid") + f(quadrat:site_trans, model = "iid")
+inla_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + scaled_overall_seedling_cover + scaled_overall_seedling_cover:dom_species_id + f(site_trans, model="iid") + f(quadrat:site_trans, model = "iid")
 
 
 # inla_formula <- 
@@ -185,26 +137,21 @@ inla_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + sca
 fit <- inla(inla_formula,
             family = "gaussian",
             data = sla_ind.df,
-            control.compute = list(cpo=TRUE),
-            control.inla = list(strategy = "laplace"))
+            control.compute =list(dic=TRUE, waic= TRUE, cpo = TRUE, 
+                                  mlik = TRUE,config=TRUE),
+            control.predictor=list(compute=T))
+
 
 # analyse the output of the model
 summary(fit)
 ```
 
-##### Frequentist
-```{r}
-lmer_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + (1|site_trans/quadrat)
-
-fit2 <- lmer(lmer_formula,
-             data = sla_ind.df)
-
-summary(fit2)
-```
 
 
 #### Model Fit
-```{r}
+The figure below compares the fitted predictions against the observed weighted SLA values. No observeable patterns can be determine between either graph, suggesting the model is appropriate. There are some standardised residuals that deviate more than 1.5 standard deviations from the zero line for the lower fitted values. However, this does not raise any concerns for model fit.
+
+```{r, fig.width = 5}
 # summary(fit)
 predictions <- fit$summary.fitted.values$mean
 dataset <- sla_ind.df
@@ -217,7 +164,7 @@ pred.df <- dataset %>%
              cpo = fit$cpo$pit)
 
 ## Fitted vs Predicted
-pred.df %>%
+fit_vs_pred <- pred.df %>%
   ggplot(aes(x = observed, y = fitted)) +
   geom_point() +
   xlab("Observed Mean SLA (CA)") +
@@ -228,7 +175,7 @@ pred.df %>%
   ggtitle("Observed vs Fitted SLA")
 
 ## Fitted vs Standardised Residuals
-pred.df %>%
+fit_vs_res <- pred.df %>%
   ggplot(aes(x = fitted, y = std_residuals)) +
   geom_point() +
   xlab("Fitted Values") +
@@ -236,15 +183,15 @@ pred.df %>%
   theme_project() +
   geom_abline(slope = 0)+
   geom_abline(slope = 0, intercept = 1.5)+
-  geom_abline(slope = 0, intercept = -1.5)
+  geom_abline(slope = 0, intercept = -1.5) +
+  ggtitle("Standardised Residuals")
 
-# Residuals QQ plot
-qqnorm(pred.df$residuals)
-qqline(pred.df$residuals)
-title("Residuals                                                 ")
+multiplot(fit_vs_pred, fit_vs_res,
+          layout = matrix(c(1,2), nrow = 1))
+
 
  # Histogram of predictions
-pred.df %>%
+hist_res <- pred.df %>%
   ggplot(aes(x = fitted)) +
   geom_histogram(bins=7) +
   theme_project() +
@@ -252,20 +199,44 @@ pred.df %>%
   
 
 # CPO Values: QQ plot and Histogram
-pred.df %>%
+hist_cpo <- pred.df %>%
   ggplot(aes(x = cpo)) +
   geom_histogram(bins=7) +
   theme_project() +
   ggtitle("Histograms of CPO")
-
-qqnorm(pred.df$cpo)
-qqline(pred.df$cpo)
-title("CPO                                       ")
-
 ```
 
+Observing the QQ plots and histograms in the figure below highlights some interesting trends. The CPO values are closer to the uniform distribution for this model, with evidence from the QQ plot deviateing at the tail ends. The Residual QQ plot deviates more at the lower tail end, resulting in a skewed histogram distribution. However, majority of the residuals align to a normal distribution, no the model is considered appropriate.
+
+```{r, fig.height = 5, fig.width = 7}
+par(mfrow = c(2,2))
+# CPI QQ plot
+qqnorm(pred.df$cpo)
+qqline(pred.df$cpo)
+title("CPO                                         ")
+
+CPO <- pred.df$cpo
+hist(CPO)
+
+# Residuals QQ plot
+qqnorm(pred.df$residuals)
+qqline(pred.df$residuals)
+title("Residuals                                                   ")
+
+Residuals <- pred.df$residuals
+hist(Residuals)
+
+par(mfrow = c(1,1))
+```
+
+
+
+
+
 #### Fixed Effect Credible Intervals
-```{r }
+A large number of interaction parameters are estimated in this model, as observed in the figure below. The full effect can be determined by combining the interaction effects.
+
+```{r, fig.height = 5}
 ## How to look at predictions and compare to original???
 fixed <- summary(fit)$fixed
 vec <- fixed[1:length(fixed)]
@@ -287,66 +258,83 @@ fixed.df <- data.frame(Estimate = row.names(fixed),
   tbl_df() %>%
   mutate(beta = 0:(n1-1)) %>%
   mutate(Est2 = paste0(Estimate, " - b", beta),
-         Est2 = reorder(Est2, rev(beta)))
+         Est2 = reorder(Est2, rev(beta))) 
 
 fixed.df %>%
   ggplot(aes(y = Est2, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
   geom_errorbarh() +
   theme_project() +
-  ggtitle("SLA Weight - Fixed") +
+  ggtitle("SLA Weighted - Fixed Effects") +
   xlab("Credible Intervals") +
   ylab("Parameter") +
   geom_vline(xintercept = 0)
 
-ggsave(paste0(data_folder, "scale_sla_cw_", "fixed",".png"), width = 5, height = 3.5, dpi = 900)
+# ggsave(paste0(data_folder, "scale_sla_cw_", "fixed",".png"), width = 5, height = 3.5, dpi = 900)
 ```
 
 
-#### Real Fixed Effect Credible Intervals
 ```{r}
-mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
+mean_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI", "Scaled Overall Seedling Cover")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.5[c(1)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.5[c(5)]),
+                   sum(fixed.df$quant0.5[c(6)])), digits=4)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.5[c(1, 3)]),
-                   sum(fixed.df$quant0.5[c(5, 8)])), digits=1)) %>%
+                   sum(fixed.df$quant0.5[c(5, 9)]),
+                   sum(fixed.df$quant0.5[c(6, 11)])), digits=4)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.5[c(1, 4)]),
-                   sum(fixed.df$quant0.5[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.5[c(5, 10)]),
+                   sum(fixed.df$quant0.5[c(6, 12)])), digits=4)) %>%
   mutate(ID1_P = round(c(sum(fixed.df$quant0.5[c(1, 2)]),
-                   sum(fixed.df$quant0.5[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 3, 6)]),
-                   sum(fixed.df$quant0.5[c(5, 8)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 4, 7)]),
-                   sum(fixed.df$quant0.5[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.5[c(5)]),
+                   sum(fixed.df$quant0.5[c(6)])), digits=4)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 3, 7)]),
+                   sum(fixed.df$quant0.5[c(5, 9)]),
+                   sum(fixed.df$quant0.5[c(6, 11)])), digits=4)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.5[c(1, 2, 4, 8)]),
+                   sum(fixed.df$quant0.5[c(5, 10)]),
+                   sum(fixed.df$quant0.5[c(6, 12)])), digits=4)) %>%
   gather(Scenario, Median, -Parameter)
 
-lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
+lb_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI", "Scaled Overall Seedling Cover")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.025[c(1)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.025[c(5)]),
+                   sum(fixed.df$quant0.025[c(6)])), digits=4)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.025[c(1, 3)]),
-                   sum(fixed.df$quant0.025[c(5, 8)])), digits=1)) %>%
+                   sum(fixed.df$quant0.025[c(5, 9)]),
+                   sum(fixed.df$quant0.025[c(6, 11)])), digits=4)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.025[c(1, 4)]),
-                   sum(fixed.df$quant0.025[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.025[c(5, 10)]),
+                   sum(fixed.df$quant0.025[c(6, 12)])), digits=4)) %>%
   mutate(ID1_P = round(c(sum(fixed.df$quant0.025[c(1, 2)]),
-                   sum(fixed.df$quant0.025[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 3, 6)]),
-                   sum(fixed.df$quant0.025[c(5, 8)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 4, 7)]),
-                   sum(fixed.df$quant0.025[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.025[c(5)]),
+                   sum(fixed.df$quant0.025[c(6)])), digits=4)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 3, 7)]),
+                   sum(fixed.df$quant0.025[c(5, 9)]),
+                   sum(fixed.df$quant0.025[c(6, 11)])), digits=4)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.025[c(1, 2, 4, 8)]),
+                   sum(fixed.df$quant0.025[c(5, 10)]),
+                   sum(fixed.df$quant0.025[c(6, 12)])), digits=4)) %>%
   gather(Scenario, LB, -Parameter)
 
-ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI")) %>%
+ub_fixedeffect.df <- data.frame(Parameter = c("Intercept","Scaled LAI", "Scaled Overall Seedling Cover")) %>%
   mutate(ID1_D = round(c(sum(fixed.df$quant0.975[c(1)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
+                   sum(fixed.df$quant0.975[c(5)]),
+                   sum(fixed.df$quant0.975[c(6)])), digits=4)) %>%
   mutate(ID2_D = round(c(sum(fixed.df$quant0.975[c(1, 3)]),
-                   sum(fixed.df$quant0.975[c(5, 8)])), digits=1)) %>%
+                   sum(fixed.df$quant0.975[c(5, 9)]),
+                   sum(fixed.df$quant0.975[c(6, 11)])), digits=4)) %>%
   mutate(ID3_D = round(c(sum(fixed.df$quant0.975[c(1, 4)]),
-                   sum(fixed.df$quant0.975[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.975[c(5, 10)]),
+                   sum(fixed.df$quant0.975[c(6, 12)])), digits=4)) %>%
   mutate(ID1_P = round(c(sum(fixed.df$quant0.975[c(1, 2)]),
-                   sum(fixed.df$quant0.975[c(5)])), digits=1)) %>%
-  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 3, 6)]),
-                   sum(fixed.df$quant0.975[c(5, 8)])), digits=1)) %>%
-  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 4, 7)]),
-                   sum(fixed.df$quant0.975[c(5, 9)])), digits=1)) %>%
+                   sum(fixed.df$quant0.975[c(5)]),
+                   sum(fixed.df$quant0.975[c(6)])), digits=4)) %>%
+  mutate(ID2_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 3, 7)]),
+                   sum(fixed.df$quant0.975[c(5, 9)]),
+                   sum(fixed.df$quant0.975[c(6, 11)])), digits=4)) %>%
+  mutate(ID3_P = round(c(sum(fixed.df$quant0.975[c(1, 2, 4, 8)]),
+                   sum(fixed.df$quant0.975[c(5, 10)]),
+                   sum(fixed.df$quant0.975[c(6, 12)])), digits=4)) %>%
   gather(Scenario, UB, -Parameter)
 
 
@@ -354,15 +342,42 @@ realeffect.df <- lb_fixedeffect.df %>%
   left_join(ub_fixedeffect.df,
             by = c("Parameter", "Scenario")) %>%
   left_join(mean_fixedeffect.df,
-            by = c("Parameter", "Scenario"))
+            by = c("Parameter", "Scenario"))%>%
+  mutate(RR_lb = ifelse(exp(LB)>1, exp(LB)-1, exp(LB)-1), 
+         RR_ub = ifelse(exp(UB)<1, exp(UB)-1, exp(UB)-1), 
+         RR_med = ifelse(exp(Median)>1, exp(Median)-1, exp(Median)-1))
+```
 
+The figure below quantifies the uncertainty around the difference between species and their relationsihp with disturbance. The credible interval's of Dominant species 1 between disturbed and pristine areas of the rainforest do not overlap, so the data shows evidence of a definite difference. However, this demonstrates a large amount on uncertainty as the increase ranges from 1.4 to 66.3 of weighted SLA of species 1 in pristine rainforest areas. This difference between rainforest areas is not observed for the remaining species ID.
+
+```{r}
+# realeffect.df %>% filter(Parameter == "Intercept", Scenario == "ID1")
+
+realeffect.df %>%
+  filter(Parameter == "Intercept") %>%
+  ggplot(aes(y = Scenario, x = exp(Median), xmin = exp(UB), xmax = exp(LB))) +
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Site and Dominant Species ID") +
+  xlab("Real Intercept Effect - Credible Intervals") +
+  ylab("Intercept Scenarios") +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(breaks = seq(0, 80, 5))
+
+
+# ggsave(paste0(data_folder, "scale_sla_cw_", "intercept",".png"), width = 3.5, height = 2.5, dpi = 900)
+```
+
+In the figure below, the uncertainty around the LAI effect is demonstrated. As expected, the credible interval for species 1 does not include zero. This highlights that LAI has a positive affect on the weighted sla of species 1. For a unit increase in scaled LAI, the weighted SLA increases between 0.03 and 0.6. The data collected does not show a definitive relationship for species 2, however the distribution is more centered towards negative values, as suggested from the exploratory analysis. 
+
+```{r}
 
 realeffect.df %>%
   mutate(speciesid = paste0("Dom Species ",substr(Scenario, 3, 3))) %>%
   filter(Parameter == "Scaled LAI") %>%
-  select(speciesid, Median, UB, LB, Parameter) %>%
+  select(speciesid,RR_lb,  RR_med, RR_ub, Median, LB, UB, Parameter) %>%
   distinct() %>%
-  ggplot(aes(y = speciesid, x = Median, xmin = UB, xmax = LB)) +
+  ggplot(aes(y = speciesid, x = RR_med, xmin = RR_lb, xmax = RR_ub)) +
   geom_errorbarh() +
   theme_project() +
   ggtitle("Leaf Area Index") +
@@ -371,23 +386,30 @@ realeffect.df %>%
   geom_vline(xintercept = 0)
 
 
-ggsave(paste0(data_folder, "scale_sla_cw_", "lai",".png"), width = 3.5, height = 1.8, dpi = 900)
-
-realeffect.df %>%
-  filter(Parameter == "Intercept") %>%
-  ggplot(aes(y = Scenario, x = Median, xmin = UB, xmax = LB)) +
-  geom_errorbarh() +
-  theme_project() +
-  ggtitle("Site and Dominant Species ID") +
-  xlab("Real Intercept Effect - Credible Intervals") +
-  ylab("Intercept Scenarios") +
-  geom_vline(xintercept = 0)
-
-
-ggsave(paste0(data_folder, "scale_sla_cw_", "intercept",".png"), width = 3.5, height = 2.5, dpi = 900)
+# ggsave(paste0(data_folder, "scale_sla_cw_", "lai",".png"), width = 3.5, height = 1.8, dpi = 900)
 ```
 
+The last figure below demonstrates the relationship between overall seedling cover and different species' SLA. Overall, only species 1 responds positively to an increase in overall seedling cover, where as both species 2 and 3 do not have as definitive evidence.
+
+```{r}
+realeffect.df %>%
+  mutate(speciesid = paste0("Dom Species ",substr(Scenario, 3, 3))) %>%
+  filter(Parameter == "Scaled Overall Seedling Cover")  %>%
+  select(speciesid,RR_lb,  RR_med, RR_ub, Median, LB, UB, Parameter) %>%
+  distinct() %>%
+  ggplot(aes(y = speciesid, x = RR_med, xmin = RR_lb, xmax = RR_ub))+
+  geom_errorbarh() +
+  theme_project() +
+  ggtitle("Overall Seedling Cover") +
+  xlab("Real Cover Effect - Credible Intervals") +
+  ylab("Dominant Species ID") +
+  geom_vline(xintercept = 0)
+```
+
+
 #### Variation Breakdown
+In the figure below, we observe a different outcome than expected. Large variation was observed between quadrats for weighted SLA, however the INLA model shows that miminal variation was attributed to the random effects.
+
 ```{r}
 ## How to look at predictions and compare to original???
 random <- summary(fit)$hyperpar
@@ -410,7 +432,7 @@ randomeffects <- data.frame(hyperparameter = c("Residual", "Transect", "Quadrat:
 
 # 
 randomeffects %>%
-  ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
+  ggplot(aes(y = hyperparameter, x = exp(variance), xmin = exp(varlb), xmax = exp(varub))) +
   geom_errorbarh() +
   theme_project() +
   ggtitle("Hyperparameters") +
@@ -421,7 +443,16 @@ randomeffects %>%
   mutate(`Variation Explained` = percent(explained)) %>%
   select(hyperparameter, `Variation Explained`)
 
-ggsave(paste0(data_folder, "scale_sla_cw_", "random",".png"), width = 3.5, height = 1.8, dpi = 900)
+# ggsave(paste0(data_folder, "scale_sla_cw_", "random",".png"), width = 3.5, height = 1.8, dpi = 900)
 ```
 
 
+<!-- ##### Frequentist -->
+<!-- ```{r} -->
+<!-- lmer_formula <- log(sla_cw) ~  site + dom_species_id + site:dom_species_id + scaled_av_quad_lai +  scaled_av_quad_lai:dom_species_id + (1|site_trans/quadrat) -->
+
+<!-- fit2 <- lmer(lmer_formula, -->
+<!--              data = sla_ind.df) -->
+
+<!-- summary(fit2) -->
+<!-- ``` -->

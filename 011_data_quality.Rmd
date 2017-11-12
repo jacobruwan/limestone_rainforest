@@ -71,10 +71,6 @@ ggplot() +
   ggtitle("Humidity over Time") +
   xlab("Time of Day") +
   ylab("Relative Humidity (%)") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) +
   geom_line(aes(x=xdatetime, y=ytemp),
             data = latehobos) +
   scale_y_continuous(lim = c(65, 100))
@@ -107,10 +103,6 @@ ggplot() +
   ggtitle("Temperature over Time") +
   xlab("Time of Day") +
   ylab("Temperature") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) +
   # geom_line(aes(x=xdatetime, y=ytemp),
   #           data = latehobos) +
   scale_y_continuous(lim = c(yaxis_min, yaxis_max))
@@ -131,11 +123,7 @@ lai1 <- ggplot(aes(x=paste0(site, ":", transect), y=lai, col = site),
   theme_project()+
   scale_colour_manual(values = colours.site) +
   xlab("Site:Transect") +
-  ylab("Imbalance of LAI") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green))
+  ylab("Imbalance of LAI") 
 
 gft1 <- ggplot(aes(x=paste0(site, ":", transect), y=gft, col = site),
        data = abiotic_canopycover.df) + 
@@ -145,11 +133,7 @@ gft1 <- ggplot(aes(x=paste0(site, ":", transect), y=gft, col = site),
   theme_project()+
   scale_colour_manual(values = colours.site) +
   xlab("Site:Transet") +
-  ylab("Gap Fraction Threshold") +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green))
+  ylab("Gap Fraction Threshold")
 
 multiplot(lai1, gft1,
           layout = matrix(c(1,2), nrow=1))
@@ -170,12 +154,7 @@ abiotic_elevation.df %>%
   geom_boxplot() +
   xlab("Site") +
   ylab("Elevation (m)") +
-  theme_project() +
-  scale_colour_manual(values = colours.site) +
-  theme(legend.background = element_rect(bg_green),
-        legend.box.background = element_rect(fill=bg_green, color=bg_green),
-        legend.key = element_rect(fill=bg_green),
-        plot.background = element_rect(bg_green, color=bg_green)) +
+  theme_project()  +
   ggtitle("Elevation vs Sites and Transects")
 
 ```

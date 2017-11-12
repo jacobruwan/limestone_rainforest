@@ -1,7 +1,7 @@
 ---
-title: "Langkawi Island Limestone Rainforest Project"
-author: 'MXB344 Students: Jacob, Nick and Ricky'
-date: 'Brainstorm: 24 August 2017. Analysis: 3rd October'
+title: "Do not disturb? Investigating the impact of disturbance on understorey seedling species in Langkawi Island's limestone rainforests"
+author: 'Malaysia Statistics Group: Ruwan Joseph, Nicholas Ryan and Ricky Ng'
+date: '13th November, 2017'
 output:
   html_document:
     code_folding: hide
@@ -123,10 +123,11 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
 }
 ```
 
-# Change Data Folder
+<!-- # Change Data Folder -->
 ```{r}
 # Define the datafolder that contains all RDatasets. This will be an empty string when submitted
-data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+# data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+data_folder <- ""
 ```
 
 # Abstract
@@ -159,7 +160,7 @@ The three main research questions are:
 At a high level, abiotic indicators are investigated to quantify the disturbance conditions of the rainforest. Where as biotic variables are investigated to evaluate the impact of this disturbance on the ecosystem. Each question will be explain in further detail to identify the ecological meaning.
 
 ### Dominant Species Seedling Cover
-
+In previous studies, the plant cover of a specific species is an indicator to the nutriants stored in the soil; this is because the cover contributes to the governance of soil erosion (Pohl, Graf, Buttler, & Rixen, 2012). In addition, it was proven in other forest types that the combined contribution of seedling cover and high species richness is significantly more effective at governing soil erosion (Pohl et al., 2012).  Disturbance implies for the presence of species that are more resilient to the lack of necessary nutrients, and thereby affecting the level of seedling cover in an area (Funk,2008). For example, a fire can burn up to the entire understorey; which promotes the growth of pioneer species that disperse and grow quicker in disturbed forests (Fourrier et al., 2015). These species typically need high photosynthetic rate, growth capacity, and nutrient storage to recover from recent disturbances (Manninen, Stark, Kytöviita, Lampinen, & Tolvanen, 2009). The different types of disturbances can affect how the plants grow, and therefore may contribute to the changes in seedling cover.
 
 
 
@@ -170,16 +171,19 @@ At a high level, abiotic indicators are investigated to quantify the disturbance
 
 ### Dominant Species Specific Leaf Area
 
-_Specific Leaf Area_
+_*Specific Leaf Area*_
+
 The purpose of investigating specific leaf area, referred to as SLA in this report, is the insight is provides into a plants strategy in the ecosystem. Plants are in constant competition for resources within their community. One core resource required is light. This presents one of the most competitive strategies employed by a plant: how they invest growth into their leaves, the apparatus used to capture light. A larger leaf will capture more light, and enable faster growth. However, with a limited amount of energy available, the plant must sacrifice the thickness of their leaves. This makes the plant more susceptible to damage from herbivores.
 
 This presents a trade-off between the growth and defence mechanisms of the plant. SLA is a measure of this trade-off, calculated as the one-sided leaf area divided by the dry mass. SLA is used to relatively compare different species within the same community, categorising plants as resource acquisition or resource conservation. A relatively high SLA can suggest the plant has a need to compete more aggressively for light that other species within the same community.
 
-_Investigation of Weighted and Aggregated SLA_
+_*Investigation of Weighted and Aggregated SLA*_
+
 To provide a thorough comparison of the SLA between species and between disturbance, the SLA is weighted by each plants contribution to the community. This is calculated as the SLA of each leaf, weighted by the amount of area coverage the plant has in its community. This weighting takes into account how established a plant is in the community, and provides an insight to how this dominance affects a plant's investment strategy. This weighted measure is used to quantify the difference between species. To measure the difference due to disturbance, each species is aggregated to the community level. From Grime 2004, we know that dominant species have a large influence on the ecosystem, so this aggregation determines the growth strategy of the community.
 
 
 _*REFERENCES*_
+
 Quested, H., Eriksson, O., Fortunel, C., & Garnier, E. (2007). Plant Traits Relate to Whole-Community Litter Quality and Decomposition following Land Use Change. Functional Ecology,21(6), 1016-1026. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20142742 
 
 Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . Vile, D. (2008). Impact of Abundance Weighting on the Response of Seed Traits to Climate and Land Use. Journal of Ecology, 96(2), 355-366. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20143472 
@@ -190,7 +194,7 @@ Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . 
 
 
 
-# REFERENCES NEEDED
+#### REFERENCES NEEDED
 
 
 ### Species Richness
@@ -205,10 +209,10 @@ Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . 
 
 # Experimental Design
 
-_Disturbance_
+_*Disturbance*_
 
 
-_Design and Method_
+_*Design and Method*_
 
 
 
@@ -223,9 +227,10 @@ All raw data collected throughout the experiment was compiled into a single exce
 ```{r, child = '010_data_preparation.Rmd'}
 ```
 
-## Data Quality
-```{r, child = '011_data_quality.Rmd'}
-```
+Prior to analysis, the data quality was evaluated. Major outcomes were that humidity data remained at a constant 100%, outliers were detected for temperature readings and the canopy analyser data was unbalanced. The research focus on relative humidity was not continued further, as not model could be derived. The temperature outliers were removed, and the imputing method was used to enable leaf area index and gap fraction threshold data to be analysed. Further details are included in Appendix 1: Data Quality.
+
+
+
 
 
 
@@ -235,17 +240,17 @@ All raw data collected throughout the experiment was compiled into a single exce
 # Analysis
 The models used throughout this report are generalised linear mixed effects models. This section will outline how and why these models are required, and will provide an overview of the model development process.
 
-_Mixed Effects_
+_*Mixed Effects*_
 
 Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
   
 The fixed effects include all abiotic and biotic variables that are collected throughout the experiment. The final model will represent the most predictive subset of these variables. The random effects of each model include variation between transects, and variation between quadrats nested in transects. This structure is necessary due to the experimental design, and will remain constant for every model (i.e. not form part of the model selection).
 
-_Generalised Linear Mixed Effects_
+_*Generalised Linear Mixed Effects*_
 
 The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness.
 
-_Bayesian Model_
+_*Bayesian Model*_
 
 The bayesian paradigm is utilised for it's ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
 
@@ -254,7 +259,7 @@ The frequentist paradigm is limited as it requires the difficult integration of 
 
 The bayesian model estimates a distribution for each parameter in the model. These distributions are interpreted using 95% Credible Intervals, which evaluates the 2.5% and 97.5% quantiles of the distribution. If this interval does not include zero, then the collected data provides evidence that the parameter has a positive or negative effect. The uncertainty around this parameter is evaluated as range between these quantile estimates. As such, the predictor variable's effect on the response variable will be reported with a lower and upper bound estimate.
 
-_Process Overview_
+_*Process Overview*_
 
 This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationships between the predictor and response variable. 
 
@@ -263,6 +268,8 @@ This section demonstrates the model development process. The data is explored th
   * Model fit is evaluated on residual plots and whether the CPO PIT values are approximately uniformly/normally distributed.
 
 The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
+
+
 
 ## Temperature
 ### Exploratory Analysis
@@ -274,10 +281,23 @@ The following subsections are segmented into an exploratory analysis and model d
 ```
 
 ### Model Outcomes
+
 *RUWAN* write stuff: Risk Ratio (RR) of credible intervals
 
 
-## Dominant Seedling Cover
+
+
+
+
+
+
+
+
+
+
+
+
+## Seedling Cover
 ### Exploratory Analysis
 ```{r, child = '030_exploratory_cover.Rmd'}
 ```
@@ -287,9 +307,20 @@ The following subsections are segmented into an exploratory analysis and model d
 ```
 
 ### Model Outcomes
-*RICKY* write stuff: Risk Ratio (RR) of credible intervals
+The variables remaining through the model fit procedure were the abundance of dominant species and their species identification; disturbance did not appear likely to be a significant variable to the seedling cover of dominent species. However, the results of the regression demonstrated that each species contributes differently to the seedling cover; the presence of dominant species 2 implied that there was relatively higher seedling cover compared to dominant species 1 and 3. Furthermore, the regression showed that the abundance of dominent species has a positive effect on the seedling cover. 
 
-## Dominant Shannon's Index of Diversity
+
+
+
+
+
+
+
+
+
+
+
+## Shannon's Index of Diversity
 ### Exploratory Analysis
 ```{r, child = '040_exploratory_shannons.Rmd'}
 ```
@@ -300,14 +331,27 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 ### Model Outcomes
+
 *Nick* write stuff: Risk Ratio (RR) of credible intervals
 
 
-## Dominant Specific Leaf Area
+
+
+
+
+
+
+
+
+
+
+
+
+## Specific Leaf Area
 As SLA can only equal values between zero and infinity, the log of SLA will be modelled. 
 
 ### Aggregated
-The following subsections investigate key relationships that explain the community aggregated SLA., which includes 30 observations. 
+The following subsections investigate key relationships that explain the community aggregated SLA, which includes 30 observations. 
 
 #### Exploratory Analysis
 ```{r, child = '050_exploratory_sla_cagg.Rmd'}
@@ -319,12 +363,10 @@ The following subsections investigate key relationships that explain the communi
 
 ```
 
-
-#### Model Outcomes
-*Ruwan* write stuff: Risk Ratio (RR) of credible intervals
-
-
 ### Individual Species
+The following subsections investigate key relationships that explain the variation of community weighted SLA.
+  
+
 #### Exploratory Analysis
 ```{r, child = '052_exploratory_sla_cweight.Rmd'}
 
@@ -336,8 +378,20 @@ The following subsections investigate key relationships that explain the communi
 ```
 
 
-#### Model Outcomes
-*Ruwan* write stuff: Risk Ratio (RR) of credible intervals
+### Model Outcomes
+Overall, the model estimates a distinct difference between disturbed and undisturbed forest areas. Upon investigating each individual species, this difference betwen sites can be attributed to dominant species 1. Both dominant species 2 and 3 had less weighted SLA than species 1, and the parameter estimates showed no major differences between rainforest sites.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Species Richness
@@ -351,26 +405,28 @@ The following subsections investigate key relationships that explain the communi
 
 
 ### Model Outcomes
-*Ricky* write stuff: Risk Ratio (RR) of credible intervals
+Through a model fit procedure, the only variable that was likely to be significant to the model was the maximum temperature in the given area. From the regression, it appears to have a negative relationship with species richness; as the maximum temperature increases, the species richness decreases. 
 
 
 
 # Discussion
 ## Ecological Meaning of Model Outcomes
 
-_Temperature_
+_**Temperature**_
 
 
-_Seedling Cover_
+_**Seedling Cover**_
+
+While the analysis indicated that the disturbances of the limestone rainforests does not contribute to the seedling cover, it was found that each dominant species had a significant role in the growth in seedling cover. Recall that the seedling cover is also the governance of soil erosion protection. Furthermore the abundance of the three dominant species has a significant positive effect on the plant cover. Therefore, from the analysis of the seedling cover, it is to be deduced that there is importance in protecting the three dominant species to ensure seedling cover. 
+
+_**Shannons Index of Diversity**_
 
 
-_Shannons Index of Diversity_
+_**Specific leaf Area**_
 
+From the community aggregated and community weighted SLA models, we can infer that dominant species 1 is a resource acquisition specialist in pristine rainforests conditions, after accounting for the seedling coverage. Species 1 exhibited a distinctly different investment strategy when disturbance factors were not present, suggesting that species 1 experiences more competition in pristine rainforest conditions. At an aggregated level, the pristine rainforest areas were found to have a estimated larger SLA. However, majority of this difference is attributed to the growth strategies of species 1.
 
-_Specific leaf Area_
-
-
-_Species Richness_
+_**Species Richness**_
 
 
 # Limitations
@@ -382,10 +438,14 @@ Another limitation was a result of the limited time available to collect data su
 
 
 # Conclusion and Recommendations
+The findings of this project reveals information that can be used for protect the limestone forests. The implications to the future of limestone forests are derived in this study of seedling species in accordance to the plant cover, species richness, SLA, diversity, and temperature. 
+
 
 
 # Appendix
-
+## Appendix 1: Data Quality
+```{r, child = '011_data_quality.Rmd'}
+```
 
 
 

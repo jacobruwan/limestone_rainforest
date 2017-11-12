@@ -16,7 +16,7 @@ load(paste0(dropbox, "domshannons_rq1.RData"))
 domshannons_rq1.df %>% str()
 ```
 
-# Site
+#### Site
 ```{r}
 domshannons_rq1.df %>%
   ggplot(aes(x = paste0(site), y = dom_shannon)) +
@@ -30,7 +30,7 @@ domshannons_rq1.df %>%
 
 ```
 
-# Overall Seedling Cover
+#### Overall Seedling Cover
 ```{r}
 domshannons_rq1.df %>%
   ggplot(aes(x = overall_seedling_cover, y = dom_shannon, col = site)) +
@@ -42,7 +42,7 @@ domshannons_rq1.df %>%
   xlab("Overall Seedling Cover")
 ```
 
-# SLA
+#### SLA
 ```{r}
 domshannons_rq1.df %>%
   ggplot(aes(x = av_totaldom_sla, y = dom_shannon, col = site)) +
@@ -54,7 +54,7 @@ domshannons_rq1.df %>%
   xlab("SLA")
 ```
 
-## Dominant Species 1 SLA
+#### Dominant Species 1 SLA
 ```{r}
 domshannons_rq1.df %>%
   ggplot(aes(x = av_dom_1_sla, y = dom_shannon, col = site)) +

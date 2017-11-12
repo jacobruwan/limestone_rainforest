@@ -107,10 +107,10 @@ full_formula <- length_formulastring %>%
 
 <!-- ``` -->
 
-#### Final Model
+##### Final Model
 ```{r}
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_ca_mean) ~  site + overall_seedling_cover + f(site_trans, model='iid')")
+inla_formula <- as.formula("log(sla_ca_mean) ~  site + scaled_overall_seedling_cover + f(site_trans, model='iid')")
 
  # 
 
@@ -122,13 +122,13 @@ fit <- inla(inla_formula,
             control.predictor=list(compute=T))
 
 # analyse the output of the model
-summary(fit)
+# summary(fit)
 ```
 
-The final model models the log of community aggregated SLA by site and overall seedling cover. This results is determined by the maximum marginal log-Likelihood and by observing the credible intervals. As this model only has 30 observations and there are 30 unique quadrats, the only random effect variable included is the variation between transects.
+The final model regresses the log of community aggregated SLA by site and overall seedling cover. This results is determined by the maximum marginal log-Likelihood and by observing the credible intervals. As this model only has 30 observations and there are 30 unique quadrats, the only random effect variable included is the variation between transects.
 
 $$
-log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Site} + Overall Seedling Cover + \epsilon_{transect} +\epsilon_{residual}
+log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Overall Seedling Cover} + \epsilon_{transect} +\epsilon_{residual}
 
 $$
 
@@ -143,11 +143,11 @@ $$
 
 
 
-#### Model Fit
+##### Model Fit
 
 The figure below highlights the fitted predictions of the model against the observed values, the standardised residuals are shown on the right. These residual plot shows that there ihe residuals are more likely to be positive in the middle range of fitted values, which is not ideal. However, there are no large concerns for the model fit, as the sample size is low.
 
-```{r, fig.width = 2.25}
+```{r, fig.width = 5}
 # summary(fit)
 predictions <- fit$summary.fitted.values$mean
 dataset <- sla_com.df
@@ -204,7 +204,7 @@ hist_cpo <- pred.df %>%
 
 The model fit is further investigated in the code below, QQ plots and histograms of residual and CPO values. The CPO QQ plot demonstrate a good fit for the middles values of the QQ line, with deviations at the tail end. This is supported by the histogram, suggesting there are no major concerns for model fit. The residual qq plots and histogram support the trend shown in the figure above, where there isn't an even distribution around the zero line. However, there are no dramatic deviations, thus the model is considered appropriate.
 
-```{r, fig.width = 3}
+```{r, fig.height = 5, fig.width = 7}
 par(mfrow = c(2,2))
 # CPI QQ plot
 qqnorm(pred.df$cpo)
@@ -225,8 +225,8 @@ hist(Residuals)
 par(mfrow = c(1,1))
 ```
 
-#### Fixed Effect Credible Intervals
-In the figure below, the credible intervals of each estimated paramater is shown, transformed from the log scale to the original SLA domain. This graph demonstrates that a unit increase in overall seedling cover can increase community agrgegated SLA from a value between 8.5 up to 84, keeping all else constant. This represents a large amount on uncertainty around this relationship, however it is clear that overall seedling cover has a positive relationship as the credible interval does not include zero. Similarly, given the same overall seedling cover, a pristine forest areas is expected to have a positive increase on community aggregated sla value. This increase can range between 1.1 and 2.5 based on the credible intervals estimated.
+##### Fixed Effect Credible Intervals
+In the figure below, the credible intervals of each estimated paramater is shown, transformed from the log scale to the original SLA domain. This graph demonstrates that a unit increase in the scaled overall seedling cover can increase community agrgegated SLA from a value between 0.4 up to 1.1, keeping all else constant. This presents some uncertainty, however it is clear that overall seedling cover has a positive relationship as the credible interval does not include zero. Similarly, given the same overall seedling cover, a pristine forest areas is expected to have a positive increase on community aggregated sla value. This increase can range between 1.1 and 2.5 based on the credible intervals estimated.
 
 ```{r }
 ## How to look at predictions and compare to original???
@@ -251,7 +251,7 @@ fixed.df <- data.frame(Estimate = row.names(fixed),
   mutate(beta = 0:(n1-1)) %>%
   mutate(Est2 = paste0(Estimate, " - b", beta),
          Est2 = reorder(Est2, rev(beta))) %>%
-  mutate(RR_lower = exp(quant0.025), RR_upper = exp(quant0.975))
+  mutate(RR_lower = exp(quant0.025)-1, RR_upper = exp(quant0.975)-1)
 
 fixed.df %>%
   ggplot(aes(y = Est2, x = exp(quant0.5), xmin = exp(quant0.025), xmax = exp(quant0.975))) +
@@ -261,13 +261,13 @@ fixed.df %>%
   xlab("Credible Intervals") +
   ylab("Parameter") +
   geom_vline(xintercept = 0) +
-  scale_x_continuous(breaks = seq(0, 90, 5))
+  scale_x_continuous(breaks = seq(0, 90, 3))
 
 
 # ggsave(paste0(data_folder, "sla_", "agg","_estimates.png"), width = 3, height = 1.5, dpi = 900)
 ```
 
-#### Random Effect Credible Intervals
+##### Random Effect Credible Intervals
 Based on the INLA model, no variation was attributed to between transects. This is a surprising result, as the exploratory analysis demonstrate distinct differences in log SLA between transects.
 
 ```{r}

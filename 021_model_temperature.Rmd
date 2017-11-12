@@ -86,16 +86,16 @@ datarq2 %>%
 _Autocorrelation_
 ```{r}
 
-acf(splinefit)
-
-# Regress the one step lag residuals against forward residuals
-res <- datarq2$residuals
-
-y <- res[-length(res)]
-x <- res[-1]
-
-fit_ac <- lm(y ~ x)
-summary(fit_ac)
+# acf(splinefit)
+# 
+# # Regress the one step lag residuals against forward residuals
+# res <- datarq2$residuals
+# 
+# y <- res[-length(res)]
+# x <- res[-1]
+# 
+# fit_ac <- lm(y ~ x)
+# summary(fit_ac)
 
 
 ```

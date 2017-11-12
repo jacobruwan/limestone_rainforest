@@ -16,35 +16,33 @@ response_variables <- c("sla_ca_mean", "sla_ca_sd")
   <!--   * high community aggregated sla -> infer plants in that plot growing faster -->
   <!--   * low sla -> plasticity to disturbance -->
 
-### Random Effects
+##### Random Effects
 The figure below shows the variation in community aggregated sla between different transects. This demonstrates that some variation can be attributed to the different transects in the rainforest.
 
 ```{r}
 trans <- sla_com.df %>%
-  ggplot(aes(x = site_trans, y = sla_ca_mean, col = site)) +
+  ggplot(aes(x = site_trans, y = log(sla_ca_mean))) +
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("SLA (CA) vs Site") +
+  ggtitle("Log SLA Transect Variation") +
   xlab("Transect") +
-  ylab("SLA (CA)") +
-  scale_y_continuous(lim = c(0, max(sla_com.df$sla_ca_mean)))
+  ylab("Log SLA (CA)") 
 
 quad <- sla_com.df %>%
-  ggplot(aes(x = paste0(site_trans, quadrat), y = sla_ca_mean, col = site)) +
+  ggplot(aes(x = paste0(site_trans, quadrat), y = log(sla_ca_mean), col = site)) +
   geom_boxplot() +
   theme_project() +
   scale_colour_manual(values = colours.site, name = "Site") +
-  ggtitle("SLA (CA) vs Site") +
+  ggtitle("Log SLA (CA) Quadrat Variation") +
   xlab("Quadrat:Transect") +
-  ylab("SLA (CA)") +
-  scale_y_continuous(lim = c(0, max(sla_com.df$sla_ca_mean)))
+  ylab("Log SLA (CA)") 
 
 multiplot(trans, #quad,
           layout = matrix(c(1,2), nrow = 1))
 ```
     
-### Site
+##### Site
 The figure below demonstrates the difference between community aggregated SLA between different areas of the rainforest. We see that there is a distinct increase in the SLA of communities in pristine rainforests. There also appears to be a larger spread for pristine communities. The log of SLA is shown on the right side of the figure.
 
 ```{r}
@@ -95,7 +93,7 @@ multiplot(sla_norm, sla_log,
 
 Other variables such as overall seedling cover and abundance showed positive relationships with community aggegated sla.
 
-### Overall Seedling Cover
+##### Overall Seedling Cover
 
 As expected, the figure below shows the value of community weighted SLA increases as the overall seedling cover increases. There is a slight ihint of an interaction between overall seedling cover and site, so this will be further investigated in the model.
 
@@ -126,7 +124,7 @@ sla_com.df %>%
 
 ```
 
-### Total Dominant Species Abundance
+##### Total Dominant Species Abundance
 In the figure below, as the total abundance increases, we observe that community aggregated SLA also increases. There is more evidence here suggesting an interation between abundance and site. 
 
 ```{r}
@@ -158,7 +156,7 @@ sla_com.df %>%
 
 No other predictor variables presented any meaningful relationship with community aggregated SLA, so are not reported here.
 
-### Correlation
+##### Correlation
 From the table below, we observe the correlation between overall cover and total abundance. There is no evidence of a high correlation, so both variables are included in model development.
 
 ```{r}

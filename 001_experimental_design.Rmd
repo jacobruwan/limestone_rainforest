@@ -17,17 +17,9 @@ output:
     fig_width: 5
 ---
 
-
-Design:
-
-  * Two Forest Types (Pristine vs Disturbed)
-  * Each operator is responsible for the same measurement
-    This changed throughout experiment
-  * Randomise coordinates of quadrats from along transect
-    
-## Randomisation
-### Location of Quadrats
-#### Part 1
+<!-- ## Randomisation -->
+<!-- ### Location of Quadrats -->
+<!-- #### Part 1 -->
 ```{r}
 # Randomly generate 12 trials for the length and width.
 # Set seet is chosen randomly by all participants
@@ -68,7 +60,7 @@ Keep <- Coordinates2 %>%
   select(Length_Prop, Width_Prop, Length_Coord, Width_Coord)
 ```
 
-### Part 2: 30 Quadrats
+<!-- ### Part 2: 30 Quadrats -->
 ```{r}
 shit1 <- runif(26, 0, 1) # length.prop2 
 shit2 <- runif(26, 0, 1) # width.prop2
@@ -104,12 +96,12 @@ combined <- rbind(Keep,
 # combined
 ```
 
-### Part 3: Culling of single overlap
+<!-- ### Part 3: Culling of single overlap -->
 ```{r}
 extra_overlap_pristine3_length <- runif(1, 0, 1)
 extra_overlap_pristine3_width <- runif(1, 0, 1)
 
-combined %>%
+combined %<>%
   filter(Order != 30) %>%
   rbind(data.frame(Length_Prop = extra_overlap_pristine3_length,
                    Width_Prop = extra_overlap_pristine3_width) %>%
@@ -120,10 +112,37 @@ combined %>%
 
 ```
 
-```{r}
-df <- read_excel("C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Quadrat_Positions_Original.xlsx")
 
-df %>%
+Disturbance in a rainforest can occur in a many natural ways such as by floods, storms, fires or fallen trees.
+However, other disturbance may include construction or pathways. Disturbances can dictate the way in which plants in the understorey coexist. For example, a fire can burn up to the entire understorey; which promotes the growth of pioneer species that disperse and grow quicker in disturbed forests (Fourrier et al., 2015). Therefore, to understand how disturbance affects the limestone forests, disturbance was categorised under Pristine and Disturbed by expert opinion in this project. 
+
+Sources of variances can come from variables themselves, or the random effects of our chosen models. While these are inevitable, the replication in our model (the repetition of quadrats in a transect, and the repetition of transect in each disturbance category) should recognise and estimate such variability and indicate the validity of our experiment. However, biases can also occur, reducing the practicality of our results. Therefore, introducing the aspect of randomisation to our model reduces the error of selection and/or accidental bias. For example in our model, we randomised the placement of quadrats in 6 transects by randomly generating coordinates through the use of the statistical program R. 
+
+  
+The experimental design was set up with six transects, with five quadrats in each. The quadrats were randomly generated to ensure no accidental or selection biases occured in choosing the area samples to study. Three of those transects are disturbed while the other three or pristine rainforest. This randomisation of quadrat placements, and an overview of the design, are observed in the figure below.
+
+
+```{r}
+# df <- read_excel("C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Quadrat_Positions_Original.xlsx") %>%
+  # select(Site, Transect, Quadrat, Length_Coord, Width_Coord)
+
+
+# Some qudrats were placed down on day 1 (4 quadrats)
+# These positions had to be retained, then further changes to the experimental design were made for more transects
+# This meant more quadrats needed to be estimated
+df2 <- combined %>%
+  mutate(Site = c("D", "P", "D", "P", rep("D", 3), rep("P", 3),
+                  rep(c(rep("D", 5), rep("P", 5)), 2)),
+         Transect = c(rep(1, 10), rep(2, 10), rep(3, 10)),
+         Quadrat = c(1, 1, 2, 2, rep(3:5, 1), rep(3:5, 1),
+                  rep(c(rep(1:5, 1), rep(1:5, 1)), 2))) %>%
+  select(Site, Transect, Quadrat, Length_Coord, Width_Coord) %>%
+  mutate(Length_Coord = round(Length_Coord, digits = 2),
+         Width_Coord = round(Width_Coord, digits = 2))
+
+# df3 <- df %>% left_join(df2, by = c("Site", "Transect", "Quadrat"))
+
+dist <- df2 %>%
   filter(Site == "D") %>%
   ggplot() +
   geom_point(aes(x=Width_Coord, y=Length_Coord)) +
@@ -134,7 +153,7 @@ df %>%
   ylab("Length") +
   xlab("Width")
 
-df %>%
+pris <- df2 %>%
   filter(Site == "P") %>%
   ggplot() +
   geom_point(aes(x=Width_Coord, y=Length_Coord)) +
@@ -145,9 +164,13 @@ df %>%
   ylab("Length") +
   xlab("Width")
 
+multiplot(dist, pris,
+          layout = matrix(c(1,2), nrow = 1))
 ```
 
+Our research revolved around three dominant species in each quadrat, determined as being accumulatively representing at least 80% of the area.  Therefore, our data includes thirty quadrat observations, ninety species observation. The experimental design influences our choice of a mixed effects model.
 
+For each Transect, the Abiotic measures were recorded such as: decomposition and temperature. For each quadrat, the variables measured were: soil compaction, leaf area index, overall seedling cover, and species richness. With the three dominant species, the variables studied were, the abundance, seedling cover, leaf area, leaf dry weight, and functional leaf traits. This forms the basis of our data collection
 
 
 
