@@ -26,7 +26,7 @@ sladata <- sla_com.df
 ```{r}
 # define the vector of possible predictors, exclude random effects
 response <- "sla_ca_mean"
-temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("sla_ca_mean", "site", "transect", "quadrat",
+temp_predictors <- names(sladata)[-(which(names(sladata) %in% c("sla_ca_mean", "sla_ca_sd","site", "site_trans","transect", "quadrat",
                                                          "min_temp", "range_temp",
                                                          "overall_seedling_cover", "scaled_overall_seedling_cover",
                                                          "total_dom_abundance", "scaled_total_dom_abundance")))]
@@ -93,7 +93,7 @@ full_formula <- length_formulastring %>%
 <!-- for (i in 1:length(formula_string_combinations)) { -->
 <!-- inla_formula <- as.formula(paste0("log(sla_ca_mean) ~ site + ", -->
 <!--                           formula_string_combinations[[i]], -->
-<!--                           " + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")) -->
+<!--                           " + f(site_trans, model='iid') + f(quadrat:site_trans, model = 'iid')")) -->
 
 <!-- fit <- inla(inla_formula, -->
 <!--             family = "gaussian", -->
@@ -108,11 +108,11 @@ full_formula <- length_formulastring %>%
 <!-- save(loglinear_stepwise_summary, file = paste0(data_folder, "loglinear_stepwise_summary.RData")) -->
 
 <!-- # load(paste0(dropbox, "loglinear_stepwise_summary.RData")) -->
-<!-- #  -->
+<!-- # -->
 <!-- # top10 <- loglinear_stepwise_summary %>% -->
 <!-- #   arrange(desc(Log_Likelihood)) %>% -->
 <!-- #   head(10) -->
-<!-- #  -->
+<!-- # -->
 <!-- # top10 -->
 <!-- ``` -->
 
@@ -123,14 +123,15 @@ full_formula <- length_formulastring %>%
 <!-- loglinear_stepwise_summary %>% -->
 <!--   arrange(desc(Log_Likelihood)) %>% -->
 <!--   head(10) -->
-<!-- # fit <-  -->
+<!-- # fit <- -->
 
 <!-- ``` -->
 
-#### Final Model: Minimum Marginal log-Likelihood
+#### Final Model
+##### Bayesian
 ```{r}
 # RUn a model on the top 3 variables identified
-inla_formula <- as.formula("log(sla_ca_mean) ~  site + f(transect, model='iid') + f(quadrat:transect, model = 'iid')")
+inla_formula <- as.formula("log(sla_ca_mean) ~  site + f(site_trans, model='iid') + f(quadrat:site_trans, model = 'iid')")
 
 fit <- inla(inla_formula,
             family = "gaussian",
@@ -141,6 +142,15 @@ fit <- inla(inla_formula,
 # analyse the output of the model
 summary(fit)
 ```
+
+##### Frequentist
+```{r}
+fit2 <- lmer(log(sla_ca_mean) ~ site + (1|site_trans),
+             data = sladata)
+
+summary(fit2)
+```
+
 
 
 #### Model Fit
