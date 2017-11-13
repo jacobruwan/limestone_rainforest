@@ -3,32 +3,53 @@ title: "model_development"
 output: html_document
 ---
 
-#### Linear Spline Model 
+### Final Model
+As temperature depends on time, a different model structure is required to capture the variation and quantify the differences between sites. A spline mixed effects model is used, to capture non linearity of time against temperature. The separate HOBO devices (8 different cycles) will represent the random effects of the model, with the main fixed effect being site. The random effects structure is used to limit the effect of serial correlation in the dataset.
+
 ```{r}
 datarq2 <- hobo_rq2.df
 
 datarq2 %<>% mutate(lagtemp = lag(temp)) %>% filter(!is.na(lagtemp))
 
-# Define knot points
-k1 <- 14
-k2 <- 14
-k3 <- 17
 
-splinefit <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)),# + site:bs(time24, knots = c(k1, k2, k3)),
-          data = datarq2)
+# splinefit <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)),# + site:bs(time24, knots = c(k1, k2, k3)),
+#           data = datarq2)
 
 
 # inla_spline <- inla(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + site:bs(time24, knots = c(k1, k2, k3)),
 #                     family = "gaussian",
 #                     data = datarq2)
 
-summary(splinefit)
+# summary(splinefit)
 
-splinefit2 <- lmer(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + (1|hobo_id),
+splinefit2 <- lmer(temp ~ site + bs(time24, knots = c(14, 17)) + (1|hobo_id),
                    data = datarq2)
 
-summary(splinefit2)
+# summary(splinefit2) %>% names()
 # acf(splinefit)
+```
+
+### Estimates
+The two tables below demonstrate the estimated fixed and random effects. The second table demonstrates that majority of the variance is explained by each hobo device. After accounting for this variation, the Site estimate's has a negative t-value. This suggests that there is no significant difference between disturbed and pristine areas of the rainforest. The non linear relationship between time and temperature was significant for certain knot points.
+
+```{r}
+summary(splinefit2)$coefficients %>%
+  data.frame() %>%
+  round(digits = 2) %>%
+  rename(Standard.Error = Std..Error) %>%
+  kable(caption = "Temperature Model: Fixed Effect Estimates")
+ 
+
+```
+
+```{r}
+summary(splinefit2)$varcor %>% 
+  data.frame() %>%
+  rename(Hyperparameter = grp, Variance = vcov) %>%
+  select(Hyperparameter, Variance) %>%
+  mutate(Variance = round(Variance, digits = 4))  %>%
+  kable(caption = "Temperature Model: Random Effect Estimates")
+
 ```
 
 <!-- ```{r} -->
@@ -65,48 +86,63 @@ summary(splinefit2)
 
 ### Model Fit
 
-_**Residuals**_
+In the figure below, the residual values are observed. From the curved data points in both graphs, it is clear that serial correlation is evident for this data,. Majority of the variation lies within 1.5 standard deviations from the zero line.
 
-```{r}
-pred <- splinefit$fitted.values
+```{r, fig.width = 5}
+# summary(fit)
+fitted <- fitted(splinefit2)
+res <- summary(splinefit2)$residuals
 
-datarq2 %<>%
-  mutate(temp_pred = pred,
-         residuals = temp - temp_pred,
-         stdresiduals = (residuals-mean(residuals))/sqrt(var(residuals))) 
+pred.df <- datarq2 %>%
+  mutate(fitted = fitted,
+         observed = temp,
+         residuals = observed - fitted,
+         std_residuals = (residuals-mean(residuals))/sqrt(var(residuals))) 
 
-datarq2 %>%
-  ggplot(aes(x=temp, y=temp_pred, col=site)) +
-  geom_point() +
+
+## Fitted vs Predicted
+fit_vs_pred <- pred.df %>%
+  ggplot(aes(x = observed, y = fitted)) +
+  geom_point(size = 0.8) +
+  xlab("Observed Mean SLA (CA)") +
+  ylab("Fitted Values") +
   theme_project() +
-  geom_abline(slope=1, intercept=0)+
   coord_equal() +
-  scale_colour_manual(values = colours.site)
+  geom_abline() +
+  ggtitle("Observed vs Fitted SLA")
 
-datarq2 %>%
-  ggplot(aes(x=temp_pred, y=stdresiduals, col=site)) +
-  geom_point() +
-  theme_project()+
-  scale_colour_manual(values = colours.site)
+## Fitted vs Standardised Residuals
+fit_vs_res <- pred.df %>%
+  ggplot(aes(x = fitted, y = std_residuals)) +
+  geom_point(size = 0.8) +
+  xlab("Fitted Values") +
+  ylab("Standardised Residuals") +
+  theme_project() +
+  geom_abline(slope = 0)+
+  geom_abline(slope = 0, intercept = 1.5)+
+  geom_abline(slope = 0, intercept = -1.5) +
+  ggtitle("Standardised Residuals")
 
-```
-
-_**Serial Correlation**_
-```{r}
-
-# acf(splinefit)
-# 
-# # Regress the one step lag residuals against forward residuals
-# res <- datarq2$residuals
-# 
-# y <- res[-length(res)]
-# x <- res[-1]
-# 
-# fit_ac <- lm(y ~ x)
-# summary(fit_ac)
-
+multiplot(fit_vs_pred, fit_vs_res,
+          layout = matrix(c(1,2), nrow = 1))
 
 ```
+
+With the exception of the tail end, the model aligns well to the QQ line, with a normally distributed histogram.
+
+```{r, fig.height = 5, fig.width = 7}
+par(mfrow = c(1,2))
+# Residuals QQ plot
+qqnorm(pred.df$residuals)
+qqline(pred.df$residuals)
+title("Residuals                                                ")
+
+Residuals <- pred.df$residuals
+hist(Residuals)
+
+par(mfrow = c(1,1))
+```
+
 
 
 

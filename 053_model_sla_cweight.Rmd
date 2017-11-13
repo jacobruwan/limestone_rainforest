@@ -116,9 +116,9 @@ full_formula <- length_formulastring %>%
 #### Final Model
 The final model regressed the log of community weighted SLA by site, species ID and LAI, with interactions terms with the species ID. This model includes quadrats nested in transect as a random effect due to the large number of replicates. 
 
-\[
-log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Species ID 2} + \beta_{Species ID 3}  + \beta_{LAI} + \beta_{Overall Seedling Cover} + \beta_{Pristine:Species ID 2} + \beta_{Pristine:Species ID 3}  + \beta_{Species ID 2:LAI} + \beta_{Species ID 3:LAI}  + \varepsilon_{transect} + \varepsilon_{quadrat:transect} + \varepsilon_{residual}
-\]
+<!-- \[ -->
+<!-- log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Species ID 2} + \beta_{Species ID 3}  + \beta_{LAI} + \beta_{Overall Seedling Cover} + \beta_{Pristine:Species ID 2} + \beta_{Pristine:Species ID 3}  + \beta_{Species ID 2:LAI} + \beta_{Species ID 3:LAI}  + \varepsilon_{transect} + \varepsilon_{quadrat:transect} + \varepsilon_{residual} -->
+<!-- \] -->
 
 
 <!-- ##### Bayesian -->

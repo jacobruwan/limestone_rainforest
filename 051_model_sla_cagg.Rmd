@@ -127,10 +127,10 @@ fit <- inla(inla_formula,
 
 The final model regresses the log of community aggregated SLA by site and overall seedling cover. This results is determined by the maximum marginal log-Likelihood and by observing the credible intervals. As this model only has 30 observations and there are 30 unique quadrats, the only random effect variable included is the variation between transects.
 
-$$
-log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Overall Seedling Cover} + \epsilon_{transect} +\epsilon_{residual}
+<!-- $$ -->
+<!-- log(SLA_{Community Aggregated}) = \beta_0 + \beta_{Pristine} + \beta_{Overall Seedling Cover} + \epsilon_{transect} +\epsilon_{residual} -->
 
-$$
+<!-- $$ -->
 
 
 <!-- ##### Frequentist -->

@@ -357,9 +357,7 @@ hobo_nofilter <- hobo %>%
          filter_maxhobo = max_time)
 
 
-hobo2 <- hobo_nofilter %>%
-  filter(date_time >= filter_minhobo, date_time <= filter_maxhobo)
-
+hobo2 <- hobo_nofilter 
 
 
 
@@ -374,6 +372,7 @@ max_min_hobo2 <- hobo2  %>%
 
 
 hobo3 <- hobo2 %>%
+  filter(date_time >= filter_minhobo, date_time <= filter_maxhobo) %>%
   left_join(max_min_hobo2, by=c("Site", "Transect", "hobo_id", 
                                 "start_hobo", "end_hobo")) %>%
   mutate(hobo_id = factor(hobo_id))

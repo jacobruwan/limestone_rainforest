@@ -68,10 +68,10 @@ a_p <- ggplot(aes(x=site, y=dom_shannon, col=site), data=domshannons_rq1.df) + g
 
 The figure below shows that total dominant abundance, overall seedling cover, dominant total leaf area, total dominant leaf dry weight, and average quadrat GFT appear to have a relationship with Shannon's Index. This is based on the inspecting the standard error and the data that falls within the confidence interval.  
 
-```{r, fig.align='center'}
+```{r, fig.align='center', fig.height=5, fig.width=7}
 
 #dom_total_abundance
-d_p <- ggplot(aes(y=dom_shannon, x=dom_total_abundance), data=domshannons_rq1.df) + geom_point() + labs(title="(a) S.I. v. T. D. Abund", y="Shannon Index", x="dom_total_abundance (scaled)") + geom_smooth(method = "lm") + theme_project()
+d_p <- ggplot(aes(y=dom_shannon, x=dom_total_abundance), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. v. T. D. Abund", y="Shannon Index", x="dom_total_abundance (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #dom_simpson
 e_p <- ggplot(aes(y=dom_shannon, x=dom_simpson), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Simpson's Ind", y="Shannon Index", x="dom_simpson (scaled)") + geom_smooth(method = "lm") + theme_project()
@@ -80,14 +80,14 @@ e_p <- ggplot(aes(y=dom_shannon, x=dom_simpson), data=domshannons_rq1.df) + geom
 f_p <- ggplot(aes(y=dom_shannon, x=dom_total_seedling_cover), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Tot Seed Cover", y="Shannon Index", x="dom_total_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #overall_seedling_cover
-g_p <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover), data=domshannons_rq1.df) + geom_point() + labs(title=" (b) S.I. v. Ov Seed Cov", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
+g_p <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover), data=domshannons_rq1.df) + geom_point() + labs(title=" S.I. v. Ov Seed Cov", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #total_dom_leaf_area
-h_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_area), data=domshannons_rq1.df) + geom_point() + labs(title="(c) S.I. v. D. Leaf Area", y="Shannon Index", x="total_dom_leaf_area (scaled)") + geom_smooth(method = "lm") + theme_project()
+h_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_area), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. v. D. Leaf Area", y="Shannon Index", x="total_dom_leaf_area (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 
 #total_dom_leaf_dry_weight
-i_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_dry_weight), data=domshannons_rq1.df) + geom_point() + labs(title="(d) S.I. v. D. Leaf Dry", y="Shannon Index", x="total_dom_leaf_dry_weight (scaled)") + geom_smooth(method = "lm") + theme_project()
+i_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_dry_weight), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. v. D. Leaf Dry", y="Shannon Index", x="total_dom_leaf_dry_weight (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #av_totaldom_sla
 j_p <- ggplot(aes(y=dom_shannon, x=av_totaldom_sla), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Avg SLA", y="Shannon Index", x="av_totaldom_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
@@ -108,7 +108,7 @@ n_p <- ggplot(aes(y=dom_shannon, x=av_quad_compaction), data=domshannons_rq1.df)
 o_p <- ggplot(aes(y=dom_shannon, x=av_quad_lai), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Quad LAI", y="Shannon Index", x="av_quad_lai (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #av_quad_gft
-p_p <- ggplot(aes(y=dom_shannon, x=av_quad_gft), data=domshannons_rq1.df) + geom_point() + labs(title="(e) S.I. v. Avg Qua GFT", y="Shannon Index", x="av_quad_gft (scaled)") + geom_smooth(method = "lm") + theme_project()
+p_p <- ggplot(aes(y=dom_shannon, x=av_quad_gft), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. v. Avg Qua GFT", y="Shannon Index", x="av_quad_gft (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #av_trans_elevation
 q_p <- ggplot(aes(y=dom_shannon, x=av_trans_elevation), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Trans El", y="Shannon Index", x="av_trans_elevation (scaled)") + geom_smooth(method = "lm") + theme_project()

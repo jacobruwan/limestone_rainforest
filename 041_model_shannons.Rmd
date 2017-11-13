@@ -9,7 +9,7 @@ A total of 4 models were reviewed, each time assessed on their marginal log-like
 
 After elimation, and including site due to the research question, the variables that were suitbale predictors for shannon's index were: overall seedling cover, site:overall seedling cover, total dominant leaf dry weight, and average quadrat GFT. 
 
-$$Shannon's Index = 0 + {Prinstine} + {Overall Seedling Cover} + {SiteP:Overall Seedling Cover} + {Total Dominant Leaf Dry Weight} + {Average Quadrat GFT} + {transect} + {residual}$$
+<!-- $$Shannon's Index = 0 + {Prinstine} + {Overall Seedling Cover} + {SiteP:Overall Seedling Cover} + {Total Dominant Leaf Dry Weight} + {Average Quadrat GFT} + {transect} + {residual}$$ -->
 
 The Marginal log-Likelihood was  -24.15 (compared to -42.55, which was in the intial model that included all quadrat-level variables). 
 

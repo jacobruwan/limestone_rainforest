@@ -110,7 +110,7 @@ ggplot() +
 
 ```
 
-We can see that disturbed transects tend to have a higher tmperature accross the two and a half day cycle. An interesting 'spike' in the data is observed for one pristine transect between 12pm and 6pm. The source of this measurment is unknown, so can not be excluded as an outlier.
+We can see that disturbed transects tend to have a higher temperature across the two and a half day cycle. An interesting 'spike' in the data is observed for one pristine transect between 12pm and 6pm. The source of this measurement is unknown, so can not be excluded as an outlier.
 
 
 <!-- ### Univariate Relationship -->

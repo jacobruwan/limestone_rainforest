@@ -29,7 +29,8 @@ fit3 = inla(presence_richness ~ max_temp +
 
 #### Model Fit
 
-##### INSERT RICKY COMMENTS
+From the standardised residuals plot, it is to be noted that the residuals values varies throughout, with minor differences when the fitted values increase. 
+
 ```{r, fig.width = 5}
 # summary(fit)
 fit <- fit3
@@ -87,7 +88,7 @@ hist_cpo <- pred.df %>%
   ggtitle("Histograms of CPO")
 ```
 
-##### INSERT RICKY COMMENTS
+As for the residuals QQ plot, the plots alternate above and under the line, indicating that the residuals are likely to be normal. However, both histograms in this analysis does not exhibit notable normality, which may imply that the model may not fit relatively well. However, this may be that there is a lakc of data in the analysis.
 
 ```{r, fig.height = 5, fig.width = 7}
 par(mfrow = c(2,2))
@@ -111,8 +112,7 @@ par(mfrow = c(1,1))
 ```
 
 #### Fixed Effect Credible Intervals
-
-##### INSERT RICKY COMMENTS
+The credible interval for parameter estimate of maximum temperature shows that a unit increase maximum temperature can decrease species richness by  -0.2923 to -0.0406. 
 
 ```{r }
 ## How to look at predictions and compare to original???

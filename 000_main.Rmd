@@ -141,13 +141,13 @@ Limestone rainforests are well known for their high biodiversity and endemic spe
 
 _**Understorey Seedling Species**_
 
-Due to the scope of this project it was decided to focus on the understory of the rainforest. This was for multiple logistic reasons and findings in past literature. This did not limit the study as the understory of rainforests have been shown to be incredibly important with particular variables being good predictors. Understories have continuously been used to investigate disturbed forests. One example looked at different forest understories in the Philippines, a main finding being higher species richness in the disturbed (Wills et al., 2016). 
+Due to the scope of this project it was decided to focus on the understorey of the rainforest. This was for multiple logistic reasons and findings in past literature. This did not limit the study as the understorey of rainforests have been shown to be incredibly important with particular variables being good predictors. Understorey's have continuously been used to investigate disturbed forests. One example looked at different forest understorey's in the Philippines, a main finding being higher species richness in the disturbed (Wills et al., 2016). 
 
 Studies also explored disturbance and the difficulties of restoration. They showed that functional traits act a filter, in a sense, for the types of plant species able to inhabit particular ecosystems. These can include an array of features that are only suitable for specific species. Species without specific functional traits cannot inhabit certain communities (Funk et al., 2008)
 
 _**Dominant Species**_
 
-We also found past research that introduced the concept of dominant plant species influencing ecosystems. Meaning their functional traits may contribute to their survival in disturbed ecosystems, being able to bypass the filters posed by disturbance (Wangchuk et al., 2014). This then leads to the backbone of this study that the understory is the future of the rainforest signifying its importance for this study. 
+We also found past research that introduced the concept of dominant plant species influencing ecosystems. Meaning their functional traits may contribute to their survival in disturbed ecosystems, being able to bypass the filters posed by disturbance (Wangchuk et al., 2014). This then leads to the backbone of this study that the understorey is the future of the rainforest signifying its importance for this study. 
 
 _**Target Resolutions**_
 
@@ -163,7 +163,7 @@ The three main research questions are:
 At a high level, abiotic indicators are investigated to quantify the disturbance conditions of the rainforest. Where as biotic variables are investigated to evaluate the impact of this disturbance on the ecosystem. Each question will be explain in further detail to identify the ecological meaning.
 
 ### Dominant Species Seedling Cover
-In previous studies, the plant cover of a specific species is an indicator to the nutriants stored in the soil; this is because the cover contributes to the governance of soil erosion (Pohl, Graf, Buttler, & Rixen, 2012). In addition, it was proven in other forest types that the combined contribution of seedling cover and high species richness is significantly more effective at governing soil erosion (Pohl et al., 2012).  Disturbance implies for the presence of species that are more resilient to the lack of necessary nutrients, and thereby affecting the level of seedling cover in an area (Funk,2008). For example, a fire can burn up to the entire understorey; which promotes the growth of pioneer species that disperse and grow quicker in disturbed forests (Fourrier et al., 2015). These species typically need high photosynthetic rate, growth capacity, and nutrient storage to recover from recent disturbances (Manninen, Stark, Kyt√∂viita, Lampinen, & Tolvanen, 2009). The different types of disturbances can affect how the plants grow, and therefore may contribute to the changes in seedling cover.
+In previous studies, the plant cover of a specific species is an indicator to the nutrients stored in the soil; this is because the cover contributes to the governance of soil erosion (Pohl, Graf, Buttler, & Rixen, 2012). In addition, it was proven in other forest types that the combined contribution of seedling cover and high species richness is significantly more effective at governing soil erosion (Pohl et al., 2012).  Disturbance implies for the presence of species that are more resilient to the lack of necessary nutrients, and thereby affecting the level of seedling cover in an area (Funk,2008). For example, a fire can burn up to the entire understorey; which promotes the growth of pioneer species that disperse and grow quicker in disturbed forests (Fourrier et al., 2015). These species typically need high photosynthetic rate, growth capacity, and nutrient storage to recover from recent disturbances (Manninen, Stark, Kytaviita, Lampinen, & Tolvanen, 2009). The different types of disturbances can affect how the plants grow, and therefore may contribute to the changes in seedling cover.
 
 
 
@@ -172,39 +172,28 @@ Shannon's Diversity Index is calculated using the abundance multiple by the natu
 
 Species diversity is a standard variable calculated in ecological studies. Previous studies have looked at the diversity of a particular trees in Malaysia and found adverse effects of diversity on the overall biodiversity of the forest (Addo-Fordjour, Rahmad & Shahrul, 2012). This study also was on disturbed forests due to tourism, which is a major industry in Malaysia and Langkawi Island. 
 
-Other studies suggested that increased disturbance leads to high diversities due to advantageous/fast growing species (Nguyen et al., 2012). One particular study also focussed on only dominant species and found their diversity was a good indicator of disturbance (Stevens et al., 2015). This was reiterated in an understory study on ecosystem functions in forests of varying soil types, elevation and weather conditions (Duguid et al., 2013). 
+Other studies suggested that increased disturbance leads to high diversities due to advantageous/fast growing species (Nguyen et al., 2012). One particular study also focused on only dominant species and found their diversity was a good indicator of disturbance (Stevens et al., 2015). This was reiterated in an understorey study on ecosystem functions in forests of varying soil types, elevation and weather conditions (Duguid et al., 2013). 
 
 All of these studies show that the diversity of dominant species change in response to disturbance, and Shannon's Diversity Index is a useful tool. 
 
 ### Dominant Species Specific Leaf Area
 
-_*Specific Leaf Area*_
+_**Specific Leaf Area**_
 
 The purpose of investigating specific leaf area, referred to as SLA in this report, is the insight is provides into a plants strategy in the ecosystem. Plants are in constant competition for resources within their community. One core resource required is light. This presents one of the most competitive strategies employed by a plant: how they invest growth into their leaves, the apparatus used to capture light. A larger leaf will capture more light, and enable faster growth. However, with a limited amount of energy available, the plant must sacrifice the thickness of their leaves. This makes the plant more susceptible to damage from herbivores.
 
-This presents a trade-off between the growth and defence mechanisms of the plant. SLA is a measure of this trade-off, calculated as the one-sided leaf area divided by the dry mass. SLA is used to relatively compare different species within the same community, categorising plants as resource acquisition or resource conservation. A relatively high SLA can suggest the plant has a need to compete more aggressively for light that other species within the same community.
+This presents a trade-off between the growth and defence mechanisms of the plant. SLA is a measure of this trade-off, calculated as the one-sided leaf area divided by the dry mass. SLA is used to relatively compare different species within the same community, categorising plants as resource acquisition or resource conservation. A relatively high SLA can suggest the plant has a need to compete more aggressively for light that other species within the same community (Quested et al., 2007).
 
-_*Investigation of Weighted and Aggregated SLA*_
+_**Investigation of Weighted and Aggregated SLA**_
 
-To provide a thorough comparison of the SLA between species and between disturbance, the SLA is weighted by each plants contribution to the community. This is calculated as the SLA of each leaf, weighted by the amount of area coverage the plant has in its community. This weighting takes into account how established a plant is in the community, and provides an insight to how this dominance affects a plant's investment strategy. This weighted measure is used to quantify the difference between species. To measure the difference due to disturbance, each species is aggregated to the community level. From Grime 2004, we know that dominant species have a large influence on the ecosystem, so this aggregation determines the growth strategy of the community.
-
-
-_*REFERENCES*_
-
-Quested, H., Eriksson, O., Fortunel, C., & Garnier, E. (2007). Plant Traits Relate to Whole-Community Litter Quality and Decomposition following Land Use Change. Functional Ecology,21(6), 1016-1026. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20142742 
-
-Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . Vile, D. (2008). Impact of Abundance Weighting on the Response of Seed Traits to Climate and Land Use. Journal of Ecology, 96(2), 355-366. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20143472 
-
+To provide a thorough comparison of the SLA between species and between disturbance, the SLA is weighted by each plants contribution to the community. This is calculated as the SLA of each leaf, weighted by the amount of area coverage the plant has in its community. This weighting takes into account how established a plant is in the community, and provides an insight to how this dominance affects a plant's investment strategy. This weighted measure is used to quantify the difference between species. To measure the difference due to disturbance, each species is aggregated to the community level. From Grime 2004, we know that dominant species have a large influence on the ecosystem, so this aggregation determines the growth strategy of the community (Pakeman et al., 2008).
 
 ### Temperature
-
-
-
-
-#### REFERENCES NEEDED
-
+Disturbed areas of a rainforest exhibit trait that change the environmental conditions of the ecosystem. One outcome of this disturbance is generally an increase in temperature, as a result from the exposure from the canopy cover (De Lima et al., 2013). 
 
 ### Species Richness
+Species richness in ecology is discussed to illustrate the quantity of species in an area, but does not account for diversity. In 1973, the classic humped-back model(HBM) was theorised, stating that the productivity of an ecosystem peaks when species richness also peaks (Fraser et al., 2015). Although there is conflict between academic resources concerning the validity of this model, it is a phenomena still investigated in ecology (Ashouri, Jalili, Danehkar, Chahouki, & Hamzeh'ee, 2016). Studies have indicated that disturbances, evolutionary history, temperature, and dispersal limitations are also likely to contribute to species richness (Ashouri et al., 2016).  However, the variable of temperature is complicated as its implication on species richness depends on the competitiveness in the environment (Hillebrand, Burgmer, & Biermann,2012). Therefore, other variables derived from the environment may possibly predict species richness. 
+
 
 
 
@@ -240,26 +229,23 @@ Prior to analysis, the data quality was evaluated. Major outcomes were that humi
 # Analysis Overview
 The models used throughout this report are generalised linear mixed effects models. This section will outline how and why these models are required, and will provide an overview of the model development process.
 
-_*Mixed Effects*_
+_**Mixed Effects**_
 
 Mixed effects models enable the variation of the response variable to be explained by fixed and random effects. Fixed effects represent the predictor variables that are of direct interest, such as disturbance or dominant species id. Random effects represent variables that are known to cause variation in the response variable, but are not of direct interest.
   
 The fixed effects include all abiotic and biotic variables that are collected throughout the experiment. The final model will represent the most predictive subset of these variables. The random effects of each model include variation between transects, and variation between quadrats nested in transects. This structure is necessary due to the experimental design, and will remain constant for every model (i.e. not form part of the model selection).
 
-_*Generalised Linear Mixed Effects*_
+_**Generalised Linear Mixed Effects**_
 
 The choice between a linear mixed effects model (LMM) and generalised linear mixed effects model (GLMM) depends on the domain of the response variable. GLM's transform the predictors of the linear model from the real scale into the correct domain through a link function. For example, Species Richness can only be a positive integer value. Thus, a Poisson GLM can be used with a log-link function to model the average species richness.
 
-_*Bayesian Model*_
+_**Bayesian Model**_
 
-The bayesian paradigm is utilised for it's ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the value of a conditional probability:
+The Bayesian paradigm is utilised for it's ability to handle a mixed effects structure in GLMM's. The mixed effects structure requires the likelihood conditional on the random effects. The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the Bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
 
-$$ Insert the equation  $$
-The frequentist paradigm is limited as it requires the difficult integration of this conditional probability, with various approximation methods used. However, the bayesian paradigm uses this probability directly and more efficiently. The modelling method used throughout this report is Integrated Nested Laplace Approximation (INLA). Essentially, INLA matches the posterior distribution of each parameter based on the mode and spread of the data.
+The Bayesian model estimates a distribution for each parameter in the model. These distributions are interpreted using 95% Credible Intervals, which evaluates the 2.5% and 97.5% quantiles of the distribution. If this interval does not include zero, then the collected data provides evidence that the parameter has a positive or negative effect. The uncertainty around this parameter is evaluated as range between these quantile estimates. As such, the predictor variable's effect on the response variable will be reported with a lower and upper bound estimate.
 
-The bayesian model estimates a distribution for each parameter in the model. These distributions are interpreted using 95% Credible Intervals, which evaluates the 2.5% and 97.5% quantiles of the distribution. If this interval does not include zero, then the collected data provides evidence that the parameter has a positive or negative effect. The uncertainty around this parameter is evaluated as range between these quantile estimates. As such, the predictor variable's effect on the response variable will be reported with a lower and upper bound estimate.
-
-_*Process Overview*_
+_**Process Overview**_
 
 This section demonstrates the model development process. The data is explored through meaningful graphs that identify visual patterns within the data. This information guides the model development, which aims to quantify the relationships between the predictor and response variable. 
 
@@ -268,8 +254,6 @@ This section demonstrates the model development process. The data is explored th
   * Model fit is evaluated on residual plots and whether the CPO PIT values are approximately uniformly/normally distributed.
 
 The following subsections are segmented into an exploratory analysis and model development of each research question's response variables. 
-
-
 
 # Temperature
 ## Exploratory Analysis
@@ -281,9 +265,7 @@ The following subsections are segmented into an exploratory analysis and model d
 ```
 
 ## Model Outcomes
-
-*RUWAN* write stuff: Risk Ratio (RR) of credible intervals
-
+High amounts of serial correlation were found in the dataset. After the random effects structure accounted for some of this variation, there was no significant difference between sites.
 
 
 
@@ -307,7 +289,7 @@ The following subsections are segmented into an exploratory analysis and model d
 ```
 
 ## Model Outcomes
-The variables remaining through the model fit procedure were the abundance of dominant species and their species identification; disturbance did not appear likely to be a significant variable to the seedling cover of dominent species. However, the results of the regression demonstrated that each species contributes differently to the seedling cover; the presence of dominant species 2 implied that there was relatively higher seedling cover compared to dominant species 1 and 3. Furthermore, the regression showed that the abundance of dominent species has a positive effect on the seedling cover. 
+The variables remaining through the model fit procedure were the abundance of dominant species and their species identification; disturbance did not appear likely to be a significant variable to the seedling cover of dominant species. However, the results of the regression demonstrated that each species contributes differently to the seedling cover; the presence of dominant species 2 implied that there was relatively higher seedling cover compared to dominant species 1 and 3. Furthermore, the regression showed that the abundance of dominant species has a positive effect on the seedling cover. 
 
 
 
@@ -379,7 +361,7 @@ The following subsections investigate key relationships that explain the variati
 
 
 ## Model Outcomes
-Overall, the model estimates a distinct difference between disturbed and undisturbed forest areas. Upon investigating each individual species, this difference betwen sites can be attributed to dominant species 1. Both dominant species 2 and 3 had less weighted SLA than species 1, and the parameter estimates showed no major differences between rainforest sites.
+Overall, the model estimates a distinct difference between disturbed and undisturbed forest areas. Upon investigating each individual species, this difference between sites can be attributed to dominant species 1. Both dominant species 2 and 3 had less weighted SLA than species 1, and the parameter estimates showed no major differences between rainforest sites.
 
 
 
@@ -409,11 +391,15 @@ Through a model fit procedure, the only variable that was likely to be significa
 
 
 
+
+
+
 # Discussion
 ## Ecological Meaning of Model Outcomes
 
 _**Temperature**_
 
+No significant difference was modelling between disturbed and undisturbed areas of the rainforest. This is a result of the lack of data available, and the complexity of modelling serial correlation. However, a slight difference can be visually observed, suggesting that the disturbed areas have certain characteristics that increase temperature.
 
 _**Seedling Cover**_
 
@@ -421,7 +407,7 @@ While the analysis indicated that the disturbances of the limestone rainforests 
 
 _**Shannons Index of Diversity**_
 
-In terms of ecological meaning, the model investigating shannon's index tell us that diversity does not appear to change between disturbed and pristine sites. Other factors affected diversity. It increased with higher cover of all seedlings, possibly explained by the advantages species in disturbed ecosystems utilising the expose ground and nutrients. Higher GFT tells us that diversity increased with less canopy cover which also may explain the higher dominant leaf dry weight as larger leaves utilise sunlight better. 
+In terms of ecological meaning, the model investigating Shannon's index tell us that diversity does not appear to change between disturbed and pristine sites. Other factors affected diversity. It increased with higher cover of all seedlings, possibly explained by the advantages species in disturbed ecosystems utilising the expose ground and nutrients. Higher GFT tells us that diversity increased with less canopy cover which also may explain the higher dominant leaf dry weight as larger leaves utilise sunlight better. 
 
 _**Specific leaf Area**_
 
@@ -429,18 +415,27 @@ From the community aggregated and community weighted SLA models, we can infer th
 
 _**Species Richness**_
 
+### RICKY SPECIES RICHNESS SUMMARY
 
-# Limitations
-The first limitation occurred for the leaf sample measurements, due the low sensitivity of the weighing scales. This was overcome by measuring the total weight of all leaf samples, per species per quadrat, and calculating the mean. This provides misleading results for the small or large leaves of the sample, which deviate significantly from the mean weight.
 
-The main limitation was due to the equipment available for the experiment overseas. No oven was available for drying leaves or filter paper, which resulted in the moisture content being an uncontrolled variable. This affects the dry leaf mass and filter paper weight measurements.
 
-Another limitation was a result of the limited time available to collect data such as temperature readings and soil decomposition. This prevented a throrough analysis of the variation in temperature at the rainforest. This also prevented the filter paper to adequately capture any difference in decomposition rates from the rainforest.
+
 
 
 # Conclusion and Recommendations
 The findings of this project reveals information that can be used for protect the limestone forests. The implications to the future of limestone forests are derived in this study of seedling species in accordance to the plant cover, species richness, SLA, diversity, and temperature. 
 
+While the analysis indicated that the disturbances of the limestone rainforests does not contribute to the seedling cover, it was found that each dominant species had a significant role in the growth in seedling cover. Recall that the seedling cover is also the governance of soil erosion protection. Furthermore the abundance of the three dominant species has a significant positive effect on the plant cover. Therefore, from the analysis of the seedling cover, it is to be deduced that there is importance in protecting the three dominant species to ensure seedling cover. 
+
+In examining the effects of disturbance on the temperature, it was found that disturbance implied for higher temperature. A disturbed area was more likely to have high temperatures as oppose to cooler temperatures.
+
+While the Shannon's Index of Diversity is not dependent on the disturbance, it appears to be dependent on other variables such as higher seedling cover, GFT, and leaf dry weight. These variables all imply for a higher diversity index. 
+
+The specific leaf area was found to differ between disturbances as well as affect be affected differently according to the specific leaf. Species 1 was more likely to have a larger weighted SLA in pristine forest. 
+
+Finally, it was found that higher temperatures implied lower species richness. That is, species richness has a negative relationship with the maximum temperature. 
+
+The implications of our findings show that the disturbance of the limestone rainforests in Langkawi Island affects the several important attributes. The understanding of the dominant seedling species predicts the future of the forest, and therefore the negative impacts of seedling species will reflect in the future. Brief limitations are attached as an appendix (Appendix 2).
 
 
 # Appendix
@@ -448,30 +443,31 @@ The findings of this project reveals information that can be used for protect th
 ```{r, child = '011_data_quality.Rmd'}
 ```
 
+## Appendix 2: Limitations
+The first limitation occurred for the leaf sample measurements, due the low sensitivity of the weighing scales. This was overcome by measuring the total weight of all leaf samples, per species per quadrat, and calculating the mean. This provides misleading results for the small or large leaves of the sample, which deviate significantly from the mean weight.
+
+The main limitation was due to the equipment available for the experiment overseas. No oven was available for drying leaves or filter paper, which resulted in the moisture content being an uncontrolled variable. This affects the dry leaf mass and filter paper weight measurements.
+
+Another limitation was a result of the limited time available to collect data such as temperature readings and soil decomposition. This prevented a thorough analysis of the variation in temperature at the rainforest. This also prevented the filter paper to adequately capture any difference in decomposition rates from the rainforest.
 
 
 # References
-
   1. Addo-Fordjour, P., Rahmad, Z., & Shahrul, A. (2012). Effects of human disturbance on liana community diversity and structure in a tropical rainforest, Malaysia: implication for conservation. Journal Of Plant Ecology, 5(4), 391-399. http://dx.doi.org/10.1093/jpe/rts012
   2. Ashouri, P., Jalili, A., Danehkar, A., Chahouki, M. A. Z., & Hamzeh'ee, B. (2016). Is there any support for the humped-back model in some steppe and semi steppe regions of iran? Acta Oecologica, 73, 61-70. doi:10.1016/j.actao.2016.03.002
-  3. Clements, R., Sodhi, N., Schilthuizen, M., & Ng, P. (2006). Limestone Karsts of Southeast Asia: Imperiled Arks of Biodiversity. Bioscience, 56(9), 733-742. http://dx.doi.org/10.1641/0006-3568(2006)56[733:lkosai]2.0.co;2
-  4. Duguid, M., Frey, B., Ellum, D., Kelty, M., & Ashton, M. (2013). The influence of ground disturbance and gap position on understory plant diversity in upland forests of southern New England. Forest Ecology And Management, 303, 148-159. http://dx.doi.org/10.1016/j.foreco.2013.04.018
-  5. Fraser, L., Pither, J., Jentsch, A., Sternberg, M., Zobel, M., Askarizadeh, D., . . . Zupo, T. (2015). Worldwide evidence of a unimodal relationship between productivity and plant species richness. Science, 349(6245), 302-305. doi:10.1126/science.aab3916
-  6. Funk, J., Cleland, E., Suding, K., & Zavaleta, E. (2008). Restoration through reassembly: plant traits and invasion resistance. Trends In Ecology & Evolution, 23(12), 695-703. http://dx.doi.org/10.1016/j.tree.2008.07.013
-  7. Grime, J. (1998). Benefits of plant diversity to ecosystems: immediate, filter and founder effects. Journal Of Ecology, 86(6), 902-910. http://dx.doi.org/10.1046/j.1365-2745.1998.00306.x
-  8. Hillebrand, H., Burgmer, T., & Biermann, E. (2012). Running to stand still: Temperature effects on species richness, species turnover, and functional community dynamics. Marine Biology, 159(11), 2415-2422. doi:10.1007/s00227-011-1827-z
+  3. De Lima, N·dia Gilma Beserra, Galvani, E., Falc„o, R. M., & Cunha-Lignon, M. (2013). Air temperature and canopy cover of impacted and conserved mangrove ecosystems: A study of a subtropical estuary in brazil. Journal of Coastal Research, 2(65), 1152-1157. doi:10.2112/SI65-195
+  4. Clements, R., Sodhi, N., Schilthuizen, M., & Ng, P. (2006). Limestone Karsts of Southeast Asia: Imperiled Arks of Biodiversity. Bioscience, 56(9), 733-742. http://dx.doi.org/10.1641/0006-3568(2006)56[733:lkosai]2.0.co;2
+  5. Duguid, M., Frey, B., Ellum, D., Kelty, M., & Ashton, M. (2013). The influence of ground disturbance and gap position on understory plant diversity in upland forests of southern New England. Forest Ecology And Management, 303, 148-159. http://dx.doi.org/10.1016/j.foreco.2013.04.018
+  6. Fraser, L., Pither, J., Jentsch, A., Sternberg, M., Zobel, M., Askarizadeh, D., . . . Zupo, T. (2015). Worldwide evidence of a unimodal relationship between productivity and plant species richness. Science, 349(6245), 302-305. doi:10.1126/science.aab3916
+  7. Funk, J., Cleland, E., Suding, K., & Zavaleta, E. (2008). Restoration through reassembly: plant traits and invasion resistance. Trends In Ecology & Evolution, 23(12), 695-703. http://dx.doi.org/10.1016/j.tree.2008.07.013
+  8. Grime, J. (1998). Benefits of plant diversity to ecosystems: immediate, filter and founder effects. Journal Of Ecology, 86(6), 902-910. http://dx.doi.org/10.1046/j.1365-2745.1998.00306.x
+  9. Hillebrand, H., Burgmer, T., & Biermann, E. (2012). Running to stand still: Temperature effects on species richness, species turnover, and functional community dynamics. Marine Biology, 159(11), 2415-2422. doi:10.1007/s00227-011-1827-z
 Cancel
-  9. Wills, J., Herbohn, J., Moreno, M., Avela, M., & Firn, J. (2016). Next-generation tropical forests: reforestation type affects recruitment of species and functional diversity in a human-dominated landscape. Journal Of Applied Ecology, 54(3), 772-783. http://dx.doi.org/10.1111/1365-2664.12770
   10. McMorrow, J., & Talip, M. (2001). Decline of forest area in Sabah, Malaysia: Relationship to state policies, land code and land capability. Global Environmental Change, 11(3), 217-230. http://dx.doi.org/10.1016/s0959-3780(00)00059-5
   11. Nguyen, H., Herbohn, J., Firn, J., & Lamb, D. (2012). Biodiversity-productivity relationships in small-scale mixed-species plantations using native species in Leyte province, Philippines. Forest Ecology And Management, 274, 81-90. http://dx.doi.org/10.1016/j.foreco.2012.02.022
-  12. Stevens, J., Safford, H., Harrison, S., & Latimer, A. (2015). Forest disturbance accelerates thermophilization of understory plant communities. Journal Of Ecology, 103(5), 1253-1263. http://dx.doi.org/10.1111/1365-2745.12426
-  13. Wangchuk, K., Darabant, A., Rai, P., Wurzinger, M., Zollitsch, W., & Gratzer, G. (2014). Species richness, diversity and density of understory vegetation along disturbance gradients in the Himalayan conifer forest. Journal Of Mountain Science, 11(5), 1182-1191. http://dx.doi.org/10.1007/s11629-013-2942-8
-
-
-
-
-
-
-
+  12. Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . Vile, D. (2008). Impact of Abundance Weighting on the Response of Seed Traits to Climate and Land Use. Journal of Ecology, 96(2), 355-366. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20143472 
+  13.Quested, H., Eriksson, O., Fortunel, C., & Garnier, E. (2007). Plant Traits Relate to Whole-Community Litter Quality and Decomposition following Land Use Change. Functional Ecology,21(6), 1016-1026. Retrieved from http://www.jstor.org.ezp01.library.qut.edu.au/stable/20142742 
+  14. Stevens, J., Safford, H., Harrison, S., & Latimer, A. (2015). Forest disturbance accelerates thermophilization of understory plant communities. Journal Of Ecology, 103(5), 1253-1263. http://dx.doi.org/10.1111/1365-2745.12426
+  15. Wangchuk, K., Darabant, A., Rai, P., Wurzinger, M., Zollitsch, W., & Gratzer, G. (2014). Species richness, diversity and density of understory vegetation along disturbance gradients in the Himalayan conifer forest. Journal Of Mountain Science, 11(5), 1182-1191. http://dx.doi.org/10.1007/s11629-013-2942-8
+  16. Wills, J., Herbohn, J., Moreno, M., Avela, M., & Firn, J. (2016). Next-generation tropical forests: reforestation type affects recruitment of species and functional diversity in a human-dominated landscape. Journal Of Applied Ecology, 54(3), 772-783. http://dx.doi.org/10.1111/1365-2664.12770
 
 

@@ -111,9 +111,8 @@ par(mfrow = c(1,1))
 ```
 
 #### Fixed Effect Credible Intervals
-In this model, it is clear that all the variables are significant. This is because no variables' credible interval overlaps '0'. 
+In this model, it is clear that all the variables are significant. This is because no variables' credible interval overlaps '0'. The credible interval for abundance shows that a unit increase in (scaled) abundance can increase (transformed) seedling cover by 0.59 to 1.11.
 
-##### INSERT RICKY COMMENTS
 ```{r }
 ## How to look at predictions and compare to original???
 fixed <- summary(fit3)$fixed
