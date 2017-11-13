@@ -30,7 +30,7 @@ splinefit2 <- lmer(temp ~ site + bs(time24, knots = c(14, 17)) + (1|hobo_id),
 ```
 
 ### Estimates
-The two tables below demonstrate the estimated fixed and random effects. The second table demonstrates that majority of the variance is explained by each hobo device. After accounting for this variation, the Site estimate's has a negative t-value. This suggests that there is no significant difference between disturbed and pristine areas of the rainforest. The non linear relationship between time and temperature was significant for certain knot points.
+The two tables below demonstrate the estimated fixed and random effects. The second table demonstrates that majority of the variance is explained by each hobo device. After accounting for this variation, the Site estimate (first table) has a negative t-value. This suggests that there is no significant difference between disturbed and pristine areas of the rainforest. The non linear relationship between time and temperature was significant for certain knot points.
 
 ```{r}
 summary(splinefit2)$coefficients %>%
@@ -135,7 +135,7 @@ par(mfrow = c(1,2))
 # Residuals QQ plot
 qqnorm(pred.df$residuals)
 qqline(pred.df$residuals)
-title("Residuals                                                ")
+title("Residuals                                             ")
 
 Residuals <- pred.df$residuals
 hist(Residuals)

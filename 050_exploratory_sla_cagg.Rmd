@@ -95,7 +95,7 @@ Other variables such as overall seedling cover and abundance showed positive rel
 
 ##### Overall Seedling Cover
 
-As expected, the figure below shows the value of community weighted SLA increases as the overall seedling cover increases. There is a slight ihint of an interaction between overall seedling cover and site, so this will be further investigated in the model.
+As expected, the figure below shows the value of community weighted SLA increases as the overall seedling cover increases. There is a slight hint of an interaction between overall seedling cover and site, so this will be further investigated in the model.
 
 ```{r}
 # Mean sla plot

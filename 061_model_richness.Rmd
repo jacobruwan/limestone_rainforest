@@ -88,7 +88,7 @@ hist_cpo <- pred.df %>%
   ggtitle("Histograms of CPO")
 ```
 
-As for the residuals QQ plot, the plots alternate above and under the line, indicating that the residuals are likely to be normal. However, both histograms in this analysis does not exhibit notable normality, which may imply that the model may not fit relatively well. However, this may be that there is a lakc of data in the analysis.
+As for the residuals QQ plot, the plots alternate above and under the line, indicating that the residuals are likely to be normal. However, both histograms in this analysis does not exhibit notable normality, which may imply that the model may not fit relatively well. However, this may be that there is a lack of data in the analysis.
 
 ```{r, fig.height = 5, fig.width = 7}
 par(mfrow = c(2,2))

@@ -58,7 +58,7 @@ latehobos <- data.frame(ytemp = c(25.5, 28),
 
 The temperature analysis is limited to predictor variables summarised at the transect level. This provides only six different measurements, which essentially captures the variation between transects. Thus, only the difference between disturbed and pristine forest areas are reported.
 
-### Site: Time Series
+### Site
 The figure below compares the recorded temperature over time, with the green and red points representing the pristine and disturbed areas. 
 
 ```{r}

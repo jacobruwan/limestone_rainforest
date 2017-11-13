@@ -122,7 +122,9 @@ df2<- na.omit(df1)
 correlation_analyse <- subset(df2, select=-c(`species_ID`, `transect`, `quadrat`, `site`, `site_trans`))
 
 cor(correlation_analyse %>% select(-presence_richness), use = "complete.obs") %>%
-  round(digits = 2)
+  round(digits = 2) %>%
+  data.frame() %>%
+  kable(caption = "Possible predictor variable correlation's for the species richness model")
 
 ```
 

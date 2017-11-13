@@ -155,6 +155,7 @@ abiotic_elevation.df %>%
   xlab("Site") +
   ylab("Elevation (m)") +
   theme_project()  +
-  ggtitle("Elevation vs Sites and Transects")
+  ggtitle("Elevation vs Sites and Transects")+
+  scale_colour_manual(values = colours.site)
 
 ```

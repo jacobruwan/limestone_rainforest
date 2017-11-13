@@ -143,13 +143,13 @@ fit <- inla(inla_formula,
 
 
 # analyse the output of the model
-summary(fit)
+# summary(fit)
 ```
 
 
 
 #### Model Fit
-The figure below compares the fitted predictions against the observed weighted SLA values. No observeable patterns can be determine between either graph, suggesting the model is appropriate. There are some standardised residuals that deviate more than 1.5 standard deviations from the zero line for the lower fitted values. However, this does not raise any concerns for model fit.
+The figure below compares the fitted predictions against the observed weighted SLA values. No observeable patterns can be determined between either graph, suggesting the model is appropriate. There are some standardised residuals that deviate more than 1.5 standard deviations from the zero line for the lower fitted values. However, this does not raise any concerns for model fit.
 
 ```{r, fig.width = 5}
 # summary(fit)
@@ -206,7 +206,7 @@ hist_cpo <- pred.df %>%
   ggtitle("Histograms of CPO")
 ```
 
-Observing the QQ plots and histograms in the figure below highlights some interesting trends. The CPO values are closer to the uniform distribution for this model, with evidence from the QQ plot deviateing at the tail ends. The Residual QQ plot deviates more at the lower tail end, resulting in a skewed histogram distribution. However, majority of the residuals align to a normal distribution, no the model is considered appropriate.
+Observing the QQ plots and histograms in the figure below highlights some interesting trends. The CPO values are closer to the uniform distribution for this model, with evidence from the QQ plot deviateing at the tail ends. The Residual QQ plot deviates more at the lower tail end, resulting in a skewed histogram distribution. However, majority of the residuals align to a normal distribution, so the model is considered appropriate.
 
 ```{r, fig.height = 5, fig.width = 7}
 par(mfrow = c(2,2))
@@ -408,7 +408,7 @@ realeffect.df %>%
 
 
 #### Variation Breakdown
-In the figure below, we observe a different outcome than expected. Large variation was observed between quadrats for weighted SLA, however the INLA model shows that miminal variation was attributed to the random effects.
+In the figure below, we observe a different outcome than expected. Large variation was observed between quadrats for weighted SLA, however the INLA model shows that minimal variation was attributed to the random effects.
 
 ```{r}
 ## How to look at predictions and compare to original???

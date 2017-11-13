@@ -56,7 +56,7 @@ instant_pkgs <- function(pkgs) {
 # Define packages to load run instant_pkgs
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", "knitr",
                       "ggplot2", "ggthemes", "lubridate",
-                      "lme4", "INLA", "stringr", "scales", "splines", "car")
+                      "lme4", "INLA", "stringr", "scales", "splines", "car", "grid")
 
 instant_pkgs(packages_to_load)
 ```
@@ -128,6 +128,11 @@ data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Dat
 ```
 
 # Abstract
+Limestone rainforests are well known for their high biodiversity, endemic species, and unique landscape. This investigation analysed understorey seedling functional traits of three dominant species in addition to abiotic factors in pristine and disturbed sites of a limestone rainforest on Langkawi Island, Malaysia. The research questions focused on determining how disturbance impacted diversity, specific leaf area, and temperature, and investigating surrogates for collecting resource expensive species richness data. 
+
+Bayesian Generalised Linear Mixed Effect Models were used to investigate key relationships. Although variation was visually observed for transects and quadrats nested in transects (design), minimal variance was attributed to these random effects. According to the model, this suggests that future research in the rainforest may not require a transect design. 
+
+The fixed effects showed disturbance resulted lower specific leaf area, driven by dominant species 1. The data however did not provide evidence that seedling cover, diversity or temperature were significantly different between sites. Instead, gap fraction threshold and dominant species were the main drivers of diversity and seedling cover. Temperature provided a mild indicator of species richness. Modelling provided strong evidence of positive or negative relationships, with uncertainty around the actual estimate effects. Further data is required to quantify more precise estimates and relationships, however this report provides important initial insights for future research.
 
 
 # Background
@@ -156,9 +161,9 @@ From our study and what we have learned from our research we aimed to quantify t
 ## Research Questions
 The three main research questions are:
 
-  1. $H_0$: Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
-  2. $H_0$: Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
-  3. $H_0$: Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
+  1. Is the cover, Shannon's diversity index and specific leaf area of the three dominant species in the forest (either individually or together) different between pristine and disturbed areas of the limestone forest? If so, then how do these differ between the two areas?
+  2. Is the temperature and humidity different between pristine and disturbed areas of the limestone forest?
+  3. Can species richness be predicted based on other data which are much cheaper (in terms of time and effort) to collect?
 
 At a high level, abiotic indicators are investigated to quantify the disturbance conditions of the rainforest. Where as biotic variables are investigated to evaluate the impact of this disturbance on the ecosystem. Each question will be explain in further detail to identify the ecological meaning.
 
@@ -313,8 +318,10 @@ The variables remaining through the model fit procedure were the abundance of do
 
 
 ## Model Outcomes
-There was no difference between sites, with higher variation in the disturbed transects. This follows a suggestion that arose that disturbed areas are more adaptive to the conditions. We saw relationships between the overall seedling cover, total dominant leaf dry weight, average quadrat Gap Fraction Threshold and the interaction between site and overall seedling cover. 
-GFT, overall seedling cover and total overall dominant dry leaf weight increased Shannon's Index. The interaction between site and seedling cover, after adding together overall seedling cover and the interaction, the effect is no longer a predictive variable. 
+There was no difference in Shannon's Index between sites, but there was higher variation in the disturbed transects. This follows a suggestion that arose that disturbed areas are more adaptive to the conditions. We also saw relationships between the overall seedling cover, total dominant leaf dry weight, average quadrat Gap Fraction Threshold and the interaction between site and overall seedling cover. 
+
+GFT, overall seedling cover and total overall dominant dry leaf weight increased Shannon's Index. The interaction between site and seedling cover, after adding together overall seedling cover and the interaction, the effect is no longer a predictive variable.
+
 
 
 
@@ -403,11 +410,11 @@ No significant difference was modelling between disturbed and undisturbed areas 
 
 _**Seedling Cover**_
 
-While the analysis indicated that the disturbances of the limestone rainforests does not contribute to the seedling cover, it was found that each dominant species had a significant role in the growth in seedling cover. Recall that the seedling cover is also the governance of soil erosion protection. Furthermore the abundance of the three dominant species has a significant positive effect on the plant cover. Therefore, from the analysis of the seedling cover, it is to be deduced that there is importance in protecting the three dominant species to ensure seedling cover. 
+From the analysis, it is demonstrated that the disturbance does not impact the seedling cover in an area. However, it was found that the individual dominant species had a varying impact on the seedling cover; with species 2 contributing the most. In this way, it indicates that these dominant species, particularly species 2, are important to the seedling cover. With more seedling cover, there is soil erosion protection, and therefore this analysis indicates the importance of these species. Furthermore, the analysis indicated the impact of abundance to the seedling cover. While this may appear intuitive, it is important to reiterate that since the seedling cover protects the nutrients for neighbouring plants, it implies that abundance is also important for the protection of these nutrients. 
 
 _**Shannons Index of Diversity**_
 
-In terms of ecological meaning, the model investigating Shannon's index tell us that diversity does not appear to change between disturbed and pristine sites. Other factors affected diversity. It increased with higher cover of all seedlings, possibly explained by the advantages species in disturbed ecosystems utilising the expose ground and nutrients. Higher GFT tells us that diversity increased with less canopy cover which also may explain the higher dominant leaf dry weight as larger leaves utilise sunlight better. 
+In terms of ecological meaning, the model investigating Shannon's index tell us that diversity does not appear to change between disturbed and pristine sites. Other factors affected diversity. It increased with higher cover of all seedlings, possibly explained by the advantageous species in disturbed ecosystems utilising the expose ground and nutrients. Higher GFT tells us that diversity increased with less canopy cover which also may explain the higher dominant leaf dry weight as larger leaves utilise sunlight better. 
 
 _**Specific leaf Area**_
 
@@ -415,7 +422,7 @@ From the community aggregated and community weighted SLA models, we can infer th
 
 _**Species Richness**_
 
-### RICKY SPECIES RICHNESS SUMMARY
+From the analysis, it is demonstrated that the disturbance does not impact the seedling cover in an area. However, it was found that the individual dominant species had a varying impact on the seedling cover; with species 2 contributing the most. In this way, it indicates that these dominant species, particularly species 2, are important to the seedling cover. With more seedling cover, there is soil erosion protection, and therefore this analysis indicates the importance of these species. Furthermore, the analysis indicated the impact of abundance to the seedling cover. While this may appear intuitive, it is important to reiterate that since the seedling cover protects the nutrients for neighbouring plants, it implies that abundance is also important for the protection of these nutrients. 
 
 
 
@@ -423,19 +430,19 @@ _**Species Richness**_
 
 
 # Conclusion and Recommendations
-The findings of this project reveals information that can be used for protect the limestone forests. The implications to the future of limestone forests are derived in this study of seedling species in accordance to the plant cover, species richness, SLA, diversity, and temperature. 
+The findings of this project reveals information that can be used to protect the limestone forests. The implications to the future of limestone forests are derived in this study of seedling species in accordance to the plant cover, species richness, SLA, diversity, and temperature. 
 
 While the analysis indicated that the disturbances of the limestone rainforests does not contribute to the seedling cover, it was found that each dominant species had a significant role in the growth in seedling cover. Recall that the seedling cover is also the governance of soil erosion protection. Furthermore the abundance of the three dominant species has a significant positive effect on the plant cover. Therefore, from the analysis of the seedling cover, it is to be deduced that there is importance in protecting the three dominant species to ensure seedling cover. 
 
-In examining the effects of disturbance on the temperature, it was found that disturbance implied for higher temperature. A disturbed area was more likely to have high temperatures as oppose to cooler temperatures.
+In examining the effects of disturbance on the temperature, it was found that disturbance did not significantly suggest a higher temperature. 
 
-While the Shannon's Index of Diversity is not dependent on the disturbance, it appears to be dependent on other variables such as higher seedling cover, GFT, and leaf dry weight. These variables all imply for a higher diversity index. 
+While the Shannon's Index of Diversity is not dependent on the disturbance, it appears to be dependent on other variables such as higher seedling cover, GFT, and leaf dry weight. These variables all imply for a higher diversity of dominant species.
 
 The specific leaf area was found to differ between disturbances as well as affect be affected differently according to the specific leaf. Species 1 was more likely to have a larger weighted SLA in pristine forest. 
 
 Finally, it was found that higher temperatures implied lower species richness. That is, species richness has a negative relationship with the maximum temperature. 
 
-The implications of our findings show that the disturbance of the limestone rainforests in Langkawi Island affects the several important attributes. The understanding of the dominant seedling species predicts the future of the forest, and therefore the negative impacts of seedling species will reflect in the future. Brief limitations are attached as an appendix (Appendix 2).
+The implications of our findings show how disturbance affects the limestone rainforests in Langkawi Island and the relationships with several important attributes. The understanding of the dominant seedling species can predict the future of the forest, and therefore the negative impacts of future seedling species. We have also highlighted key relationships that can be used to determine similar relationship in limestone rainforests. These relationships can also be built upon for future research, while addressing the brief limitations, attached in Appendix 2.
 
 
 # Appendix
@@ -444,11 +451,12 @@ The implications of our findings show that the disturbance of the limestone rain
 ```
 
 ## Appendix 2: Limitations
-The first limitation occurred for the leaf sample measurements, due the low sensitivity of the weighing scales. This was overcome by measuring the total weight of all leaf samples, per species per quadrat, and calculating the mean. This provides misleading results for the small or large leaves of the sample, which deviate significantly from the mean weight.
+The first limitation occurred for the leaf sample measurements, due the low sensitivity of the weighing scales. This was overcome by measuring the total weight of all leaf samples, per species per quadrat, and calculating the mean. This provides misleading results for the small or large leaves of the sample, which deviate significantly from the mean weight. We advise bring appropriate scales or obtaining/borrowing them from the local university or labs. 
 
-The main limitation was due to the equipment available for the experiment overseas. No oven was available for drying leaves or filter paper, which resulted in the moisture content being an uncontrolled variable. This affects the dry leaf mass and filter paper weight measurements.
+The main limitation was due to the equipment available for the experiment overseas. No oven was available for drying leaves or filter paper, which resulted in the moisture content being an uncontrolled variable. This affects the dry leaf mass and filter paper weight measurements. Again, it is recommended to arrange borrowing equipment from local university or technical labs. 
 
-Another limitation was a result of the limited time available to collect data such as temperature readings and soil decomposition. This prevented a thorough analysis of the variation in temperature at the rainforest. This also prevented the filter paper to adequately capture any difference in decomposition rates from the rainforest.
+Another limitation was a result of the limited time available to collect data such as temperature readings and soil decomposition. This prevented a thorough analysis of the variation in temperature at the rainforest. This also prevented the filter paper to adequately capture any difference in decomposition rates from the rainforest. One solution is to ensure that on the first day/on arrival the data loggers are placed where they need to go. 
+
 
 
 # References

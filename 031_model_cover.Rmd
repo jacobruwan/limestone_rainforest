@@ -3,12 +3,6 @@ title: "model_development"
 output: html_document
 ---
 
-```{r}
-datafolder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-
-load(paste0(datafolder, "domseedlingcover_rq1.RData"))
-```
-
 
 #### Final Model
 ```{r}
@@ -28,7 +22,7 @@ From this regression, it appears that the significant variables in this model ar
 
 
 #### Model Fit
-In the figure below, it can be noted that there is some issues with fitted values that extend higher than -1. As fitted values increase, the variation of standardised residuals starts to decrease. This would imply that for larger fitted values, the model is not suffice. 
+In the figure below, it can be noted that there is some issues with fitted values that extend higher than -1. As fitted values increase, the variation of standardised residuals starts to decrease. This would imply that for larger fitted values, the model will not suffice. 
 
 ```{r, fig.width = 5}
 # summary(fit)
@@ -111,7 +105,7 @@ par(mfrow = c(1,1))
 ```
 
 #### Fixed Effect Credible Intervals
-In this model, it is clear that all the variables are significant. This is because no variables' credible interval overlaps '0'. The credible interval for abundance shows that a unit increase in (scaled) abundance can increase (transformed) seedling cover by 0.59 to 1.11.
+In this model, it is clear that all the variables have strong relationship against cover. The credible interval comparing dominant species 3 from species 1 slightly crosses over 0, however majority of the distribution is positive. The credible interval for abundance shows that a unit increase in (scaled) abundance can increase (transformed) seedling cover from a value of 0.59 to 1.11.
 
 ```{r }
 ## How to look at predictions and compare to original???

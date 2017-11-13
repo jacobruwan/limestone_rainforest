@@ -11,7 +11,7 @@ After elimation, and including site due to the research question, the variables 
 
 <!-- $$Shannon's Index = 0 + {Prinstine} + {Overall Seedling Cover} + {SiteP:Overall Seedling Cover} + {Total Dominant Leaf Dry Weight} + {Average Quadrat GFT} + {transect} + {residual}$$ -->
 
-The Marginal log-Likelihood was  -24.15 (compared to -42.55, which was in the intial model that included all quadrat-level variables). 
+The Marginal log-Likelihood was -24.15 (compared to -42.55, from the initial model). 
 
 ```{r}
 
@@ -30,7 +30,7 @@ result_fit4_int <- inla(formula_fit4_int, family="gaussian",
 
 
 #### Model Fit
-The residual plot in the figure below appears to have an even spread of positive and negative values in the middle range of fitted values. So there are no concerns for model fit, while also considering the small sample size of 30. 
+The residual plot in the figure below appears to have an even spread of positive and negative values in the middle range of fitted values. So there are no concerns for model fit, while also considering the small sample size of 30 observations. 
 
 
 ```{r, fig.width = 5}
@@ -92,7 +92,7 @@ hist_cpo <- pred.df %>%
 ```
 
 
-Both QQ plots for the residuals and CPO values in the figure below are beleived to be acceptable as they do show to deviate at the tails and the residaul Q-Q plot demonstrate a reasonable fit for the middel values. There is a little concern in the QQ for the middle values. This is represented in the histograms on the side side, but no major deviations are noticeable so this model is still beleived to have the best fit.  
+Both QQ plots for the residuals and CPO values in the figure below are beleived to be acceptable as they do show to deviate at the tails and the residaul Q-Q plot demonstrate a reasonable fit for the middel values. There is a little concern in the QQ for the middle values. This is represented in the histograms on the right side, but no major deviations are noticeable so this model is still beleived to have the best fit.  
 
 ```{r, fig.height = 5, fig.width = 7}
 par(mfrow = c(2,2))
@@ -270,7 +270,7 @@ realeffect.df %>%
 
 #### Variation Breakdown
 
-We can see that variation not explained by the fixed effects is mostly explained by the residuals. Figure #7 clearly outlines that it would appear that the random effects in this model explain very little of the variations, the percentages can be seen in the table below the figure.  
+We can see that variation not explained by the fixed effects is mostly explained by the residuals. The figure below clearly outlines that it would appear that the random effects in this model explain very little of the variations, the percentages can be seen in the table below the figure.  
 
 It is important to note that the nested random effect of quadrat in transect is saturated in the model, as there are 30 observations and 30 unique quadrants. Thus this random effect is excluded in the analysis for Shannon's Index. 
 

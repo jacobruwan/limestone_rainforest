@@ -493,7 +493,7 @@ domseedlingcover_rq1.df <- specieslvl_dom_seedling_count2 %>%
   left_join(leaf_traits2,
             by = c("species_id" = "Species ID")) %>%
   mutate(species_id = factor(species_id),
-         dom_species_id = factor(species_id))
+         dom_species_id = factor(dom_species_id))
 
 save(domseedlingcover_rq1.df, file = paste0(data_folder, "domseedlingcover_rq1.RData"))
 ```
