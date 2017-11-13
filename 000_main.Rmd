@@ -123,16 +123,12 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
 <!-- # Change Data Folder -->
 ```{r}
 # Define the datafolder that contains all RDatasets. This will be an empty string when submitted
-data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-# data_folder <- ""
+# data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+data_folder <- ""
 ```
 
 # Abstract
-Limestone rainforests are well known for their high biodiversity, endemic species, and unique landscape. This investigation analysed understorey seedling functional traits of three dominant species in addition to abiotic factors in pristine and disturbed sites of a limestone rainforest on Langkawi Island, Malaysia. The research questions focused on determining how disturbance impacted diversity, specific leaf area, and temperature, and investigating surrogates for collecting resource expensive species richness data. 
-
-Bayesian Generalised Linear Mixed Effect Models were used to investigate key relationships. Although variation was visually observed for transects and quadrats nested in transects (design), minimal variance was attributed to these random effects. According to the model, this suggests that future research in the rainforest may not require a transect design. 
-
-The fixed effects showed disturbance resulted lower specific leaf area, driven by dominant species 1. The data however did not provide evidence that seedling cover, diversity or temperature were significantly different between sites. Instead, gap fraction threshold and dominant species were the main drivers of diversity and seedling cover. Temperature provided a mild indicator of species richness. Modelling provided strong evidence of positive or negative relationships, with uncertainty around the actual estimate effects. Further data is required to quantify more precise estimates and relationships, however this report provides important initial insights for future research.
+Limestone rainforests are known for their high biodiversity, endemic species, and unique landscape. This investigation analysed understorey seedling functional traits of three dominant species in addition to abiotic factors in pristine and disturbed sites of a limestone rainforest on Langkawi Island, Malaysia. The research focused on determining how disturbance impacted diversity, specific leaf area, and temperature; and reviewed surrogate collection of resource-expensive species richness data. Bayesian Generalised Linear Mixed Effect Models were used to investigate key relationships. Variation was visualised for the random effects: transects and quadrats nested in transects (design); although only minimal variance was attributed. Modelling suggests that future research in this rainforest may not require a transect design. Fixed effects showed disturbance resulted in lower specific leaf area, driven by dominant species 1. The data however did not provide evidence that seedling cover, diversity or temperature were significantly different between sites. Instead, gap fraction threshold and dominant species were the main drivers of diversity and seedling cover. Temperature provided a mild indicator of species richness. Models provided strong evidence of positive or negative relationships, with uncertainty around the actual estimate effects. Further data is required to quantify more precise estimates and relationships, however this report provides important initial insights for future research.
 
 
 # Background

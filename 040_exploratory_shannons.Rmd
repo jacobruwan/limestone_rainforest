@@ -150,7 +150,7 @@ e_pp <- ggplot(aes(y=dom_shannon, x=dom_simpson, col=site), data=domshannons_rq1
 f_pp <- ggplot(aes(y=dom_shannon, x=dom_total_seedling_cover, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="Dom Tot Seed Cover", y="Shannon Index", x="dom_total_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
 
 #overall_seedling_cover
-g_pp <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover, col=site), data=domshannons_rq1.df) + geom_point() + labs(title=" (b) Overall Seed Cover", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()+ scale_colour_manual(values = colours.site)
+g_pp <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="Overall Seed Cover", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()+ scale_colour_manual(values = colours.site)
 
 #total_dom_leaf_area
 h_pp <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_area, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="Dom Leaf Area", y="Shannon Index", x="total_dom_leaf_area (scaled)") + geom_smooth(method = "lm") + theme_project()
@@ -219,8 +219,6 @@ multiplot(d_pp, g_pp,
 }
 
 ```
-
-FIGURE #3: (a) Site interaction with sclaed toal dominant abundance against scaled shannon's index. (b) Site interaction with sclaed overal seedling cover against scaled shannon's index.
 
 From this exploration we can see that potentially influential variables are: Total Dominant Abundance, Overall Seedling Cover, Dominant total leaf dry Weight, GFT. As well as the interactions: site:dom_total_abundance and site:overall_seedling_cover.
 
