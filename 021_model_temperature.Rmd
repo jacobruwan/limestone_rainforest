@@ -5,13 +5,16 @@ output: html_document
 
 #### Linear Spline Model 
 ```{r}
+datarq2 <- hobo_rq2.df
+
 datarq2 %<>% mutate(lagtemp = lag(temp)) %>% filter(!is.na(lagtemp))
 
+# Define knot points
 k1 <- 14
 k2 <- 14
 k3 <- 17
 
-splinefit <- lm(temp ~ site + lagtemp, # + bs(time24, knots = c(k1, k2, k3)) + site:bs(time24, knots = c(k1, k2, k3)),
+splinefit <- lm(temp ~ site + bs(time24, knots = c(k1, k2, k3)),# + site:bs(time24, knots = c(k1, k2, k3)),
           data = datarq2)
 
 
@@ -21,7 +24,10 @@ splinefit <- lm(temp ~ site + lagtemp, # + bs(time24, knots = c(k1, k2, k3)) + s
 
 summary(splinefit)
 
+splinefit2 <- lmer(temp ~ site + bs(time24, knots = c(k1, k2, k3)) + (1|hobo_id),
+                   data = datarq2)
 
+summary(splinefit2)
 # acf(splinefit)
 ```
 
@@ -58,7 +64,9 @@ summary(splinefit)
 <!-- ``` -->
 
 ### Model Fit
-_Residuals_
+
+_**Residuals**_
+
 ```{r}
 pred <- splinefit$fitted.values
 
@@ -83,7 +91,7 @@ datarq2 %>%
 
 ```
 
-_Autocorrelation_
+_**Serial Correlation**_
 ```{r}
 
 # acf(splinefit)

@@ -15,9 +15,6 @@ output:
     toc: yes
     toc_depth: 3
     toc_float: yes
-  word_document:
-    toc: yes
-    toc_depth: '3'
 ---
 
 ```{r setup, include=FALSE}
@@ -59,7 +56,7 @@ instant_pkgs <- function(pkgs) {
 # Define packages to load run instant_pkgs
 packages_to_load <- c("readxl", "dplyr", "tidyr", "magrittr", "knitr",
                       "ggplot2", "ggthemes", "lubridate",
-                      "lme4", "INLA", "stringr", "scales", "splines")
+                      "lme4", "INLA", "stringr", "scales", "splines", "car")
 
 instant_pkgs(packages_to_load)
 ```
@@ -126,8 +123,8 @@ multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
 <!-- # Change Data Folder -->
 ```{r}
 # Define the datafolder that contains all RDatasets. This will be an empty string when submitted
-# data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
-data_folder <- ""
+data_folder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+# data_folder <- ""
 ```
 
 # Abstract
@@ -135,20 +132,26 @@ data_folder <- ""
 
 # Background
 
-_Lankgawi Island's Limestone Rainforests_
+_**Lankgawi Island's Limestone Rainforests**_
+
+Natural rainforests are continually being destroyed by human infrastructure by the means of land clearing, agriculture, tourism, pollution and climate change. These negative influences are currently affecting the limestone rainforest on Langkawi Islands which is in conjunction to the forest clearing and logging already noticeable in other regions of Malaysia (McMorrow & Talip, 2001).
 
 
+Limestone rainforests are well known for their high biodiversity and endemic species. This is due to the unique landscape and habitat which houses the species that have evolved to adapt to live on the limestone (Clements, Sodhi & Schilthuizen, 2006). Limestone rainforests are very unique and are a popular research location; signifying the importance of this investigation and analysis. This is also the first time data and analysis have been performed on this area. 
 
-_Understorey Seedling Species_
+_**Understorey Seedling Species**_
 
+Due to the scope of this project it was decided to focus on the understory of the rainforest. This was for multiple logistic reasons and findings in past literature. This did not limit the study as the understory of rainforests have been shown to be incredibly important with particular variables being good predictors. Understories have continuously been used to investigate disturbed forests. One example looked at different forest understories in the Philippines, a main finding being higher species richness in the disturbed (Wills et al., 2016). 
 
+Studies also explored disturbance and the difficulties of restoration. They showed that functional traits act a filter, in a sense, for the types of plant species able to inhabit particular ecosystems. These can include an array of features that are only suitable for specific species. Species without specific functional traits cannot inhabit certain communities (Funk et al., 2008)
 
-_Dominant Species_
+_**Dominant Species**_
 
+We also found past research that introduced the concept of dominant plant species influencing ecosystems. Meaning their functional traits may contribute to their survival in disturbed ecosystems, being able to bypass the filters posed by disturbance (Wangchuk et al., 2014). This then leads to the backbone of this study that the understory is the future of the rainforest signifying its importance for this study. 
 
+_**Target Resolutions**_
 
-_Target Resolutions_
-
+From our study and what we have learned from our research we aimed to quantify the factors of disturbance and relate it all back to the ecological effects on the ecosystems. Our study will then lead the next two years of research to extend what we completed and add more research to the Limestone Forests on Langkawi Island.
 
 ## Research Questions
 The three main research questions are:
@@ -165,9 +168,13 @@ In previous studies, the plant cover of a specific species is an indicator to th
 
 
 ### Dominant Species Shannon's Index of Diversity
+Shannon's Diversity Index is calculated using the abundance multiple by the natural logarithm of the abundance. This index accounts for the abundance in addition to the evenness of all other species. It is also suggested that ecosystem function decline can be alleviated with dominant species becoming prevalent in the ecosystem (Grime, 1998). 
 
+Species diversity is a standard variable calculated in ecological studies. Previous studies have looked at the diversity of a particular trees in Malaysia and found adverse effects of diversity on the overall biodiversity of the forest (Addo-Fordjour, Rahmad & Shahrul, 2012). This study also was on disturbed forests due to tourism, which is a major industry in Malaysia and Langkawi Island. 
 
+Other studies suggested that increased disturbance leads to high diversities due to advantageous/fast growing species (Nguyen et al., 2012). One particular study also focussed on only dominant species and found their diversity was a good indicator of disturbance (Stevens et al., 2015). This was reiterated in an understory study on ecosystem functions in forests of varying soil types, elevation and weather conditions (Duguid et al., 2013). 
 
+All of these studies show that the diversity of dominant species change in response to disturbance, and Shannon's Diversity Index is a useful tool. 
 
 ### Dominant Species Specific Leaf Area
 
@@ -209,13 +216,6 @@ Pakeman, R., Garnier, E., Lavorel, S., Ansquer, P., Castro, H., Cruz, P., . . . 
 
 # Experimental Design
 
-_*Disturbance*_
-
-
-_*Design and Method*_
-
-
-
 
 
 ```{r, child = '001_experimental_design.Rmd'}
@@ -237,7 +237,7 @@ Prior to analysis, the data quality was evaluated. Major outcomes were that humi
 
 
 
-# Analysis
+# Analysis Overview
 The models used throughout this report are generalised linear mixed effects models. This section will outline how and why these models are required, and will provide an overview of the model development process.
 
 _*Mixed Effects*_
@@ -271,16 +271,16 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 
-## Temperature
-### Exploratory Analysis
+# Temperature
+## Exploratory Analysis
 ```{r, child = '020_exploratory_temperature.Rmd'}
 ```
 
-### Model Development
+## Model Development
 ```{r, child = '021_model_temperature.Rmd'}
 ```
 
-### Model Outcomes
+## Model Outcomes
 
 *RUWAN* write stuff: Risk Ratio (RR) of credible intervals
 
@@ -297,16 +297,16 @@ The following subsections are segmented into an exploratory analysis and model d
 
 
 
-## Seedling Cover
-### Exploratory Analysis
+# Seedling Cover
+## Exploratory Analysis
 ```{r, child = '030_exploratory_cover.Rmd'}
 ```
 
-### Model Development
+## Model Development
 ```{r, child = '031_model_cover.Rmd'}
 ```
 
-### Model Outcomes
+## Model Outcomes
 The variables remaining through the model fit procedure were the abundance of dominant species and their species identification; disturbance did not appear likely to be a significant variable to the seedling cover of dominent species. However, the results of the regression demonstrated that each species contributes differently to the seedling cover; the presence of dominant species 2 implied that there was relatively higher seedling cover compared to dominant species 1 and 3. Furthermore, the regression showed that the abundance of dominent species has a positive effect on the seedling cover. 
 
 
@@ -320,21 +320,19 @@ The variables remaining through the model fit procedure were the abundance of do
 
 
 
-## Shannon's Index of Diversity
-### Exploratory Analysis
+# Shannon's Index of Diversity
+## Exploratory Analysis
 ```{r, child = '040_exploratory_shannons.Rmd'}
 ```
 
-### Model Development
+## Model Development
 ```{r, child = '041_model_shannons.Rmd'}
 ```
 
 
-### Model Outcomes
-
-*Nick* write stuff: Risk Ratio (RR) of credible intervals
-
-
+## Model Outcomes
+There was no difference between sites, with higher variation in the disturbed transects. This follows a suggestion that arose that disturbed areas are more adaptive to the conditions. We saw relationships between the overall seedling cover, total dominant leaf dry weight, average quadrat Gap Fraction Threshold and the interaction between site and overall seedling cover. 
+GFT, overall seedling cover and total overall dominant dry leaf weight increased Shannon's Index. The interaction between site and seedling cover, after adding together overall seedling cover and the interaction, the effect is no longer a predictive variable. 
 
 
 
@@ -347,38 +345,40 @@ The variables remaining through the model fit procedure were the abundance of do
 
 
 
-## Specific Leaf Area
+
+
+# Specific Leaf Area
 As SLA can only equal values between zero and infinity, the log of SLA will be modelled. 
 
-### Aggregated
+## Aggregated
 The following subsections investigate key relationships that explain the community aggregated SLA, which includes 30 observations. 
 
-#### Exploratory Analysis
+### Exploratory Analysis
 ```{r, child = '050_exploratory_sla_cagg.Rmd'}
 
 ```
 
-#### Model Development
+### Model Development
 ```{r, child = '051_model_sla_cagg.Rmd'}
 
 ```
 
-### Individual Species
+## Individual Species
 The following subsections investigate key relationships that explain the variation of community weighted SLA.
   
 
-#### Exploratory Analysis
+### Exploratory Analysis
 ```{r, child = '052_exploratory_sla_cweight.Rmd'}
 
 ```
 
-#### Model Development
+### Model Development
 ```{r, child = '053_model_sla_cweight.Rmd'}
 
 ```
 
 
-### Model Outcomes
+## Model Outcomes
 Overall, the model estimates a distinct difference between disturbed and undisturbed forest areas. Upon investigating each individual species, this difference betwen sites can be attributed to dominant species 1. Both dominant species 2 and 3 had less weighted SLA than species 1, and the parameter estimates showed no major differences between rainforest sites.
 
 
@@ -394,17 +394,17 @@ Overall, the model estimates a distinct difference between disturbed and undistu
 
 
 
-## Species Richness
-### Exploratory Analysis
+# Species Richness
+## Exploratory Analysis
 ```{r, child = '060_exploratory_richness.Rmd'}
 ```
 
-### Model Development
+## Model Development
 ```{r, child = '061_model_richness.Rmd'}
 ```
 
 
-### Model Outcomes
+## Model Outcomes
 Through a model fit procedure, the only variable that was likely to be significant to the model was the maximum temperature in the given area. From the regression, it appears to have a negative relationship with species richness; as the maximum temperature increases, the species richness decreases. 
 
 
@@ -421,6 +421,7 @@ While the analysis indicated that the disturbances of the limestone rainforests 
 
 _**Shannons Index of Diversity**_
 
+In terms of ecological meaning, the model investigating shannon's index tell us that diversity does not appear to change between disturbed and pristine sites. Other factors affected diversity. It increased with higher cover of all seedlings, possibly explained by the advantages species in disturbed ecosystems utilising the expose ground and nutrients. Higher GFT tells us that diversity increased with less canopy cover which also may explain the higher dominant leaf dry weight as larger leaves utilise sunlight better. 
 
 _**Specific leaf Area**_
 
@@ -449,6 +450,22 @@ The findings of this project reveals information that can be used for protect th
 
 
 
+# References
+
+  1. Addo-Fordjour, P., Rahmad, Z., & Shahrul, A. (2012). Effects of human disturbance on liana community diversity and structure in a tropical rainforest, Malaysia: implication for conservation. Journal Of Plant Ecology, 5(4), 391-399. http://dx.doi.org/10.1093/jpe/rts012
+  2. Ashouri, P., Jalili, A., Danehkar, A., Chahouki, M. A. Z., & Hamzeh'ee, B. (2016). Is there any support for the humped-back model in some steppe and semi steppe regions of iran? Acta Oecologica, 73, 61-70. doi:10.1016/j.actao.2016.03.002
+  3. Clements, R., Sodhi, N., Schilthuizen, M., & Ng, P. (2006). Limestone Karsts of Southeast Asia: Imperiled Arks of Biodiversity. Bioscience, 56(9), 733-742. http://dx.doi.org/10.1641/0006-3568(2006)56[733:lkosai]2.0.co;2
+  4. Duguid, M., Frey, B., Ellum, D., Kelty, M., & Ashton, M. (2013). The influence of ground disturbance and gap position on understory plant diversity in upland forests of southern New England. Forest Ecology And Management, 303, 148-159. http://dx.doi.org/10.1016/j.foreco.2013.04.018
+  5. Fraser, L., Pither, J., Jentsch, A., Sternberg, M., Zobel, M., Askarizadeh, D., . . . Zupo, T. (2015). Worldwide evidence of a unimodal relationship between productivity and plant species richness. Science, 349(6245), 302-305. doi:10.1126/science.aab3916
+  6. Funk, J., Cleland, E., Suding, K., & Zavaleta, E. (2008). Restoration through reassembly: plant traits and invasion resistance. Trends In Ecology & Evolution, 23(12), 695-703. http://dx.doi.org/10.1016/j.tree.2008.07.013
+  7. Grime, J. (1998). Benefits of plant diversity to ecosystems: immediate, filter and founder effects. Journal Of Ecology, 86(6), 902-910. http://dx.doi.org/10.1046/j.1365-2745.1998.00306.x
+  8. Hillebrand, H., Burgmer, T., & Biermann, E. (2012). Running to stand still: Temperature effects on species richness, species turnover, and functional community dynamics. Marine Biology, 159(11), 2415-2422. doi:10.1007/s00227-011-1827-z
+Cancel
+  9. Wills, J., Herbohn, J., Moreno, M., Avela, M., & Firn, J. (2016). Next-generation tropical forests: reforestation type affects recruitment of species and functional diversity in a human-dominated landscape. Journal Of Applied Ecology, 54(3), 772-783. http://dx.doi.org/10.1111/1365-2664.12770
+  10. McMorrow, J., & Talip, M. (2001). Decline of forest area in Sabah, Malaysia: Relationship to state policies, land code and land capability. Global Environmental Change, 11(3), 217-230. http://dx.doi.org/10.1016/s0959-3780(00)00059-5
+  11. Nguyen, H., Herbohn, J., Firn, J., & Lamb, D. (2012). Biodiversity-productivity relationships in small-scale mixed-species plantations using native species in Leyte province, Philippines. Forest Ecology And Management, 274, 81-90. http://dx.doi.org/10.1016/j.foreco.2012.02.022
+  12. Stevens, J., Safford, H., Harrison, S., & Latimer, A. (2015). Forest disturbance accelerates thermophilization of understory plant communities. Journal Of Ecology, 103(5), 1253-1263. http://dx.doi.org/10.1111/1365-2745.12426
+  13. Wangchuk, K., Darabant, A., Rai, P., Wurzinger, M., Zollitsch, W., & Gratzer, G. (2014). Species richness, diversity and density of understory vegetation along disturbance gradients in the Himalayan conifer forest. Journal Of Mountain Science, 11(5), 1182-1191. http://dx.doi.org/10.1007/s11629-013-2942-8
 
 
 

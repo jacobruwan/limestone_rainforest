@@ -3,72 +3,127 @@ title: "model_development"
 output: html_document
 ---
 
+All predictor variables were first scaled so that for they would be comparable with eachother. Variables were then investigated separately against species richness to identify reasonable covariates for the model fit. 
+
+
 ```{r}
-# This code should be removed when entire process is productionised
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+species_richness <- data.frame(species_richness_rq3.df) %>%
+  rename(presence_richness = species_richness)
+# str(species_richness)
 
-load(paste0(dropbox, "domseedlingcover_rq1.RData"))
+#specify as factor
+species_richness$site <- as.factor(species_richness$site)
+species_richness$transect <- as.factor(species_richness$transect)
+species_richness$quadrat <- as.factor(species_richness$quadrat)
 
+#replace 0s
+species_richness$dom_2_seedling_cover[species_richness$dom_2_seedling_cover==0] <- 0.000000000001
+
+species_richness$dom_3_seedling_cover[species_richness$dom_3_seedling_cover==0] <- 0.000000000001
+
+
+
+#scale variables
+
+species_richness$dom_1_seedling_cover <- scale(species_richness$dom_1_seedling_cover)
+species_richness$dom_2_seedling_cover <- scale(species_richness$dom_2_seedling_cover)
+species_richness$dom_3_seedling_cover <- scale(species_richness$dom_3_seedling_cover)
+species_richness$overall_seedling_cover <- scale(species_richness$overall_seedling_cover)
+species_richness$dom_1_sla <- scale(species_richness$dom_1_sla)
+species_richness$av_quad_compaction <- scale(species_richness$av_quad_compaction)
+species_richness$av_trans_elevation <- scale(species_richness$av_trans_decomposition)
+species_richness$min_temp <- scale(species_richness$min_temp)
+species_richness$max_temp <- scale(species_richness$max_temp)
+species_richness$dom_1_abundance<- scale(species_richness$dom_1_abundance)
+species_richness$dom_2_abundance<- scale(species_richness$dom_2_abundance)
+species_richness$dom_3_abundance<- scale(species_richness$dom_3_abundance)
+
+
+#update dateframe (take out irrelevant variables)
+species_richness <- subset(species_richness, select=-c(`dom_4_abundance`, `dom_4_seedling_cover`))
 ```
 
-This section provides an insight to the trends in the collected data. This analysis will be focused on individual research questions. This will provide interpretability when developing the statistical model.
-
+#### Site
+Although there is differences in the range of species richness between the two disturbances, they exhibit very similar shapes in the above graph. Hence, the two categories may not be significantly different. However, for the sake of this project, the disturbance was investigated. 
 
 ```{r}
-domseedlingcover_rq1.df
-
-```
-
-#### Site vs Dominant Seedling Cover
-In the figure below, we observe:
-
-  * a slighty larger variance for domiannt species 1 and 2 in pristine sites.
-  * higher IQR and medians for dominant species 1 and 2 in pristine sites
-  * domiant species 3 is less evident in pristine sites
-  * the coverage dominant species 4 is insignificant in comparison to the other 3
-  
-```{r}
-domseedlingcover_rq1.df %>%
-  select(dom_species_id, site, dom_seedling_cover, transect, quadrat) %>%
-  distinct() %>%
-  filter(!is.na(dom_species_id)) %>%
-  ggplot(aes(x = factor(dom_species_id), y = dom_seedling_cover, col = site)) +
+##species richness vs site
+species_richness %>%
+  ggplot(aes(x=site, y = presence_richness, col=site)) +
   geom_boxplot() +
+  # geom_smooth(method="loess", span = 5) +
+  scale_colour_manual(values = colours.site, name = "Site") +
   theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Dominant Seedling Cover vs Site")
+  ggtitle("Species Richness vs Site")+
+  xlab("Site") +
+  ylab("Species Richness")
 
+#species richness appear similar in both sites. However, the first and 3rd quantiles overlap and are very similar between both sites. There may not be a significant relation between the species richness and the disturbance. For the basis of our research, the variable SITE will still be included to verify its significance
 ```
 
-#### Dominant Seedling Cover vs Elevation
+
+#### Temperature
 ```{r}
-domseedlingcover_rq1.df  %>%
-  ggplot(aes(x=factor(round(av_trans_elevation)), 
-             y = dom_seedling_cover, 
-             col=dom_species_id)) +
-  geom_boxplot() +
+##temperature range vs species richness
+species_richness %>%
+  ggplot(aes(x=max_temp, 
+             y = presence_richness,
+             col=site)) +
+  geom_point()  +
+  geom_smooth(method="lm",se=FALSE, span = 5) +
   theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Seedling Cover vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Seedling Cover (%)")
-
-
+  scale_colour_manual(values = colours.site, name = "Site")+
+  ggtitle("Species Richness vs Maximum Temperature")+
+  xlab("Scaled Maximum Temperature") +
+  ylab("Species Richness")
 ```
 
+From the graph above, it appears that there is significant pattern exhibited between maximum temperature and species richness. Furthermore it does appear that the two disturbance categories intersect. However, upon investigation of model fit, interaction was not suited in the model. there seems to be a negative relationship between maximum temperature and species richness. 
 
-#### Dominant Seedling Abundance vs Elevation
+#### Correlation
 ```{r}
-domseedlingcover_rq1.df  %>%
-  ggplot(aes(x=factor(round(av_trans_elevation)), 
-             y = dom_abundance, 
-             col=dom_species_id)) +
-  geom_boxplot() +
-  theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Seedling Abundance vs Elevation")+
-  xlab("Transect Elevation") +
-  ylab("Seedling Abundance")
+#update species_richness
+species_richness <- subset(species_richness, select = c(`site`, `quadrat`, `transect`,
+                                        `dom_1_seedling_cover`,
+                                         `dom_2_seedling_cover`,
+                                        `dom_3_seedling_cover`,
+                                        `overall_seedling_cover`,
+                                         `dom_1_abundance`,
+                                         `dom_2_abundance`,
+                                         `dom_3_abundance`,
+                                         `max_temp`, `dom_1_sla`, `dom_2_sla`, 
+                                         `dom_3_sla`, `presence_richness`))
 
+
+## TRANSFORM DATA:
+
+
+SLA <- as.vector(t(species_richness[,-c(1,2,3,4,5,6,7,8,9,10,11,15)]))
+abundance <- as.vector(t(species_richness[,-c(1,2,3,4,5,6,7,11,12,13,14,15)]))
+quadrat <- rep(species_richness$quadrat, each=3)
+species_ID <- rep(c(1,2,3), times=12) 
+presence_richness <- rep(species_richness$presence_richness, each=3)
+overall_seedling_cover <-rep(species_richness$overall_seedling_cover, each=3)
+transect <- rep(species_richness$transect, each=3)
+max_temp <- rep(species_richness$max_temp, each=3)
+site <- rep(species_richness$site,each=3)
+
+
+df1 <- data.frame (SLA=SLA, quadrat=quadrat, site=site, species_ID=species_ID,
+                   presence_richness=presence_richness, transect=transect,
+                   max_temp=max_temp,
+                   overall_seedling_cover=overall_seedling_cover, abundance=abundance)
+df1$species_ID <- as.factor(df1$species_ID)
+df1 <- mutate(df1, site_trans = factor(paste0(df1$site,df1$transect)))
+
+
+df2<- na.omit(df1)
+
+correlation_analyse <- subset(df2, select=-c(`species_ID`, `transect`, `quadrat`, `site`, `site_trans`))
+
+cor(correlation_analyse %>% select(-presence_richness), use = "complete.obs") %>%
+  round(digits = 2)
 
 ```
+
+The correlation matrix indicates that none of the predictor variables are correlated with eachother. This implies that there is no violation in assumption for performing ther regression. 

@@ -93,9 +93,6 @@ With a limited number of days recorded, the data is combined by their 24 hour ti
 # Filter the data between useable dates
 datarq2 <- hobo_rq2.df # Ten Hour Lag..
 
-datarq2 %<>%
-  mutate(time24 = as.numeric(substr(date_time, 12, 13)) + 
-                         as.numeric(substr(date_time, 15, 16))/60)
 
 # Plot the graphs
 ggplot() +

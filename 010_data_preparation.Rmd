@@ -676,7 +676,9 @@ hobo_nofilter2.df <- hobo_nofilter%>%
             by = c("Site", "Transect")) %>%
   rename(site = Site, transect= Transect)  %>%
   mutate(transect = factor(transect)) %>%
-  arrange(desc(hobo_id), date_time)
+  arrange(desc(hobo_id), date_time)%>%
+  mutate(time24 = as.numeric(substr(date_time, 12, 13)) + 
+                         as.numeric(substr(date_time, 15, 16))/60)
 
 
 hobo_rq2.df <- hobo3 %>%
@@ -696,7 +698,9 @@ hobo_rq2.df <- hobo3 %>%
                                          "%Y-%m-%d %H:%M:%S")),
          date_time < as.POSIXct(strftime("2017-09-28 22:00:00", 
                                          "%Y-%m-%d %H:%M:%S"))) %>%
-  select(site, transect, hobo_id, date_time, temp, rel_humid, av_trans_elevation, av_trans_compaction, av_trans_lai, av_trans_gft, av_trans_decomposition)
+  select(site, transect, hobo_id, date_time, temp, rel_humid, av_trans_elevation, av_trans_compaction, av_trans_lai, av_trans_gft, av_trans_decomposition) %>%
+  mutate(time24 = as.numeric(substr(date_time, 12, 13)) + 
+                         as.numeric(substr(date_time, 15, 16))/60)
 
   
 save(hobo_rq2.df, file = paste0(data_folder, "hobo_rq2.RData"))

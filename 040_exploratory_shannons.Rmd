@@ -3,71 +3,245 @@ title: "model_development"
 output: html_document
 ---
 
-```{r}
-# This code should be removed when entire process is productionised
-dropbox <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data\\"
+```{r, include=FALSE}
 
-load(paste0(dropbox, "domshannons_rq1.RData"))
+#Setup data
+
+# head(domshannons_rq1.df)
+# attach(domshannons_rq1.df)
+
+#FACTOR 
+domshannons_rq1.df$transect <- as.factor(domshannons_rq1.df$transect)
+domshannons_rq1.df$quadrat <- as.factor(domshannons_rq1.df$quadrat)
+
+#SCALE VARIABLES - ONLY RUN ONCE! - KEEP RESPONSE THE SAME AND COMPARABLE
+    domshannons_rq1.df$dom_total_abundance <- scale(domshannons_rq1.df$dom_total_abundance, center=TRUE, scale=TRUE)
+            domshannons_rq1.df$dom_simpson <- scale(domshannons_rq1.df$dom_simpson, center=TRUE, scale=TRUE)
+domshannons_rq1.df$dom_total_seedling_cover <- scale(domshannons_rq1.df$dom_total_seedling_cover, center=TRUE, scale=TRUE)
+  domshannons_rq1.df$overall_seedling_cover <- scale(domshannons_rq1.df$overall_seedling_cover, center=TRUE, scale=TRUE)
+      domshannons_rq1.df$total_dom_leaf_area <- scale(domshannons_rq1.df$total_dom_leaf_area, center=TRUE, scale=TRUE)
+domshannons_rq1.df$total_dom_leaf_dry_weight <- scale(domshannons_rq1.df$total_dom_leaf_dry_weight, center=TRUE, scale=TRUE)
+         domshannons_rq1.df$av_totaldom_sla <- scale(domshannons_rq1.df$av_totaldom_sla, center=TRUE, scale=TRUE)
+            domshannons_rq1.df$av_dom_1_sla <- scale(domshannons_rq1.df$av_dom_1_sla, center=TRUE, scale=TRUE)
+             domshannons_rq1.df$av_dom_2_sla <- scale(domshannons_rq1.df$av_dom_2_sla, center=TRUE, scale=TRUE)
+             domshannons_rq1.df$av_dom_3_sla <- scale(domshannons_rq1.df$av_dom_3_sla, center=TRUE, scale=TRUE)
+      domshannons_rq1.df$av_quad_compaction <- scale(domshannons_rq1.df$av_quad_compaction, center=TRUE, scale=TRUE)
+           domshannons_rq1.df$av_quad_lai <- scale(domshannons_rq1.df$av_quad_lai, center=TRUE, scale=TRUE)
+           domshannons_rq1.df$av_quad_gft <- scale(domshannons_rq1.df$av_quad_gft, center=TRUE, scale=TRUE)
+      domshannons_rq1.df$av_trans_elevation <- scale(domshannons_rq1.df$av_trans_elevation, center=TRUE, scale=TRUE)
+  domshannons_rq1.df$av_trans_decomposition <- scale(domshannons_rq1.df$av_trans_decomposition, center=TRUE, scale=TRUE)
+                domshannons_rq1.df$min_temp <- scale(domshannons_rq1.df$min_temp, center=TRUE, scale=TRUE)
+                domshannons_rq1.df$max_temp <- scale(domshannons_rq1.df$max_temp, center=TRUE, scale=TRUE)
+                domshannons_rq1.df$range_temp <- scale(domshannons_rq1.df$range_temp, center=TRUE, scale=TRUE)
+
+domshannons_rq1.df %<>% mutate(site_trans = factor(paste0(site, transect)))               
+                
+
 
 ```
 
 
+#### Random Effect
+The figure below shows that there is variability between the transects. For an unknown reason, INLA is unable to calulate this - which is why our random effects presented to explain so little of the variance. This may be due to the sample size and that the fixed effects are able to explain a majority of the variation.
+
+
 ```{r}
-domshannons_rq1.df %>% str()
+
+rand_eff_p <- ggplot(aes(x=site_trans, y=dom_shannon, col=site), data=domshannons_rq1.df) + geom_boxplot() + 
+  labs(title="Shannon's Index vs. Transect", x="Random Effect / Transect", y= "Shannon's Index") + scale_colour_manual(values = colours.site, name = "Site") + theme_project(); rand_eff_p
+
+
 ```
 
 #### Site
-```{r}
-domshannons_rq1.df %>%
-  ggplot(aes(x = paste0(site), y = dom_shannon)) +
-  geom_point() +
-  theme_project() +
-  scale_colour_tableau() +
-  ggtitle("Dominant Shannons Index vs Site") +
-  xlab("Site") +
-  ylab("Shannon's")
+Looking at Shannon's Diversity Index in the figure below, it was clear there was no difference between sites. Although there was more variability in the  disturbed sites. 
 
+To further determine what other factors may influence Shannon's Index, exploratory graphs will determine which variables, and their interactions among sites, may be able to model Shannon's Index. 
+```{r, fig.align='center'}
+
+#Site
+a_p <- ggplot(aes(x=site, y=dom_shannon, col=site), data=domshannons_rq1.df) + geom_boxplot() + labs(title="Shannon's Index of Biodiversity Across Sites", y="Shannon Index (scaled)", x="Site") + geom_smooth(method = "lm") + scale_colour_manual(values = colours.site, name = "Site") + theme_project(); a_p
+
+  
+```
+<!-- FIGURE #1: The distrubution of shannon's index between the disturbed and pristine transects.  -->
+
+The figure below shows that total dominant abundance, overall seedling cover, dominant total leaf area, total dominant leaf dry weight, and average quadrat GFT appear to have a relationship with Shannon's Index. This is based on the inspecting the standard error and the data that falls within the confidence interval.  
+
+```{r, fig.align='center'}
+
+#dom_total_abundance
+d_p <- ggplot(aes(y=dom_shannon, x=dom_total_abundance), data=domshannons_rq1.df) + geom_point() + labs(title="(a) S.I. v. T. D. Abund", y="Shannon Index", x="dom_total_abundance (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#dom_simpson
+e_p <- ggplot(aes(y=dom_shannon, x=dom_simpson), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Simpson's Ind", y="Shannon Index", x="dom_simpson (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#dom_total_seedling_cover
+f_p <- ggplot(aes(y=dom_shannon, x=dom_total_seedling_cover), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Tot Seed Cover", y="Shannon Index", x="dom_total_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#overall_seedling_cover
+g_p <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover), data=domshannons_rq1.df) + geom_point() + labs(title=" (b) S.I. v. Ov Seed Cov", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#total_dom_leaf_area
+h_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_area), data=domshannons_rq1.df) + geom_point() + labs(title="(c) S.I. v. D. Leaf Area", y="Shannon Index", x="total_dom_leaf_area (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+
+#total_dom_leaf_dry_weight
+i_p <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_dry_weight), data=domshannons_rq1.df) + geom_point() + labs(title="(d) S.I. v. D. Leaf Dry", y="Shannon Index", x="total_dom_leaf_dry_weight (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_totaldom_sla
+j_p <- ggplot(aes(y=dom_shannon, x=av_totaldom_sla), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Avg SLA", y="Shannon Index", x="av_totaldom_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_1_sla
+k_p <- ggplot(aes(y=dom_shannon, x=av_dom_1_sla), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 1 Avg SLA", y="Shannon Index", x="av_dom_1_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_2_sla
+l_p <- ggplot(aes(y=dom_shannon, x=av_dom_2_sla), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 2 Avg SLA", y="Shannon Index", x="av_dom_2_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_3_sla
+m_p <- ggplot(aes(y=dom_shannon, x=av_dom_3_sla), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 3 Avg SLA", y="Shannon Index", x="av_dom_3_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_compaction
+n_p <- ggplot(aes(y=dom_shannon, x=av_quad_compaction), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. v. Avg Quad Comp", y="Shannon Index", x="av_quad_compaction (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_lai
+o_p <- ggplot(aes(y=dom_shannon, x=av_quad_lai), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Quad LAI", y="Shannon Index", x="av_quad_lai (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_gft
+p_p <- ggplot(aes(y=dom_shannon, x=av_quad_gft), data=domshannons_rq1.df) + geom_point() + labs(title="(e) S.I. v. Avg Qua GFT", y="Shannon Index", x="av_quad_gft (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_trans_elevation
+q_p <- ggplot(aes(y=dom_shannon, x=av_trans_elevation), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Trans El", y="Shannon Index", x="av_trans_elevation (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_trans_decomposition
+r_p <- ggplot(aes(y=dom_shannon, x=av_trans_decomposition), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Tran Decomp", y="Shannon Index", x="av_trans_decomposition (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#min_temp
+s_p <- ggplot(aes(y=dom_shannon, x=min_temp), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Min Temp", y="Shannon Index", x="min_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#max_temp
+t_p <- ggplot(aes(y=dom_shannon, x=max_temp), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Max Temp", y="Shannon Index", x="max_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#range_temp
+u_p <- ggplot(aes(y=dom_shannon, x=range_temp), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Range of Temp", y="Shannon Index", x="range_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+
+multiplot(d_p, g_p, h_p, i_p, p_p,
+          layout = matrix(c(1,2,3,4,5,6), nrow=2))
 
 ```
 
-#### Overall Seedling Cover
-```{r}
-domshannons_rq1.df %>%
-  ggplot(aes(x = overall_seedling_cover, y = dom_shannon, col = site)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  theme_project() +
-  ggtitle("Shannon's Index vs Overall Seedling Cover") +
-  ylab("Shannon's") + 
-  xlab("Overall Seedling Cover")
+<!-- FIGURE #2: (a) Scaled total dominant species against scaled shannon's diversity Index. (b) Scaled overal seedling cover against scaled shannon's diversity index. (c) Scaled total dominant leaf area against scaled shannon's diversity index. (d)Scaled total dominant leaf dry weight against scaled shannon's diversity index. (e) Scaled avergae quadrat GFT against scaled shannon's diversity index. -->
+
+
+Figure #3, portrays a difference between site with total dominant species abundance and overall seedling cover. These interactions will be added to the modelling along with the predictor variables above (Figure #2).
+
+```{r, fig.align='center'}
+
+{
+
+#dom_total_abundance
+d_pp <- ggplot(aes(y=dom_shannon, x=dom_total_abundance, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="(a) S.I. vs Tot Dom Abundance", y="Shannon Index", x="dom_total_abundance (scaled)") + geom_smooth(method = "lm") + theme_project() + scale_colour_manual(values = colours.site)
+
+#dom_simpson
+e_pp <- ggplot(aes(y=dom_shannon, x=dom_simpson, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Simpson's Ind", y="Shannon Index", x="dom_simpson (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#dom_total_seedling_cover
+f_pp <- ggplot(aes(y=dom_shannon, x=dom_total_seedling_cover, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Tot Seed Cover", y="Shannon Index", x="dom_total_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#overall_seedling_cover
+g_pp <- ggplot(aes(y=dom_shannon, x=overall_seedling_cover, col=site), data=domshannons_rq1.df) + geom_point() + labs(title=" (b) S.I. vs Overall Seed Cover", y="Shannon Index", x="overall_seedling_cover (scaled)") + geom_smooth(method = "lm") + theme_project()+ scale_colour_manual(values = colours.site)
+
+#total_dom_leaf_area
+h_pp <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_area, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Leaf Area", y="Shannon Index", x="total_dom_leaf_area (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+
+#total_dom_leaf_dry_weight
+i_pp <- ggplot(aes(y=dom_shannon, x=total_dom_leaf_dry_weight, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Leaf Dry Weight", y="Shannon Index", x="total_dom_leaf_dry_weight (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_totaldom_sla
+j_pp <- ggplot(aes(y=dom_shannon, x=av_totaldom_sla, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Avg SLA", y="Shannon Index", x="av_totaldom_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_1_sla
+k_pp <- ggplot(aes(y=dom_shannon, x=av_dom_1_sla, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 1 Avg SLA", y="Shannon Index", x="av_dom_1_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_2_sla
+l_pp <- ggplot(aes(y=dom_shannon, x=av_dom_2_sla, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 2 Avg SLA", y="Shannon Index", x="av_dom_2_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_dom_3_sla
+m_pp <- ggplot(aes(y=dom_shannon, x=av_dom_3_sla, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Dom Sp. 3 Avg SLA", y="Shannon Index", x="av_dom_3_sla (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_compaction
+n_pp <- ggplot(aes(y=dom_shannon, x=av_quad_compaction, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Quad Comp", y="Shannon Index", x="av_quad_compaction (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_lai
+o_pp <- ggplot(aes(y=dom_shannon, x=av_quad_lai, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Quad LAI", y="Shannon Index", x="av_quad_lai (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_quad_gft
+p_pp <- ggplot(aes(y=dom_shannon, x=av_quad_gft, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Quad GFT", y="Shannon Index", x="av_quad_gft (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_trans_elevation
+q_pp <- ggplot(aes(y=dom_shannon, x=av_trans_elevation, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Trans El", y="Shannon Index", x="av_trans_elevation (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#av_trans_decomposition
+r_pp <- ggplot(aes(y=dom_shannon, x=av_trans_decomposition, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Avg Tran Decomp", y="Shannon Index", x="av_trans_decomposition (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#min_temp
+s_pp <- ggplot(aes(y=dom_shannon, x=min_temp, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Min Temp", y="Shannon Index", x="min_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#max_temp
+t_pp <- ggplot(aes(y=dom_shannon, x=max_temp, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Max Temp", y="Shannon Index", x="max_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+#range_temp
+u_pp <- ggplot(aes(y=dom_shannon, x=range_temp, col=site), data=domshannons_rq1.df) + geom_point() + labs(title="S.I. vs Range of Temp", y="Shannon Index", x="range_temp (scaled)") + geom_smooth(method = "lm") + theme_project()
+
+
+# ggarrange(d_pp, e_pp, f_pp, g_pp, #int dom abundance, overall seedling cover
+#           ncol = 2, nrow = 2)
+# 
+# ggarrange(h_pp, i_pp, j_pp, k_pp,
+#           ncol = 2, nrow = 2)
+# 
+# 
+# ggarrange(l_pp, m_pp, n_pp, o_pp, #none 
+#           ncol = 2, nrow = 2)
+# 
+# 
+# ggarrange(p_pp, q_pp, r_pp, s_pp, 
+#           ncol = 2, nrow = 2)
+# 
+# ggarrange(t_pp, u_pp)
+
+multiplot(d_pp, g_pp,
+          layout = matrix(c(1,2), nrow=1))
+
+
+}
+
 ```
 
-#### SLA
-```{r}
-domshannons_rq1.df %>%
-  ggplot(aes(x = av_totaldom_sla, y = dom_shannon, col = site)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  theme_project() +
-  ggtitle("Shannon's Index vs Total SLA") +
-  ylab("Shannon's") + 
-  xlab("SLA")
+FIGURE #3: (a) Site interaction with sclaed toal dominant abundance against scaled shannon's index. (b) Site interaction with sclaed overal seedling cover against scaled shannon's index.
+
+From this exploration we can see that potentially influential variables are: Total Dominant Abundance, Overall Seedling Cover, Dominant total leaf dry Weight, GFT. As well as the interactions: site:dom_total_abundance and site:overall_seedling_cover.
+
+Important to note: Total Dominant Seedling cover cannot be included as it was used to calculate Shannon's Index. These will now be modelled via GLMM using Baysian INLA. 
+
+#### Correlation
+
+Correlation (of the final predictors investigated) was inspected to ensure there was no interference with the regressions. As seen in the table below, there were no correlations of concern (acceptance level 0.85). 
+
+<!-- TABLE #1: Correlations between overall seedling cover, total dominant leaf dry weight, and average quadrat GFT.  -->
+```{r inclide=FALSE}
+
+df <-  subset(domshannons_rq1.df, select = c("overall_seedling_cover", "total_dom_leaf_dry_weight", "av_quad_gft"))
+
+cor(df, use="complete.obs") %>%
+  round(digits = 2) %>%
+  kable()
+
+
+
 ```
-
-#### Dominant Species 1 SLA
-```{r}
-domshannons_rq1.df %>%
-  ggplot(aes(x = av_dom_1_sla, y = dom_shannon, col = site)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  theme_project() +
-  ggtitle("Shannon's Index vs Dominant Species 1 SLA") +
-  ylab("Shannon's") + 
-  xlab("Dom 1 SLA")
-```
-
-
-
 
 
 

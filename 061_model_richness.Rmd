@@ -9,15 +9,175 @@ datafolder <- "C:\\Users\\Jacob\\Dropbox\\Semester 2 2017\\MXB344\\Project\\Data
 load(paste0(datafolder, "domseedlingcover_rq1.RData"))
 ```
 
-#### Correlation
 
-#### Final Model: Minimum Marginal log-Likelihood
+
+
+
+#### Final Model
+Model fit was compared between a Poisson and Negative binomial regression, and it was decided that a negative binomial distribution would be fit for this model. 
+```{r}
+fit3 = inla(presence_richness ~ max_temp +
+              f(site_trans, model="iid"),
+            family="nbinomial",
+            data=df2,
+            control.compute = list(dic=TRUE, waic = TRUE, cpo=TRUE, mlik = TRUE,
+                                   config=TRUE), 
+            control.predictor = list(compute=T))
+# summary(fit3)
+
+```
 
 #### Model Fit
 
+##### INSERT RICKY COMMENTS
+```{r, fig.width = 5}
+# summary(fit)
+fit <- fit3
+
+predictions <- fit$summary.fitted.values$mean
+dataset <- df2
+
+pred.df <- dataset %>% 
+      mutate(fitted = predictions,
+             observed = presence_richness,
+             residuals = observed - fitted,
+             std_residuals = (residuals - mean(residuals))/sqrt(var(residuals)),
+             cpo = fit$cpo$pit)
+
+## Fitted vs Predicted
+fit_vs_pred <- pred.df %>%
+  ggplot(aes(x = observed, y = fitted)) +
+  geom_point() +
+  xlab("Observed Mean SLA (CA)") +
+  ylab("Fitted Values") +
+  theme_project() +
+  coord_equal() +
+  geom_abline() +
+  ggtitle("Observed vs Fitted SLA")
+
+## Fitted vs Standardised Residuals
+fit_vs_res <- pred.df %>%
+  ggplot(aes(x = fitted, y = std_residuals)) +
+  geom_point() +
+  xlab("Fitted Values") +
+  ylab("Standardised Residuals") +
+  theme_project() +
+  geom_abline(slope = 0)+
+  geom_abline(slope = 0, intercept = 1.5)+
+  geom_abline(slope = 0, intercept = -1.5) +
+  ggtitle("Standardised Residuals")
+
+multiplot(fit_vs_pred, fit_vs_res,
+          layout = matrix(c(1,2), nrow = 1))
+
+
+ # Histogram of predictions
+hist_res <- pred.df %>%
+  ggplot(aes(x = fitted)) +
+  geom_histogram(bins=7) +
+  theme_project() +
+  ggtitle("Histograms of Fitted Values")
+  
+
+# CPO Values: QQ plot and Histogram
+hist_cpo <- pred.df %>%
+  ggplot(aes(x = cpo)) +
+  geom_histogram(bins=7) +
+  theme_project() +
+  ggtitle("Histograms of CPO")
+```
+
+##### INSERT RICKY COMMENTS
+
+```{r, fig.height = 5, fig.width = 7}
+par(mfrow = c(2,2))
+# CPI QQ plot
+qqnorm(pred.df$cpo)
+qqline(pred.df$cpo)
+title("CPO                                         ")
+
+CPO <- pred.df$cpo
+hist(CPO)
+
+# Residuals QQ plot
+qqnorm(pred.df$residuals)
+qqline(pred.df$residuals)
+title("Residuals                                                   ")
+
+Residuals <- pred.df$residuals
+hist(Residuals)
+
+par(mfrow = c(1,1))
+```
+
 #### Fixed Effect Credible Intervals
 
-#### Real Fixed Effect Credible Intervals
+##### INSERT RICKY COMMENTS
+
+```{r }
+## How to look at predictions and compare to original???
+fixed <- summary(fit)$fixed
+vec <- fixed[1:length(fixed)]
+# random <- summary(fit)$random
+n <- length(summary(fit)$fixed)
+n1 <- n/7
+# Collect and plot the intercals
+# How to standardise the intervals?
+# Standardise the response variable?
+fixed.df <- data.frame(Estimate = row.names(fixed),
+Mean = vec[1:n1],
+SD = vec[(n1+1):(2*n1)],
+quant0.025 = vec[(2*n1+1):(3*n1)],
+quant0.5 = vec[(3*n1+1):(4*n1)],
+quant0.975 = vec[(4*n1+1):(5*n1)],
+mode = vec[(5*n1+1):(6*n1)]) %>%
+mutate(Estimate = factor(Estimate, levels = row.names(fixed)[n1:1], ordered = TRUE)) %>%
+tbl_df() %>%
+mutate(beta = 0:(n1-1)) %>%
+mutate(Est2 = paste0(Estimate, " - b", beta),
+Est2 = reorder(Est2, rev(beta)))
+fixed.df %>%
+ggplot(aes(y = Est2, x = quant0.5, xmin = quant0.025, xmax = quant0.975)) +
+geom_errorbarh() +
+theme_project() +
+ggtitle("Standardised Predictors") +
+xlab("Credible Intervals") +
+ylab("Parameter") +
+geom_vline(xintercept = 0)
+```
+
+
 
 #### Variation Breakdown
+```{r}
+## How to look at predictions and compare to original???
+random <- summary(fit3)$hyperpar
+# random
+randomeffects <- data.frame(hyperparameter = c("Residual", "Transect"),
+precision = random[[1]],
+lb = random[[3]],
+ub = random[[5]]) %>%
+mutate(variance = 1/precision,
+varlb = 1/lb,
+varub = 1/ub) %>%
+mutate(totalvar = sum(variance),
+totallb = sum(varlb),
+totalub = sum(varub)) %>%
+mutate(explained = variance/totalvar,
+explainedlb = varlb/totallb,
+explainedub = varub/totalub) %>%
+arrange(desc(explained))
+# 
+randomeffects %>%
+ggplot(aes(y = hyperparameter, x = variance, xmin = varlb, xmax = varub)) +
+geom_errorbarh() +
+theme_project() +
+ggtitle("Hyperparameters") +
+xlab("Credible Interval") +
+ylab("Hyperparameter")
+randomeffects %>%
+mutate(`Variation Explained` = percent(explained)) %>%
+select(hyperparameter, `Variation Explained`)
+```
 
+The random effects contributes to 19.7% of the variation, where as 80.3% of the variation is explained by the fixed effects of the model. While the 19.7% may not be relatively large, it was still important to investigate the model under a mixed effects model. 
